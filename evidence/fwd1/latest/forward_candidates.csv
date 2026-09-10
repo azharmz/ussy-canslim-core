@@ -1,0 +1,1 @@
+date,security_id,ticker,close,pivot,base_depth,volume_ratio,rs_proxy_raw,tminus1_to_t0,h1_open,h1_gap,t0_pivot_extension,h1_fill_extension,rs_percentile,distribution_count_25,spy_ftd_event,spy_ftd_active,spy_rally_day,M_pass_spy_only,price_pass,N_pass,S_pass,L_pass,M_pass,technical_pass

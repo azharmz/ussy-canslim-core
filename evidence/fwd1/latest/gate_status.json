@@ -1,0 +1,14 @@
+{
+  "calendar_gate_pass": false,
+  "closed_x3_portfolio_trades": 0,
+  "completed_calendar_months": 0,
+  "forward_boundary_exclusive": "2026-09-09",
+  "forward_start": "2026-09-10",
+  "market_data_asof": "2026-09-04",
+  "minimum_calendar_months": 12,
+  "minimum_closed_x3_portfolio_trades": 50,
+  "note": "Passing both gates makes FWD1 review-eligible only; it never auto-promotes production.",
+  "production_ready": false,
+  "status": "ACCUMULATING",
+  "trade_gate_pass": false
+}

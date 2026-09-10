@@ -1,0 +1,73 @@
+{
+  "code_sha": "52f9b92c5052ec6361cb01de78561da6eb68d7ab",
+  "collected_at_utc": "2026-09-10T15:06:40.664747+00:00",
+  "experiment": "FWD1_FORWARD_VALIDATION",
+  "forward_boundary_exclusive": "2026-09-09",
+  "forward_candidate_count": 0,
+  "forward_candidate_symbols": 0,
+  "gate": {
+    "calendar_gate_pass": false,
+    "closed_x3_portfolio_trades": 0,
+    "completed_calendar_months": 0,
+    "forward_boundary_exclusive": "2026-09-09",
+    "forward_start": "2026-09-10",
+    "market_data_asof": "2026-09-04",
+    "minimum_calendar_months": 12,
+    "minimum_closed_x3_portfolio_trades": 50,
+    "note": "Passing both gates makes FWD1 review-eligible only; it never auto-promotes production.",
+    "production_ready": false,
+    "status": "ACCUMULATING",
+    "trade_gate_pass": false
+  },
+  "guardrail": "Interim forward performance cannot change frozen FWD1 rules. Any rule change starts a new versioned forward clock.",
+  "hard_filters": {
+    "A": false,
+    "C": false,
+    "EXH2": false
+  },
+  "market_data_asof": "2026-09-04",
+  "methodology": "docs/methodology/forward-validation-v1.md",
+  "methodology_frozen_before_forward_collection": true,
+  "research_universe": "CURRENT_COMPLIANT_UNIVERSE_FROZEN_AT_2026_08_28",
+  "run_id": "34493433671",
+  "variants": [
+    {
+      "already_open_skip_count": 0,
+      "candidate_trade_count": 0,
+      "capacity_skip_count": 0,
+      "cash_skip_count": 0,
+      "closed_portfolio_trade_count": 0,
+      "cost20bp_rt_cagr": null,
+      "cost20bp_rt_max_drawdown": 0.0,
+      "cost20bp_rt_total_return": 0.0,
+      "final_censored_position_count": 0,
+      "first_date": null,
+      "gross_cagr": null,
+      "gross_max_drawdown": 0.0,
+      "gross_total_return": 0.0,
+      "last_date": "2026-09-04",
+      "portfolio_entry_count": 0,
+      "variant": "X1"
+    },
+    {
+      "already_open_skip_count": 0,
+      "candidate_trade_count": 0,
+      "capacity_skip_count": 0,
+      "cash_skip_count": 0,
+      "closed_portfolio_trade_count": 0,
+      "cost20bp_rt_cagr": null,
+      "cost20bp_rt_max_drawdown": 0.0,
+      "cost20bp_rt_total_return": 0.0,
+      "final_censored_position_count": 0,
+      "first_date": null,
+      "gross_cagr": null,
+      "gross_max_drawdown": 0.0,
+      "gross_total_return": 0.0,
+      "last_date": "2026-09-04",
+      "portfolio_entry_count": 0,
+      "variant": "X3"
+    }
+  ],
+  "x1_mandatory_control": true,
+  "x3_primary": true
+}

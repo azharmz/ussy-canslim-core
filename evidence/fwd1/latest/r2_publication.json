@@ -1,0 +1,5 @@
+{
+  "note": "R2 credentials are read-only for this consumer. Canonical persistence is Git repository history; Actions artifact is the detailed mirror.",
+  "reason": "AccessDenied",
+  "status": "NOT_PUBLISHED"
+}

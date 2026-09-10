@@ -68,15 +68,79 @@ Workflow run `34432960298` successfully executed technical baseline v1 against `
 
 **Decision:** classify this as `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST`.
 
-Reasons:
-- the ready export applies current active-compliant membership to rolling historical bars;
-- ready OHLCV is capped at 300 bars/security;
-- M was SPY-only because no QQQ benchmark contract was found;
-- therefore no PF/CAGR/drawdown/performance conclusion is allowed.
+## 2026-09-10 — Full-history OHLCV exists, but PIT membership history does not
+Audit run `34433104954` found 1,300 full histories under `backtest/ohlcv/{security_id}.parquet`, but only one historical membership snapshot: `universe/membership/2026-08-28.json`. No QQQ benchmark contract exists.
 
-The run is accepted only as evidence that the independent technical rule engine and R2 consumer path work end-to-end. Entry-quality diagnostics (`T-1->T0`, H+1 gap, T0 pivot extension, H+1 fill extension) are retained but not filtered/tuned.
+**Decision:**
+- a true expanded-universe PIT track begins only on 2026-08-28 and grows forward as membership snapshots accumulate;
+- historical studies that freeze 2026-08-28 membership backward are exploratory/static-universe evidence only;
+- current membership must never be backfilled historically and described as PIT;
+- exploratory M may be SPY-only only when explicitly labeled; full M-v1 remains SPY-or-QQQ.
 
-## 2026-09-10 — Full-history OHLCV exists separately
-`ussy-data` builds rolling data from `backtest/ohlcv/{security_id}.parquet`, while universe snapshots are read from `universe/membership/{snapshot_date}.json`.
+## 2026-09-10 — E0 static-history candidate evidence is exploratory only
+Workflow run `34433339770` produced 10,731 technical candidate rows across 860 symbols using a static 2026-08-28 compliant universe and long OHLCV history.
 
-**Decision:** full E0 must use the longest defensible PIT-membership window supported by actual membership snapshots and full OHLCV. Current membership must never be backfilled across old price history merely to lengthen a backtest.
+Evidence class: `STATIC_2026_08_28_UNIVERSE_EXPLORATORY_NOT_PIT_UNIVERSE`.
+
+**Decision:** use this event set for mechanism diagnostics and implementation development, not for unbiased historical performance inference.
+
+## 2026-09-10 — Freeze independent execution/exit baseline X1
+Primary execution baseline `X1_7PCT_STOP_20PCT_PIVOT_TARGET` is frozen before performance testing:
+
+- T0 signal after close;
+- H+1 open is executable only when `pivot < Open_H+1 <= 1.05 * pivot`;
+- one active position per security; later candidate while open = `SKIP_ALREADY_OPEN`;
+- hard stop = 7% below actual H+1 fill;
+- primary target = 20% above pivot;
+- gap-through exits use the session open;
+- same-bar stop/target ambiguity is resolved stop-first;
+- no arbitrary time stop; sample-end open positions are censored.
+
+This does not inherit TrendFoll ATR stop, EMA20 exit, or 45-session time stop. Eight-week hold is registered as a separate future variant, not silently approximated.
+
+CI run `34433458116`: **SUCCESS**.
+
+## 2026-09-10 — E1-E4 supports fill-aware anti-chasing, not a new momentum cutoff
+Workflow run `34433673545` evaluated 10,731 static-universe candidates under the frozen X1 execution logic.
+
+Entry funnel:
+- 5,777 accepted trades;
+- 501 `ABOVE_BUY_ZONE_AT_FILL`;
+- 726 `BELOW_PIVOT_AT_FILL`;
+- 3,727 `SKIP_ALREADY_OPEN`.
+
+The highest T-1->T0 shock quartile was weaker than the lowest, and high shock/gap materially increased the chance that H+1 was already outside the 5% buy zone. Among accepted fills, larger H+1 gaps mainly reduced payoff-to-target rather than changing target-hit rate.
+
+**Decision:**
+- the legacy H+1 chasing concern is real as an execution mechanism;
+- the frozen 5% actual-fill buy-zone rule is the primary anti-chasing control;
+- do not create a new post-hoc momentum or gap threshold from this biased static study;
+- keep 3%/5%/8% extension variants pre-specified for later controlled comparison.
+
+The descriptive trade-level PF 1.093 from this run is not a strategy verdict because historical membership is not PIT and portfolio construction is absent.
+
+## 2026-09-10 — Freeze historical C/A identity and as-of contract v1
+Audit runs `34433970918` and `34434046658` confirmed:
+
+- fundamental PIT rows are keyed by `symbol + CIK`, not `security_id`;
+- the pinned fundamentals snapshot contains `current_universe.csv` with 1,327 unique `security_id` values and one-to-one current symbol/ticker bridge;
+- the final readiness report maps symbol to CIK.
+
+Historical research therefore uses the pinned identity chain:
+
+```text
+security_id
+-> pinned current_universe.csv symbol
+-> pinned final readiness report CIK
+-> SEC PIT rows
+```
+
+Signal cutoff is **16:00 America/New_York on T0**, converted DST-aware to UTC. Only SEC evidence with `accepted_at <= cutoff` may be used.
+
+For C, select the latest fiscal quarter known at cutoff; a later amendment to an older period must not displace a newer fiscal quarter merely because its `accepted_at` is later. Within the chosen fiscal period, use the latest accepted state known by cutoff. If the latest quarter's growth is undefined/missing, C is NOT_EVALUABLE; do not skip backward to manufacture an evaluable value.
+
+For A, within each FY use the latest annual evidence known by cutoff, then evaluate the latest three consecutive FY growth states. Amendments affect only cutoffs after their own acceptance.
+
+Hard invariant: `max(source accepted_at used) <= signal_cutoff_utc`.
+
+Methodology: `docs/methodology/historical-ca-asof-v1.md`.

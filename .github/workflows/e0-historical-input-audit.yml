@@ -1,0 +1,38 @@
+name: E0 historical input audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-e0-historical-input-audit'
+      - '.github/workflows/e0-historical-input-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependency
+        run: python -m pip install --disable-pip-version-check boto3
+      - name: Audit historical inputs
+        run: python scripts/audit_e0_historical_inputs.py
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: e0-historical-input-audit-${{ github.run_id }}
+          path: results/e0-historical-input-audit/summary.json
+          retention-days: 30

@@ -142,9 +142,42 @@ Mechanism check:
 
 Interpretation: X3's improvement primarily comes from **filtering breakout attempts that fail to demonstrate pivot hold**, not from delayed entry improving the same trades.
 
-**Decision:** promote **X3 pivot-hold confirmation** to the preferred research execution baseline for C/A ablation. Keep X1 as the mandatory control. This is not a production deployment decision.
+**Decision:** X3 is the current preferred research execution baseline and X1 remains mandatory control. This preference is not a production decision and does not close additional entry-quality research.
 
 Detailed record: `results/entry-timing-basis-test-v1/README.md`.
+
+## 2026-09-10 — Post-breakout exhaustion diagnostic: interaction matters more than shock alone
+Run `34466747136` = SUCCESS on the same 10,731 technical candidates.
+
+The legacy concern was tested explicitly: a large T-1->T0 expansion may be followed by T+1 rejection/profit-taking and subsequent weakness.
+
+Key descriptive findings:
+
+- bottom shock decile median T-1->T0 move ~0.78%, X1 PF ~1.36;
+- top shock decile median move ~8.70%, X1 PF ~1.05;
+- however extreme shock alone did **not** produce a higher raw T+1..T+3 pivot-retest rate; low-shock candidates were actually closer to the pivot and retested it more often mechanically;
+- the important interaction appears when a high-shock breakout is followed by T+1 rejection.
+
+Within the **highest shock quintile**:
+
+| T+1 state | Candidates | X1 PF | Stop rate | Retest pivot by T+3 | Breakdown below pivot by T+3 |
+|---|---:|---:|---:|---:|---:|
+| Bearish **and** Close < T0 Close | 962 | **0.560** | **80.84%** | 74.32% | 60.60% |
+| Bearish only | 171 | 0.675 | 76.40% | 34.50% | 25.15% |
+| Close < T0 only | 120 | 1.601 | 61.25% | 61.67% | 43.33% |
+| No rejection | 893 | **1.573** | **59.63%** | 21.61% | 14.22% |
+
+This strongly supports the *mechanism hypothesis* that **large T0 expansion becomes dangerous when the following session confirms rejection**, rather than a simplistic rule that all large T0 momentum is bad.
+
+**Decision:**
+
+- do **not** add a hard T-1->T0 momentum cutoff from this same sample;
+- do **not** treat raw return-to-pivot frequency as the sole exhaustion definition, because distance from pivot mechanically differs by shock size;
+- register `high shock × T+1 rejection` as an exploratory exhaustion hypothesis for independent/forward validation;
+- X3 remains preferred for current research, but is not declared the final execution model solely from ET1; its pivot-hold behavior is directionally consistent with avoiding the identified T+1 rejection mechanism;
+- C/A ablation should wait until this entry-quality hypothesis is clearly versioned so fundamental effects are not confused with a newly discovered execution filter.
+
+Artifacts: `candidate_exhaustion_features.csv`, `shock_deciles.csv`, `shock_x_t1_rejection.csv` from workflow artifact `post-breakout-exhaustion-v1-34466747136`.
 
 ## 2026-09-10 — Historical C/A identity and as-of contract
 Fundamental PIT rows are keyed by symbol+CIK, while the pinned universe bridge exposes security_id. Historical research uses:
@@ -169,4 +202,4 @@ Run `34434268817` = SUCCESS. The dataset supports the frozen latest-period/lates
 
 ## Next decision gate
 
-Implement historical C/A attachment to the 10,731 technical candidate events, validate distribution/anti-look-ahead first, then run X3 baseline vs X3+C vs X3+C+A. X1 equivalents remain control sensitivity. Portfolio construction must be frozen before portfolio-return/max-drawdown claims.
+Version the post-breakout exhaustion hypothesis without tuning a cutoff on the discovery sample, define its independent/forward validation protocol, then implement historical C/A attachment. After that compare X3 baseline vs X3+C vs X3+C+A with X1 retained as control. Portfolio construction must be frozen before portfolio-return/max-drawdown claims.

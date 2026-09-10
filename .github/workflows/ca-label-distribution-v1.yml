@@ -1,0 +1,45 @@
+name: C/A label distribution v1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  distribution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 pyyaml
+
+      - name: Run C/A distribution study
+        run: python scripts/run_ca_distribution.py
+
+      - name: Show summary
+        run: cat results/ca-label-distribution-v1/summary.json
+
+      - name: Upload pinned distribution evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: ca-label-distribution-v1-${{ github.run_id }}
+          path: |
+            results/ca-label-distribution-v1/summary.json
+            results/ca-label-distribution-v1/distribution.csv
+            results/ca-label-distribution-v1/fundamentals_current_pointer.json
+            results/ca-label-distribution-v1/fundamentals_snapshot_manifest.json
+          retention-days: 30

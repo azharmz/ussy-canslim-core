@@ -16,12 +16,12 @@ Use this file to register experiments before execution. Completed experiments mu
 | E3 | Pivot extension 3/5/8% | COMPLETE / EXPLORATORY | pre-specified extension diagnostics |
 | E4 | Actual-fill pivot extension | COMPLETE / EXPLORATORY | fill-aware chasing diagnostic |
 | ET1 | X1-X4 entry timing basis test | COMPLETE / VALIDATED | choose executable daily-EOD entry baseline before fundamental ablation |
-| EXH1 | **Post-breakout exhaustion diagnostic** | **COMPLETE / EXPLORATORY** | test T-1->T0 shock × T+1 rejection mechanism |
-| EXH2 | Exhaustion validation | **NEXT / PRE-REGISTRATION REQUIRED** | independently validate exhaustion interaction; no discovery-sample cutoff tuning |
+| EXH1 | Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | test T-1->T0 shock × T+1 rejection mechanism |
+| EXH2 | Exhaustion validation | PRE-REGISTRATION REQUIRED | independently validate exhaustion interaction; no discovery-sample cutoff tuning |
 | CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | latest-quarter/FY state selection |
-| CA-HIST | Historical C/A attachment | QUEUED | causal C/A state at each signal |
-| R2-C | Preferred technical baseline + C | BLOCKED | incremental value of C after CA-HIST |
-| R2-CA | Preferred technical baseline + C+A | BLOCKED | incremental value of C+A after CA-HIST |
+| CA-HIST | Historical C/A attachment | **COMPLETE / VALIDATED** | causal C/A state at each signal with explicit SEC FY identity |
+| R2-C | Preferred technical baseline + C | **NEXT / READY** | incremental value of C after validated CA-HIST |
+| R2-CA | Preferred technical baseline + C+A | **NEXT / READY** | incremental value of C+A after validated CA-HIST |
 | PORT1 | Portfolio construction | PLANNED | sizing/max positions/equity curve |
 | ROB1 | Strategy robustness/holdout | BLOCKED | PF ex-top10, DD, subperiod, concentration |
 
@@ -133,6 +133,49 @@ At each decision cutoff:
 - older-period amendments cannot displace newer fiscal periods merely because accepted later;
 - for A, select latest accepted annual state per FY and then latest three consecutive FY growth states;
 - undefined growth remains NOT_EVALUABLE.
+
+## CA-HIST — Historical C/A attachment v1
+
+Workflow run `34479060107` = **SUCCESS**.
+
+Code commit:
+
+`26892121cb4a650b5fe9e00491a557963b9f49c1`
+
+Pinned fundamentals manifest:
+
+`fundamentals/snapshots/2026-09-10/run-34470910341/manifest.json`
+
+The wide PIT table carries annual state but not SEC FY. CA-HIST resolves `annual_eps_source_accession -> SEC fy` through the immutable long PIT artifact, then selects the latest accepted state per FY and requires the latest three resolved FY to be consecutive. Unresolved FY identity is `NOT_EVALUABLE`; no calendar-year inference is allowed.
+
+Structural validation:
+
+```text
+candidate rows                         10,731
+candidate securities                      860
+duplicate candidate attachment rows         0
+future accepted_at violations               0
+identity-missing-CIK rows                   56
+annual states                           11,703
+annual FY resolved                     10,307
+annual FY unresolved                    1,396
+```
+
+Historical distribution:
+
+```text
+C-v1   PASS 703 | FAIL 3,475 | NOT_EVALUABLE 6,553
+A-v1   PASS  34 | FAIL   768 | NOT_EVALUABLE 9,929
+C+A    PASS   2 | FAIL   650 | NOT_EVALUABLE 10,079
+```
+
+Hard validation: every A-PASS row has exactly three resolved consecutive FY, zero unresolved FY identity, and no source accepted after T0 cutoff. The two C+A PASS events are CRUS `2022-08-03` and MEDP `2023-07-25`.
+
+Evidence artifact: `historical-ca-attachment-v1-34479060107`, GitHub artifact SHA-256 `be23394a14b3096a491b67fb4836edb2656739e30ad7cefd31c52492e5f9afeb`.
+
+Verdict: **CA-HIST COMPLETE / VALIDATED.** C/A thresholds remain frozen. No trading performance was consulted. R2-C and R2-CA are now unblocked. EXH2 remains a separate hypothesis and must not be folded into the ablation.
+
+Detailed decision record: `docs/decisions/2026-09-10-historical-ca-attachment-v1.md`.
 
 ## Robustness requirements for later strategy claims
 

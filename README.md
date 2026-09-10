@@ -8,12 +8,24 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 
 | Repository | Ownership |
 |---|---|
-| `ussy-data` | Canonical universe and historical membership |
+| `ussy-data` | Canonical universe and OHLCV data contracts |
 | `ussy-fundamentals` | SEC facts, PIT normalization, readiness, immutable R2 production snapshots |
 | `ussy-trendfoll` | Independent legacy TrendFoll strategy and paper-trading implementation |
 | `ussy-canslim-research` | Independent CAN SLIM methodology, labels, experiments, evidence, decisions |
 
 TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or reject any TrendFoll rule without changing TrendFoll production.
+
+## Research-universe definition
+
+The primary historical research question uses a **frozen contemporary/current Musaffa-compliant universe**. We ask how CAN SLIM rules behave historically on the securities that are in the selected compliant research universe now.
+
+Historical Musaffa compliance is therefore **not** a strategy input and is not required for this research design. We do not claim that the resulting historical sample reconstructs which securities were known compliant in each historical year.
+
+Point-in-time discipline remains mandatory for information actually used to make historical strategy decisions, especially:
+
+- OHLCV and market-state data through the decision date only;
+- SEC fundamental evidence only after `accepted_at`;
+- no future filings, future prices, or later amendments before their acceptance time.
 
 ## Current state — 10 Sep 2026
 
@@ -26,7 +38,8 @@ TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or 
 - A-v1 methodology: **FROZEN**
 - C/A label implementation: **COMPLETE**
 - C/A distribution study: **COMPLETE / VALIDATED**
-- Trading-performance metrics were **not** used in the distribution study.
+- Independent technical baseline: **FROZEN / IMPLEMENTED**
+- Entry-timing basis test X1-X4: **IN PROGRESS**
 
 ## Frozen C-v1
 
@@ -76,14 +89,15 @@ These results are a methodology/distribution sanity check, **not a trading verdi
 - Freeze methodology before performance testing.
 - Never optimize the SEC extraction layer for CAN SLIM pass-rate or CAGR/PF.
 - `accepted_at` is the fundamental information-availability boundary.
-- Historical universe eligibility must use PIT membership, never current membership backfilled into history.
+- Define the research universe explicitly and do not confuse current-universe historical research with historical-eligibility reconstruction.
 - Completed experiments must pin immutable universe/fundamental inputs and checksums.
 - Missing is not zero. Unsupported is not failed. Insufficient history is not a bad-company verdict.
+- Daily-EOD signals may only use completed daily information; close-based conditions are filled no earlier than the next session Open.
 
 ## Next research blocks
 
-1. Establish an independent CAN SLIM technical baseline on the expanded universe.
-2. Run Entry Quality & Execution diagnostics (E0-E6).
+1. Complete the X1-X4 entry-timing basis test.
+2. Freeze the preferred executable entry model only after comparative evidence review.
 3. Integrate frozen PIT C/A labels into historical candidate states.
-4. Run ablations and robustness only after the technical baseline is specified.
-5. Extend N/S/L/I/M as independent CAN SLIM components, not by silently inheriting TrendFoll production rules.
+4. Run C and C+A ablations after entry timing is frozen.
+5. Freeze portfolio construction before portfolio return/max-drawdown claims.

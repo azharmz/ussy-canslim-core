@@ -83,7 +83,41 @@ The research universe remains the frozen current/contemporary Musaffa-compliant 
 
 Daily OHLCV and market-state calculations may use information only through each signal day T0. Because T0 close and volume are EOD facts, execution remains no earlier than allowed by the frozen X1/X3 definitions.
 
+The existing `backtest/ohlcv/{security_id}.parquet` objects are also incrementally maintained by the upstream `ussy-data` production daily updater; FWD1 consumes those same security histories with the historical strategy semantics unchanged. Market regime M continues to consume the separate pinned SPY benchmark pointer.
+
 Each collector run recomputes the entire forward window from the frozen boundary using the then-current source data. The observed run is preserved through repository history plus a GitHub Actions evidence artifact so later source corrections cannot silently replace prior observations.
+
+## Source-freshness gate
+
+A forward observation is not interpretable until the market-regime source itself reaches the forward period.
+
+Frozen data gate:
+
+```text
+SPY market_data_asof >= 2026-09-10
+```
+
+If that condition is false, FWD1 status is:
+
+```text
+WAITING_FOR_POST_BOUNDARY_DATA
+```
+
+not `ACCUMULATING`. Candidate/trade counts from such a run are operational diagnostics only; in particular, a zero candidate count must not be interpreted as evidence that the strategy produced no signals.
+
+Once the data gate passes, status becomes `ACCUMULATING` until both evidence-review gates pass. `REVIEW_ELIGIBLE` therefore requires data freshness plus the calendar and closed-trade gates.
+
+The first successful collector smoke found the SPY pointer only through 2026-09-04, while the separate upstream SPY updater had failed conservatively rather than overwrite a potentially revised historical series. No fallback market rule is introduced from this incident.
+
+## Collector schedule
+
+Scheduled FWD1 collection runs at:
+
+```text
+04:30 UTC Tuesday-Saturday
+```
+
+This is intentionally after the upstream daily OHLCV refresh for the prior US session and after the upstream SPY benchmark job. Schedule changes for dependency ordering are infrastructure changes only and do not alter strategy semantics or the forward boundary.
 
 ## Evidence persistence
 
@@ -100,11 +134,11 @@ R2 publication is optional. The first infrastructure smoke run showed that this 
 Minimum evidence per run:
 
 - run metadata / code SHA;
+- source freshness and gate status;
 - forward candidate rows;
 - X1/X3 executable trade candidates;
 - capital-constrained portfolio entries/skips/equity curves where applicable;
 - censored-position audit;
-- gate status;
 - SPY pointer evidence;
 - Actions artifact containing the frozen membership snapshot.
 
@@ -112,7 +146,7 @@ Minimum evidence per run:
 
 FWD1 does not automatically promote anything to production.
 
-The earliest evidence-review gate requires **both**:
+After the source-freshness gate passes, the earliest evidence-review gate additionally requires **both**:
 
 ```text
 >= 12 completed calendar months of forward observation
@@ -122,7 +156,7 @@ AND
 
 Before both conditions are satisfied, the status remains `ACCUMULATING` regardless of apparent performance.
 
-When both are satisfied, status becomes `REVIEW_ELIGIBLE`, not `PRODUCTION_READY`.
+When all gates are satisfied, status becomes `REVIEW_ELIGIBLE`, not `PRODUCTION_READY`.
 
 ## Metrics allowed during accumulation
 

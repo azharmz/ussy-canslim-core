@@ -38,11 +38,8 @@ def read_json(s3, bucket: str, key: str) -> dict:
 
 
 def frame_summary(df: pd.DataFrame) -> dict:
-    out = {
-        "rows": int(len(df)),
-        "columns": list(map(str, df.columns)),
-    }
-    for col in ["accepted_at", "filed_at", "fiscal_period_end", "symbol", "ticker", "security_id", "cik", "form", "fiscal_year", "fiscal_period"]:
+    out = {"rows": int(len(df)), "columns": list(map(str, df.columns))}
+    for col in ["accepted_at", "filed_at", "fiscal_period_end", "symbol", "ticker", "security_id", "isin", "cik", "form", "fiscal_year", "fiscal_period", "production_status"]:
         if col in df.columns:
             if col in {"accepted_at", "filed_at", "fiscal_period_end"}:
                 s = pd.to_datetime(df[col], errors="coerce", utc=True)
@@ -64,6 +61,7 @@ def main() -> None:
     wide = pd.read_parquet(io.BytesIO(read_bytes(s3, bucket, artifacts["fundamentals_point_in_time.parquet"]["key"])))
     long = pd.read_parquet(io.BytesIO(read_bytes(s3, bucket, artifacts["fundamentals_point_in_time_long.parquet"]["key"])))
     final_report = pd.read_csv(io.BytesIO(read_bytes(s3, bucket, artifacts["fundamentals_final_production_report.csv"]["key"])), dtype=str)
+    current_universe = pd.read_csv(io.BytesIO(read_bytes(s3, bucket, artifacts["current_universe.csv"]["key"])), dtype=str)
 
     summary = {
         "audit": "HISTORICAL_CA_JOIN_INPUTS_V1",
@@ -73,7 +71,8 @@ def main() -> None:
         "wide": frame_summary(wide),
         "long": frame_summary(long),
         "final_report": frame_summary(final_report),
-        "identity_recommendation": "Prefer security_id if available. Otherwise use the strongest stable mapping exposed by the contracts; ticker-only joins must be explicitly labeled and audited for renames.",
+        "current_universe": frame_summary(current_universe),
+        "identity_recommendation": "Prefer security_id if the current_universe bridge exposes it. If fundamental PIT remains symbol/CIK keyed, bind security_id to symbol/CIK through a versioned universe bridge and audit ticker renames before historical use.",
     }
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
     print(json.dumps(summary, indent=2, sort_keys=True))

@@ -19,15 +19,15 @@ Use this file to register experiments before execution. Completed experiments mu
 | EXH1 | Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | test T-1->T0 shock × T+1 rejection mechanism |
 | EXH2 | Exhaustion validation | PRE-REGISTRATION REQUIRED | independently validate exhaustion interaction; no discovery-sample cutoff tuning |
 | CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | latest-quarter/FY state selection |
-| CA-HIST | Historical C/A attachment | **COMPLETE / VALIDATED** | causal C/A state at each signal with explicit SEC FY identity |
-| R2-C | Preferred technical baseline + C | **NEXT / READY** | incremental value of C after validated CA-HIST |
-| R2-CA | Preferred technical baseline + C+A | **NEXT / READY** | incremental value of C+A after validated CA-HIST |
-| PORT1 | Portfolio construction | PLANNED | sizing/max positions/equity curve |
-| ROB1 | Strategy robustness/holdout | BLOCKED | PF ex-top10, DD, subperiod, concentration |
+| CA-HIST | Historical C/A attachment | COMPLETE / VALIDATED | causal C/A state at each signal with explicit SEC FY identity |
+| R2-C | Preferred technical baseline + C | **COMPLETE / VALIDATED DESCRIPTIVE** | incremental value of C after validated CA-HIST |
+| R2-CA | Preferred technical baseline + C+A | **COMPLETE / SPARSE** | incremental value of C+A; sample too small for strategy inference |
+| PORT1 | Portfolio construction | **NEXT / PRE-REGISTRATION REQUIRED** | sizing/max positions/equity curve |
+| ROB1 | Strategy robustness/holdout | BLOCKED | portfolio DD, holdout and remaining concentration/robustness |
 
 ## C1/A1
 
-Workflow run `34431101727` = **SUCCESS**.
+Workflow run `34431101727` = SUCCESS.
 
 Pinned fundamentals manifest:
 
@@ -45,7 +45,7 @@ Verdict: thresholds remain frozen; no trading metrics were used.
 
 Implementation: `src/canslim_research/technical.py`
 
-CI run `34431906311` = **SUCCESS**.
+CI run `34431906311` = SUCCESS.
 
 Verdict: independent technical baseline executable and frozen.
 
@@ -53,10 +53,10 @@ Verdict: independent technical baseline executable and frozen.
 
 Historical technical candidate engine on research universe frozen at `universe/membership/2026-08-28.json`:
 
-- candidate events: **10,731**
-- candidate securities: **860**
+- candidate events: 10,731
+- candidate securities: 860
 
-E1-E4 workflow run `34433673545` = **SUCCESS**.
+E1-E4 workflow run `34433673545` = SUCCESS.
 
 X1 funnel:
 
@@ -79,7 +79,7 @@ Implementation:
 - `scripts/run_entry_timing_basis_test.py`
 - `tests/test_entry_timing.py`
 
-Workflow run `34464861119` = **SUCCESS**; timing/execution tests: **13 passed**.
+Workflow run `34464861119` = SUCCESS; timing/execution tests: 13 passed.
 
 All variants share the same 7% stop from actual fill and 20% target from pivot.
 
@@ -98,7 +98,7 @@ Implementation: `scripts/run_post_breakout_exhaustion_diagnostics.py`
 
 Workflow: `.github/workflows/post-breakout-exhaustion-v1.yml`
 
-Workflow run `34466747136` = **SUCCESS**.
+Workflow run `34466747136` = SUCCESS.
 
 Research question: does an extreme T-1->T0 expansion become especially vulnerable when T+1 confirms rejection?
 
@@ -113,18 +113,18 @@ Highest shock quintile interaction:
 
 | T+1 state | Candidates | X1 PF | Stop rate | Retest pivot by T+3 | Breakdown below pivot by T+3 |
 |---|---:|---:|---:|---:|---:|
-| Bearish + Close < T0 Close | 962 | **0.560** | **80.84%** | 74.32% | 60.60% |
+| Bearish + Close < T0 Close | 962 | 0.560 | 80.84% | 74.32% | 60.60% |
 | Bearish only | 171 | 0.675 | 76.40% | 34.50% | 25.15% |
 | Close < T0 only | 120 | 1.601 | 61.25% | 61.67% | 43.33% |
-| No rejection | 893 | **1.573** | **59.63%** | 21.61% | 14.22% |
+| No rejection | 893 | 1.573 | 59.63% | 21.61% | 14.22% |
 
-**Verdict:** support the mechanism hypothesis `large T0 expansion × T+1 rejection -> exhaustion risk`. Do not derive or adopt a hard momentum cutoff from EXH1. Any rule based on this finding must be separately versioned and validated on independent/forward evidence.
+Verdict: support the mechanism hypothesis `large T0 expansion × T+1 rejection -> exhaustion risk`. Do not derive or adopt a hard momentum cutoff from EXH1. Any rule based on this finding must be separately versioned and validated on independent/forward evidence.
 
 Artifacts: workflow artifact `post-breakout-exhaustion-v1-34466747136` (`candidate_exhaustion_features.csv`, `shock_deciles.csv`, `shock_x_t1_rejection.csv`).
 
 ## CA period semantics
 
-Audit run `34434268817` = **SUCCESS**.
+Audit run `34434268817` = SUCCESS.
 
 At each decision cutoff:
 
@@ -136,7 +136,7 @@ At each decision cutoff:
 
 ## CA-HIST — Historical C/A attachment v1
 
-Workflow run `34479060107` = **SUCCESS**.
+Workflow run `34479060107` = SUCCESS.
 
 Code commit:
 
@@ -173,9 +173,36 @@ Hard validation: every A-PASS row has exactly three resolved consecutive FY, zer
 
 Evidence artifact: `historical-ca-attachment-v1-34479060107`, GitHub artifact SHA-256 `be23394a14b3096a491b67fb4836edb2656739e30ad7cefd31c52492e5f9afeb`.
 
-Verdict: **CA-HIST COMPLETE / VALIDATED.** C/A thresholds remain frozen. No trading performance was consulted. R2-C and R2-CA are now unblocked. EXH2 remains a separate hypothesis and must not be folded into the ablation.
+Verdict: CA-HIST COMPLETE / VALIDATED. C/A thresholds remain frozen. No trading performance was consulted. R2-C and R2-CA were unblocked. EXH2 remains a separate hypothesis and must not be folded into the ablation.
 
 Detailed decision record: `docs/decisions/2026-09-10-historical-ca-attachment-v1.md`.
+
+## R2-C / R2-CA — Fundamental ablation v1
+
+Implementation: `scripts/run_fundamental_ablation_v1.py`.
+
+Workflow: `.github/workflows/fundamental-ablation-v1.yml`.
+
+Workflow run `34481587218` = SUCCESS; 23 frozen label/timing/execution tests passed. Pinned CA-HIST validation run `34479060107` and fundamentals source run `34470910341`. No C/A thresholds changed and EXH2 was not applied.
+
+| Execution | Filter | Eligible | Entries | PF | PF ex-top10 | Target | Stop |
+|---|---|---:|---:|---:|---:|---:|---:|
+| X1 | BASE | 10,731 | 5,777 | 1.093 | 1.082 | 30.95% | 68.98% |
+| X1 | C | 703 | 382 | 1.056 | 0.949 | 30.37% | 69.63% |
+| X1 | C+A | 2 | 2 | 0.000 | n/a | 0.00% | 100.00% |
+| X3 | BASE | 10,731 | 3,604 | 1.163 | 1.146 | 32.77% | 67.18% |
+| X3 | C | 703 | 238 | 1.020 | 0.861 | 30.25% | 69.75% |
+| X3 | C+A | 2 | 2 | 0.000 | n/a | 0.00% | 100.00% |
+
+X3+C coarse-subperiod PFs with trades were approximately 1.49, 1.41, 0.44 and 1.74, but PF ex-top10 was below 1 in every such subperiod (~0.72, ~0.74, ~0.11, ~0.45). X3+C top-symbol trade share was ~2.5% and top-five share ~9.7%, versus ~0.4% and ~2.0% for baseline.
+
+Verdict for R2-C: **hard C-v1 filtering is not supported as an additive trading edge in this evidence.** It lowers both raw PF and PF ex-top10 under X3, with the same direction under X1. C-v1 remains a frozen CAN SLIM descriptor and its threshold must not be tuned post hoc.
+
+Verdict for R2-CA: **insufficient sample.** Only two C+A candidate events exist and both stop under both controls. This cannot establish that A is harmful or useful; it establishes that the strict C+A intersection is too sparse for a reliable historical strategy claim in this dataset.
+
+Evidence artifact: `fundamental-ablation-v1-34481587218`, artifact SHA-256 `9a4018cad0f8dc35439633065520d2e4d829fc835c6bfd099cdbbf4e9c1f154a`.
+
+Detailed decision record: `docs/decisions/2026-09-10-fundamental-ablation-v1.md`.
 
 ## Robustness requirements for later strategy claims
 

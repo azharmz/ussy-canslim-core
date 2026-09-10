@@ -1,0 +1,54 @@
+name: Fundamental ablation v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fundamental-ablation-v1.yml'
+      - 'scripts/run_fundamental_ablation_v1.py'
+      - 'scripts/run_historical_ca_attachment.py'
+      - 'scripts/run_entry_timing_basis_test.py'
+      - 'src/canslim_research/entry_timing.py'
+      - 'src/canslim_research/execution.py'
+      - 'src/canslim_research/labels.py'
+
+permissions:
+  contents: read
+
+jobs:
+  ablation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+      - name: Test frozen label and execution semantics
+        run: python -m pytest -q tests/test_labels.py tests/test_entry_timing.py tests/test_execution.py
+      - name: Run baseline vs C vs C+A ablation
+        run: python scripts/run_fundamental_ablation_v1.py
+      - name: Show summary
+        run: cat results/fundamental-ablation-v1/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: fundamental-ablation-v1-${{ github.run_id }}
+          path: |
+            results/fundamental-ablation-v1/summary.json
+            results/fundamental-ablation-v1/ablation_summary.csv
+            results/fundamental-ablation-v1/subperiod_summary.csv
+            results/fundamental-ablation-v1/trades.csv
+            results/fundamental-ablation-v1/entry_events.csv
+            results/fundamental-ablation-v1/ca_hist_summary.json
+            results/fundamental-ablation-v1/membership_snapshot.json
+          retention-days: 30

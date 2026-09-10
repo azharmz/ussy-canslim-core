@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import pandas as pd
@@ -126,8 +127,18 @@ def main():
         raise RuntimeError(f"Missing CA attachment for {int(merged['c_state'].isna().sum())} candidates")
 
     histories = {}
-    for sid in merged["security_id"].unique():
-        histories[str(sid)] = load_history(s3, bucket, str(sid))
+    failures = []
+    ids = [str(x) for x in merged["security_id"].unique()]
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        futs = {pool.submit(load_history, s3, bucket, sid): sid for sid in ids}
+        for fut in as_completed(futs):
+            sid = futs[fut]
+            try:
+                histories[sid] = fut.result()
+            except Exception as exc:
+                failures.append({"security_id": sid, "error": str(exc)[:300]})
+    if failures:
+        raise RuntimeError(f"History failures: {failures[:5]}")
 
     dates = merged["date"].sort_values()
     quantiles = dates.quantile([0.0, 0.2, 0.4, 0.6, 0.8, 1.0]).drop_duplicates().tolist()

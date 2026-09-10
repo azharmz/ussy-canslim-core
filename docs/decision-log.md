@@ -45,6 +45,21 @@ Revenue YoY >= 25%
 
 Undefined/missing growth remains NOT_EVALUABLE.
 
+## 2026-09-10 — C-v1 revenue evaluability guardrail
+Revenue growth is a required C-v1 input, not an optional enhancement or fallback field. The consumer must not issue an EPS-only C verdict when revenue YoY is missing or undefined.
+
+Frozen semantics:
+
+```text
+EPS evaluable + Revenue missing      -> NOT_EVALUABLE
+EPS missing    + Revenue evaluable    -> NOT_EVALUABLE
+EPS missing    + Revenue missing      -> NOT_EVALUABLE
+Both evaluable; either < 25%          -> FAIL
+Both evaluable; both >= 25%           -> PASS
+```
+
+Missing revenue is therefore a coverage/evaluability condition. It must not be coerced to 0%, treated as FAIL merely because it is missing, or silently ignored to manufacture PASS. This guardrail applies to current and historical C attachment and must be enforced before any C/C+A performance ablation is considered valid.
+
 ## 2026-09-10 — A-v1 frozen
 Latest three consecutive annual EPS YoY states must all be evaluable and each >=25%. `PASS_3Y_FALLBACK` remains a separate provenance tier.
 

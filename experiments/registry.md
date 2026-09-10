@@ -23,7 +23,8 @@ Use this file to register experiments before execution. Completed experiments mu
 | R2-C | Preferred technical baseline + C | COMPLETE / VALIDATED DESCRIPTIVE | incremental value of C after validated CA-HIST |
 | R2-CA | Preferred technical baseline + C+A | COMPLETE / SPARSE | incremental value of C+A; sample too small for strategy inference |
 | PORT1 | Frozen portfolio construction | **COMPLETE / VALIDATED DESCRIPTIVE** | capital-constrained X3 BASE vs X1 BASE; portfolio return/DD/cost sensitivity |
-| ROB1 | Strategy robustness / holdout | **NEXT / PRE-REGISTRATION REQUIRED** | accepted-portfolio robustness, benchmark context, holdout/forward validation |
+| ROB1 | Historical strategy robustness | **COMPLETE / VALIDATED HISTORICAL** | accepted-portfolio robustness, subperiod stability, opportunity cost, benchmark context; not true OOS |
+| FWD1 | Genuine forward validation | **NEXT / FROZEN GATE** | post-2026-09-09 unchanged-rule validation; production inference only after 12 months + 50 closed X3 trades |
 
 ## Core frozen evidence
 
@@ -93,7 +94,7 @@ Pre-registration: `docs/methodology/portfolio-construction-v1.md`, frozen before
 
 Specification: initial equity 100,000; long-only/no leverage; max 7 positions; each new target notional = 1/7 prior-session closing equity; no partial fills; priority `rs_percentile DESC`, `volume_ratio DESC`, ticker ASC; morning entries allocated before same-day exits; X3 BASE primary, X1 BASE control; C/A and EXH2 excluded.
 
-Final validated workflow `34485765478` = SUCCESS. Code head `c51b7b6644aec91767b5bd2767d0b11e6ac45077`. Artifact `portfolio-construction-v1-34485765478`, SHA-256 `a0a019b666ba3cd18d23cd78366a3c645053d5f051c69b0e83a9f3e0b033fa40`.
+Canonical validated workflow `34488197400` = SUCCESS. Artifact `portfolio-construction-v1-34488197400`, SHA-256 `687c9557b975802ae388861228c3c3fc0ffed191c4730affb38bccd470080636`.
 
 Censored-accounting invariant passed: X1 has 4 and X3 has 2 final censored positions, all exactly at 2026-09-09; mid-sample censored positions = 0; final censored positions are mark-to-market, not forced exits, and no phantom exit cost is charged.
 
@@ -104,7 +105,7 @@ Censored-accounting invariant passed: X1 has 4 and X3 has 2 final censored posit
 | Capacity skips | 1,010 | 564 |
 | Cash skips | 3,343 | 1,911 |
 | Gross total return | +30.70% | **+172.90%** |
-| Gross CAGR | +0.83% | **+3.04%** |
+| Gross CAGR | +0.80% | **+3.04%** |
 | Gross max DD | -66.89% | **-43.36%** |
 | Cost20bp total return | -20.86% | **+121.37%** |
 | Cost20bp CAGR | -0.70% | **+2.40%** |
@@ -120,9 +121,54 @@ Verdict: X3 retains a clear relative advantage under capital constraints, but th
 
 Detailed decision record: `docs/decisions/2026-09-10-portfolio-construction-v1.md`.
 
-## ROB1 — Next gate
+## ROB1 — Historical Robustness v1
 
-Before interpreting holdout evidence, pre-register the split/protocol and keep all PORT1 rules unchanged. Required remaining work includes accepted-portfolio MAE/MFE, opportunity cost from skipped candidates, annual/subperiod stability, benchmark-relative context, and genuine holdout/forward validation. EXH2 remains a separate hypothesis.
+Methodology: `docs/methodology/robustness-v1.md`, frozen before outcome review.
+
+Final workflow `34488295631` = SUCCESS. Code head `6f3fc86bc1230241d5414cc195004cd29c40ebcf`. Artifact `robustness-v1-34488295631`, SHA-256 `5e1ff152b9e0cb75ebb517e716dede8624dfac01885d6d898efd1274d02977eb`.
+
+ROB1 is retrospective historical robustness evidence only and is explicitly **not true OOS**.
+
+Accepted-portfolio PF:
+
+```text
+X1 = 1.060
+X3 = 1.162
+```
+
+Capital-constrained not-accepted opportunity PF:
+
+```text
+X1 = 1.104
+X3 = 1.164
+```
+
+For X3, portfolio priority therefore adds essentially no observable selection edge. Do not change the frozen ranking rule post hoc from this finding.
+
+X3 gross five-block total returns:
+
+```text
++63.45%, -8.30%, -9.09%, +33.74%, +49.89%
+```
+
+Two of five coarse periods are negative. Across 34 calendar years X3 gross records 21 positive / 13 negative years with median annual return +2.38%.
+
+Comparable SPY price-only context is ~8.80% CAGR with ~-56.47% max DD, versus X3 gross ~3.04% CAGR and ~-43.36% max DD. SPY dividends are excluded, so total-return benchmark underperformance would be larger.
+
+Verdict: X3 remains preferable to X1, but the historical economic edge is not compelling enough for production. No historical split may be relabeled OOS after the fact.
+
+Detailed decision record: `docs/decisions/2026-09-10-robustness-v1.md`.
+
+## FWD1 — Genuine forward-validation gate
+
+Forward observations must begin strictly after 2026-09-09 with all X3/PORT1 rules unchanged. Production inference is blocked until **both** of these gates are met:
+
+```text
+>= 12 calendar months
+>= 50 closed X3 portfolio trades
+```
+
+EXH2 remains a separate hypothesis and cannot be folded into FWD1 baseline without separate pre-registration/versioning.
 
 ## Anti-data-mining rule
 

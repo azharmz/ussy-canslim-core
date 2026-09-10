@@ -62,3 +62,21 @@ IBD/O'Neil concepts and our quantitative proxies are explicitly distinguished. P
 
 Implementation: `src/canslim_research/technical.py`.
 CI run `34431906311`: **SUCCESS** after fixing exact 5% boundary floating-point handling. The fix preserved the frozen rule; it did not change the threshold.
+
+## 2026-09-10 — E0 rolling smoke is not historical strategy evidence
+Workflow run `34432960298` successfully executed technical baseline v1 against `production/ready/current.json` and pinned SPY data. It produced 14 candidate rows across 13 symbols and 7 dates after the 252-day RS warm-up.
+
+**Decision:** classify this as `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST`.
+
+Reasons:
+- the ready export applies current active-compliant membership to rolling historical bars;
+- ready OHLCV is capped at 300 bars/security;
+- M was SPY-only because no QQQ benchmark contract was found;
+- therefore no PF/CAGR/drawdown/performance conclusion is allowed.
+
+The run is accepted only as evidence that the independent technical rule engine and R2 consumer path work end-to-end. Entry-quality diagnostics (`T-1->T0`, H+1 gap, T0 pivot extension, H+1 fill extension) are retained but not filtered/tuned.
+
+## 2026-09-10 — Full-history OHLCV exists separately
+`ussy-data` builds rolling data from `backtest/ohlcv/{security_id}.parquet`, while universe snapshots are read from `universe/membership/{snapshot_date}.json`.
+
+**Decision:** full E0 must use the longest defensible PIT-membership window supported by actual membership snapshots and full OHLCV. Current membership must never be backfilled across old price history merely to lengthen a backtest.

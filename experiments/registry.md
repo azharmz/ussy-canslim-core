@@ -24,7 +24,7 @@ Use this file to register experiments before execution. Completed experiments mu
 | R2-CA | Preferred technical baseline + C+A | COMPLETE / SPARSE | incremental value of C+A; sample too small for strategy inference |
 | PORT1 | Frozen portfolio construction | **COMPLETE / VALIDATED DESCRIPTIVE** | capital-constrained X3 BASE vs X1 BASE; portfolio return/DD/cost sensitivity |
 | ROB1 | Historical strategy robustness | **COMPLETE / VALIDATED HISTORICAL** | accepted-portfolio robustness, subperiod stability, opportunity cost, benchmark context; not true OOS |
-| FWD1 | Genuine forward validation | **NEXT / FROZEN GATE** | post-2026-09-09 unchanged-rule validation; production inference only after 12 months + 50 closed X3 trades |
+| FWD1 | Genuine forward validation | **LIVE / WAITING_FOR_POST_BOUNDARY_DATA** | frozen post-2026-09-09 collector; SPY source freshness gate must pass before counts become forward evidence |
 
 ## Core frozen evidence
 
@@ -159,14 +159,32 @@ Verdict: X3 remains preferable to X1, but the historical economic edge is not co
 
 Detailed decision record: `docs/decisions/2026-09-10-robustness-v1.md`.
 
-## FWD1 — Genuine forward-validation gate
+## FWD1 — Genuine forward validation
 
-Forward observations must begin strictly after 2026-09-09 with all X3/PORT1 rules unchanged. Production inference is blocked until **both** of these gates are met:
+Methodology: `docs/methodology/forward-validation-v1.md`, frozen before forward inference.
+
+Collector workflow `.github/workflows/forward-validation-v1.yml` is live. Canonical infrastructure validation run `34495098994` = SUCCESS: frozen tests pass, forward window collection completes, source-freshness gate is enforced, Git persistence is conflict-safe, and the Actions evidence artifact is uploaded.
+
+Current source state:
 
 ```text
->= 12 calendar months
+forward boundary exclusive = 2026-09-09
+minimum market_data_asof   = 2026-09-10
+observed SPY market_data_asof = 2026-09-04
+data_gate_pass = false
+status = WAITING_FOR_POST_BOUNDARY_DATA
+```
+
+Therefore the currently recorded zero candidate/trade counts are **not interpretable trading evidence**. They are an infrastructure/data-readiness observation because M cannot be evaluated after the boundary while SPY is stale.
+
+Once the data gate passes, FWD1 becomes `ACCUMULATING`. Formal review still requires both:
+
+```text
+>= 12 completed calendar months
 >= 50 closed X3 portfolio trades
 ```
+
+Passing all gates means `REVIEW_ELIGIBLE`, never automatic production promotion. Canonical observations are stored under `evidence/fwd1/`; detailed run mirrors are Actions artifacts. The collector is scheduled `04:30 UTC Tuesday-Saturday` after upstream daily OHLCV and SPY jobs.
 
 EXH2 remains a separate hypothesis and cannot be folded into FWD1 baseline without separate pre-registration/versioning.
 

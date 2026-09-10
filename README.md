@@ -1,20 +1,24 @@
 # USSY CAN SLIM Research HQ
 
-Research coordination repository for extending `ussy-trendfoll` toward a defensible, point-in-time CAN SLIM research framework.
+Independent research repository for building a defensible, point-in-time CAN SLIM strategy.
 
-This repository is **not** a production trading application. It stores methodology, experiment specifications, decision history, progress, and reproducibility metadata.
+`ussy-canslim-research` is **not an extension or replacement of `ussy-trendfoll`**. TrendFoll remains an independent strategy/project. This repository may reuse lessons, features, execution assumptions, and baseline evidence from TrendFoll, but CAN SLIM is free to adopt, modify, or reject them.
+
+This repository is **not** a production trading application. It stores methodology, experiment specifications, decision history, progress, evidence, and reproducibility metadata.
 
 ## Current status — 10 Sep 2026
 
-- Legacy technical baseline: `azharmz/ussy-trendfoll`
+- Independent CAN SLIM strategy track: **ACTIVE**
+- Legacy reference/baseline: `azharmz/ussy-trendfoll`
 - Canonical universe / historical membership: `azharmz/ussy-data`
 - Fundamental SEC/PIT engine: `azharmz/ussy-fundamentals` — **PRODUCTION-OPERATIONAL / FREEZE**
 - Fundamental production entry point: `fundamentals/current.json` in Cloudflare R2
 - Current canonical Musaffa universe: **1,327 securities**
 - Fundamental production-ready: **901** (`857 PASS_FULL` + `44 PASS_3Y_FALLBACK`)
 - Domestic SEC-supported readiness: **87.05%**
-- CAN SLIM C/A methodology: **NEXT**
-- Expanded-universe legacy baseline: **PENDING**
+- C methodology: **C-v1 FROZEN**
+- A methodology: **NEXT**
+- Independent expanded-universe CAN SLIM baseline: **PENDING**
 - Entry Quality & Execution research: **PENDING**
 
 ## Core research principle
@@ -27,7 +31,7 @@ SEC facts
   -> production readiness
   -> CAN SLIM interpretation
   -> experiment labels
-  -> backtest / robustness
+  -> independent CAN SLIM backtest / robustness
   -> forward validation
 ```
 
@@ -37,12 +41,14 @@ SEC facts
 |---|---|
 | `ussy-data` | Canonical universe and historical membership |
 | `ussy-fundamentals` | SEC facts, PIT normalization, readiness, R2 production snapshots |
-| `ussy-trendfoll` | Legacy strategy and production paper-trading implementation |
-| `ussy-canslim-research` | CAN SLIM methodology, experiments, evidence, decision log |
+| `ussy-trendfoll` | Independent TrendFoll strategy and production paper-trading implementation |
+| `ussy-canslim-research` | Independent CAN SLIM methodology, experiments, evidence, decision log |
 
-## Legacy technical baseline
+## Relationship to TrendFoll
 
-Production entry in `ussy-trendfoll`:
+TrendFoll is a useful **reference baseline**, not the destination architecture for CAN SLIM.
+
+Its current production entry is:
 
 ```text
 hard_filter_status == PASS
@@ -56,9 +62,11 @@ hard_filter_status == PASS
 
 Legacy universe was approximately **199 securities**, originating from the intersection of XTB availability and Musaffa-compliant securities. That universe constraint is not a CAN SLIM rule.
 
+CAN SLIM research can benchmark against those rules, but no result here automatically changes `ussy-trendfoll`.
+
 ## Open research issue: entry quality
 
-Filled/Open H+1 is operationally realistic but remains a research issue. Walk-forward observations include cases where T0 had a very large move or H+1 opened far above the signal price and subsequently retraced.
+Filled/Open H+1 is operationally realistic in TrendFoll but remains a research issue for CAN SLIM design. Walk-forward observations include cases where T0 had a very large move or H+1 opened far above the signal price and subsequently retraced.
 
 The dedicated Entry Quality workstream studies:
 
@@ -85,16 +93,15 @@ For reproducible research, pin the immutable snapshot/manifest/checksum actually
 ## Roadmap
 
 ```text
-Expanded-universe exact legacy baseline
-        -> Entry Quality diagnostics
-        -> Freeze C specification
+Freeze C specification  ✓
         -> Freeze A specification
-        -> Compute PIT labels / distribution
-        -> C ablation
-        -> C+A ablation
+        -> Define independent CAN SLIM technical baseline
+        -> Entry Quality diagnostics
+        -> Produce PIT C/A labels + distribution audit
+        -> CAN SLIM ablations
         -> robustness / holdout
-        -> forward validation
-        -> production review only if evidence supports it
+        -> independent forward validation
+        -> separate production implementation only if evidence supports it
 ```
 
 See `docs/progress-board.md`, `docs/decision-log.md`, and `experiments/registry.md` for the working state.

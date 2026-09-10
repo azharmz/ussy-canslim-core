@@ -1,2 +1,2 @@
-triggered_at: 2026-09-10T11:58:00+08:00
-reason: inspect stable identity and temporal schema before historical as-of C/A join
+triggered_at: 2026-09-10T12:03:00+08:00
+reason: inspect current_universe.csv as security_id-to-fundamental identity bridge

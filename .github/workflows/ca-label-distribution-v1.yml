@@ -2,6 +2,10 @@ name: C/A label distribution v1
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-ca-label-distribution'
 
 permissions:
   contents: read

@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/run-ca-label-distribution'
+      - '.github/workflows/ca-label-distribution-v1.yml'
 
 permissions:
   contents: read

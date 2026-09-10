@@ -1,0 +1,34 @@
+experiment_id: CA-DIST-v1
+purpose: distribution_sanity_check
+performance_metrics_allowed: false
+universe_source: ussy-data
+fundamentals_pointer: fundamentals/current.json
+reproducibility:
+  pin_resolved_snapshot: true
+  pin_manifest_checksum: true
+pit:
+  availability_field: accepted_at
+  rule: accepted_at <= decision_cutoff
+C_v1:
+  eps_yoy_min: 0.25
+  revenue_yoy_min: 0.25
+  missing_policy: NOT_EVALUABLE
+A_v1:
+  consecutive_annual_eps_yoy_periods: 3
+  each_yoy_min: 0.25
+  missing_policy: NOT_EVALUABLE
+  pass_3y_fallback: evaluable_separate_tier
+outputs:
+  - counts_by_C_state
+  - counts_by_A_state
+  - counts_by_CA_state
+  - reason_code_counts
+  - readiness_cross_tab
+  - sector_distribution
+  - history_depth_distribution
+forbidden_outputs:
+  - CAGR
+  - profit_factor
+  - return
+  - drawdown
+  - trade_outcomes

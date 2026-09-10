@@ -1,0 +1,45 @@
+name: E0 static-history candidates v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-e0-static-history-candidates'
+      - '.github/workflows/e0-static-history-candidates.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+      - name: Run static-history candidate study
+        run: python scripts/run_e0_static_history_candidates.py
+      - name: Show summary
+        run: cat results/e0-static-history-candidates-v1/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: e0-static-history-candidates-v1-${{ github.run_id }}
+          path: |
+            results/e0-static-history-candidates-v1/summary.json
+            results/e0-static-history-candidates-v1/candidates.csv
+            results/e0-static-history-candidates-v1/annual_candidate_counts.csv
+            results/e0-static-history-candidates-v1/membership_snapshot.json
+            results/e0-static-history-candidates-v1/spy_pointer.json
+          retention-days: 30

@@ -27,15 +27,17 @@ The methodology was frozen before portfolio outcome review in `docs/methodology/
 
 ## Workflow and evidence
 
-Successful workflow run: `34485765478`
+Canonical successful workflow run: `34488197400`
 
-Code head: `c51b7b6644aec91767b5bd2767d0b11e6ac45077`
+Code head: `35e62cdc53894381c5528560036a1201ba406699`
 
-Artifact: `portfolio-construction-v1-34485765478`
+Artifact: `portfolio-construction-v1-34488197400`
 
-Artifact SHA-256: `a0a019b666ba3cd18d23cd78366a3c645053d5f051c69b0e83a9f3e0b033fa40`
+Artifact SHA-256: `687c9557b975802ae388861228c3c3fc0ffed191c4730affb38bccd470080636`
 
-The censored-accounting hard audit passed: X1 has 4 and X3 has 2 final censored positions, all at the 2026-09-09 sample boundary; mid-sample censored positions = 0. Censored positions are marked to market and no phantom exit cost is charged.
+This supersedes PORT1 run `34485765478` only for metric/accounting finalization. Portfolio allocations and frozen strategy rules were unchanged. The finalizer makes two accounting invariants explicit: boundary `CENSORED_OPEN` positions remain mark-to-market with no phantom exit cost, and CAGR is calculated consistently from the declared 100,000 initial capital rather than the first post-entry EOD equity.
+
+Censored audit: X1 has 4 and X3 has 2 final censored positions, all at the 2026-09-09 sample boundary; mid-sample censored positions = 0.
 
 ## Portfolio results
 
@@ -46,7 +48,7 @@ The censored-accounting hard audit passed: X1 has 4 and X3 has 2 final censored 
 | Capacity skips | 1,010 | 564 |
 | Cash skips | 3,343 | 1,911 |
 | Gross total return | +30.70% | **+172.90%** |
-| Gross CAGR | +0.83% | **+3.04%** |
+| Gross CAGR | +0.80% | **+3.04%** |
 | Gross max drawdown | -66.89% | **-43.36%** |
 | Cost20bp total return | -20.86% | **+121.37%** |
 | Cost20bp CAGR | -0.70% | **+2.40%** |
@@ -74,5 +76,5 @@ The high cash/capacity skip counts are a real portfolio effect, not missing trad
 2. Retain X3 BASE as the primary research track and X1 BASE as mandatory control.
 3. Do not tune max positions, sizing, ranking, cost assumptions or event ordering from these outcomes.
 4. Do not promote the strategy to production from PORT1.
-5. Move next to ROB1: robustness/holdout/forward validation and remaining diagnostics, with EXH2 still separate.
+5. Proceed to ROB1 robustness and genuine forward validation, with EXH2 still separate.
 6. Treat C/A as descriptors only; do not reintroduce them as hard filters based on PORT1.

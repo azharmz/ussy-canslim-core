@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-10
 
-Estimated overall research-program progress: **~88%**.
+Estimated overall research-program progress: **~91%**.
 
 This percentage describes research-program completion, not literal CAN SLIM fidelity and not production readiness.
 
@@ -23,11 +23,12 @@ This percentage describes research-program completion, not literal CAN SLIM fide
 | Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | run `34466747136`; high shock × T+1 rejection mechanism |
 | Exhaustion validation protocol | PRE-REGISTRATION REQUIRED | separate workstream; no discovery-sample cutoff tuning |
 | C / C+A ablation | COMPLETE / VALIDATED DESCRIPTIVE | run `34481587218`; hard C does not improve X3/X1; C+A too sparse |
-| Portfolio construction | **COMPLETE / VALIDATED DESCRIPTIVE** | run `34485765478`; X3 survives capital constraints but absolute CAGR/DD remain weak |
-| Robustness / holdout | **NEXT / PARTIAL** | annual/portfolio DD and concentration now available; holdout/forward validation and remaining robustness remain |
+| Portfolio construction | **COMPLETE / VALIDATED DESCRIPTIVE** | canonical run `34488197400`; X3 survives capital constraints but absolute CAGR/DD remain weak |
+| Historical robustness ROB1 | **COMPLETE / VALIDATED HISTORICAL** | run `34488295631`; X3 remains > X1 but materially lags SPY CAGR; retrospective, not true OOS |
+| Genuine forward validation | **NEXT / FROZEN GATE** | rules frozen after 2026-09-09; minimum 12 calendar months + 50 closed X3 portfolio trades before production inference |
 | Institutional sponsorship (I) | DEFERRED | never implicit PASS |
 | QQQ benchmark for full M-v1 | MISSING INPUT | current exploratory engine uses SPY-only proxy |
-| Production integration | BLOCKED | strategy evidence is not yet strong enough; holdout/forward validation first |
+| Production integration | BLOCKED | strategy evidence remains economically weak; forward validation required |
 
 ## Research universe
 
@@ -89,7 +90,7 @@ Decision record: `docs/decisions/2026-09-10-fundamental-ablation-v1.md`.
 
 Portfolio methodology was frozen before outcome review in `docs/methodology/portfolio-construction-v1.md`: 100,000 initial equity, long-only/no leverage, max 7 positions, 1/7 prior-close-equity sizing, deterministic RS/volume priority, entries before same-day exits, X3 BASE primary and X1 BASE control.
 
-Final validated workflow: `34485765478` = SUCCESS. Artifact: `portfolio-construction-v1-34485765478`, SHA-256 `a0a019b666ba3cd18d23cd78366a3c645053d5f051c69b0e83a9f3e0b033fa40`.
+Canonical validated workflow: `34488197400` = SUCCESS. Artifact: `portfolio-construction-v1-34488197400`, SHA-256 `687c9557b975802ae388861228c3c3fc0ffed191c4730affb38bccd470080636`.
 
 Censored-accounting audit passed: X1 has 4 and X3 has 2 boundary censored positions, all at 2026-09-09; no mid-sample censor and no phantom exit cost.
 
@@ -99,7 +100,7 @@ Censored-accounting audit passed: X1 has 4 and X3 has 2 boundary censored positi
 | Capacity skips | 1,010 | 564 |
 | Cash skips | 3,343 | 1,911 |
 | Gross total return | +30.70% | **+172.90%** |
-| Gross CAGR | +0.83% | **+3.04%** |
+| Gross CAGR | +0.80% | **+3.04%** |
 | Gross max DD | -66.89% | **-43.36%** |
 | Cost20bp total return | -20.86% | **+121.37%** |
 | Cost20bp CAGR | -0.70% | **+2.40%** |
@@ -111,14 +112,62 @@ Interpretation: X3's relative advantage survives capital constraints, but the ab
 
 Decision record: `docs/decisions/2026-09-10-portfolio-construction-v1.md`.
 
+## ROB1 — Historical Robustness v1
+
+Final workflow `34488295631` = SUCCESS. Artifact: `robustness-v1-34488295631`, SHA-256 `5e1ff152b9e0cb75ebb517e716dede8624dfac01885d6d898efd1274d02977eb`.
+
+ROB1 is retrospective historical robustness evidence, **not true OOS**. X3 was already selected using historical evidence before this experiment.
+
+Accepted-portfolio trade quality:
+
+| Metric | X1 | X3 |
+|---|---:|---:|
+| Accepted trades | 1,424 | 1,129 |
+| PF | 1.060 | **1.162** |
+| Median realized return | -7.0% | -7.0% |
+| Median pre-exit MFE | +6.66% | +6.67% |
+| Median pre-exit MAE | -4.93% | -5.10% |
+| Target rate | 30.20% | **32.42%** |
+| Stop rate | 69.52% | **67.40%** |
+
+Capital-constraint opportunity-cost check:
+
+```text
+X1 accepted PF ~1.060 vs not-accepted PF ~1.104
+X3 accepted PF ~1.162 vs not-accepted PF ~1.164
+```
+
+Thus the frozen RS/volume priority does not appear to add material selection edge.
+
+X3 gross five-block total returns:
+
+```text
++63.45%, -8.30%, -9.09%, +33.74%, +49.89%
+```
+
+Two of five coarse blocks lose money. Across 34 calendar years, X3 gross has 21 positive / 13 negative years, median annual return +2.38%.
+
+SPY price-only comparable context:
+
+```text
+CAGR ~8.80%
+Max DD ~-56.47%
+Dividends excluded
+```
+
+X3 gross is ~3.04% CAGR with ~-43.36% max DD. Therefore X3 gives up a large amount of return for a moderate drawdown improvement. Because SPY dividends are excluded, a total-return benchmark would widen the return gap.
+
+Decision record: `docs/decisions/2026-09-10-robustness-v1.md`.
+
 ## Post-breakout exhaustion diagnostic
 
 Workflow `34466747136` = SUCCESS. The key discovery is not high T0 momentum alone but high shock followed by T+1 rejection. No cutoff is adopted from the discovery sample. EXH2 remains separately pre-registered/forward-validation work.
 
 ## Next sequence
 
-1. Execute ROB1 robustness/holdout design without altering PORT1 rules from observed outcomes.
-2. Add remaining robustness diagnostics: MAE/MFE at accepted-portfolio level, opportunity-cost/capacity analysis, annual/subperiod stability and benchmark-relative context.
-3. Define a genuine holdout/forward-validation split before using it to change strategy rules.
+1. Freeze the historical research track; do not tune X3 or PORT1 from ROB1 outcomes.
+2. Start genuine forward validation only on observations after 2026-09-09 using unchanged rules.
+3. Do not make production inference until at least 12 calendar months and 50 closed X3 portfolio trades are accumulated.
 4. Keep EXH2 separate from the baseline and validate it independently.
-5. Do not propose production unless out-of-sample evidence materially improves the current weak absolute risk-adjusted profile.
+5. Continue to treat C/A as descriptors, not hard performance filters.
+6. QQQ/full-M and institutional sponsorship I remain separate methodology gaps, not implicit PASS states.

@@ -28,6 +28,16 @@ This makes actual execution respect the same 5% CAN SLIM buy zone used at signal
 
 No intraday wait/re-entry logic is assumed in v1 because only daily OHLCV is available.
 
+### Position multiplicity
+
+Only **one active position per security** is allowed. If a new technical candidate occurs while the same `security_id` still has an open position, the later candidate is recorded as:
+
+```text
+SKIP_ALREADY_OPEN
+```
+
+This rule prevents repeated candidate days from being counted as independent concurrent trades in the same stock. It does not impose a cross-security portfolio-capacity rule; portfolio construction remains a separate methodology layer.
+
 ## 2. Purchase price
 
 For an accepted entry:
@@ -118,6 +128,7 @@ Thus the legacy H+1 chasing problem becomes an observable execution mechanism ra
 The following are frozen before trading-performance evaluation:
 
 - actual H+1 fill must remain inside the 0%-5% buy zone;
+- one active position per security;
 - 7% hard stop from actual fill;
 - 20% primary target from pivot;
 - stop-first resolution for same-bar ambiguity;

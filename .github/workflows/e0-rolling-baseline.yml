@@ -1,0 +1,45 @@
+name: E0 rolling baseline v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-e0-rolling-baseline'
+      - '.github/workflows/e0-rolling-baseline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e0:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+      - name: Run E0 rolling baseline smoke
+        run: python scripts/run_e0_rolling_baseline.py
+      - name: Show summary
+        run: cat results/e0-rolling-baseline-v1/summary.json
+      - name: Upload E0 evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: e0-rolling-baseline-v1-${{ github.run_id }}
+          path: |
+            results/e0-rolling-baseline-v1/summary.json
+            results/e0-rolling-baseline-v1/candidates.csv
+            results/e0-rolling-baseline-v1/daily_summary.csv
+            results/e0-rolling-baseline-v1/ready_pointer.json
+            results/e0-rolling-baseline-v1/spy_pointer.json
+          retention-days: 30

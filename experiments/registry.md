@@ -1,58 +1,35 @@
 # Experiment Registry
 
-Use this file to register experiments before execution. Completed experiments must pin immutable inputs and record a verdict.
-
-## Required fields
-
-```text
-experiment_id
-status
-hypothesis
-strategy_baseline
-universe_snapshot
-fundamentals_snapshot
-fundamentals_manifest_checksum
-code_commit
-config_path
-date_range
-holdout_protocol
-trade_log
-result_artifacts
-primary_metrics
-verdict
-notes
-```
+Use this file to register experiments before execution. Completed experiments must pin inputs, code/config, evidence class, and verdict.
 
 ## Registered experiments
 
 | ID | Experiment | Status | Primary purpose |
 |---|---|---|---|
-| C1 | C label distribution | COMPLETE / VALIDATED | Measure C-v1 PASS/FAIL/NOT_EVALUABLE without trading metrics |
-| A1 | A label distribution | COMPLETE / VALIDATED | Measure A-v1 PASS/FAIL/NOT_EVALUABLE without trading metrics |
-| TB1 | Independent technical baseline specification + rule engine | COMPLETE / FROZEN | Freeze transparent N/S/L/M proxies before performance testing |
-| E0-SMOKE | Rolling expanded technical baseline | COMPLETE / VALIDATED SMOKE | Validate end-to-end technical candidate generation on current ready universe; not PIT performance evidence |
-| E0 | Independent expanded technical baseline | INPUT AUDIT / FULL PIT PENDING | Establish baseline performance on longest defensible PIT-membership window |
-| E1 | Signal-day shock diagnostics | PLANNED | T-1->T0 move vs post-entry outcomes |
-| E2 | H+1 execution-gap diagnostics | PLANNED | execution gap vs retracement/outcomes |
-| E3 | Pivot extension 3/5/8% | PLANNED | pre-specified signal extension caps |
-| E4 | Actual fill pivot extension | PLANNED | executable H+1 extension from pivot |
-| E5 | Entry-quality interactions | PLANNED | shock + gap + extension interactions |
-| E6 | Entry outcome robustness | PLANNED | MAE/MFE/PF/DD/subperiod/concentration |
-| R2-C | Technical baseline + C | BLOCKED | incremental value of C; requires E0 + historical PIT C labels |
-| R2-CA | Technical baseline + C + A | BLOCKED | incremental value of C+A; requires E0 + historical PIT C/A |
-| R2-EC | Entry rule + C | BLOCKED | interaction of entry discipline and C |
-| R2-ECA | Entry rule + C + A | BLOCKED | combined candidate framework |
+| C1 | C label distribution | COMPLETE / VALIDATED | C-v1 PASS/FAIL/NOT_EVALUABLE distribution |
+| A1 | A label distribution | COMPLETE / VALIDATED | A-v1 PASS/FAIL/NOT_EVALUABLE distribution |
+| TB1 | Independent technical baseline | COMPLETE / FROZEN | transparent N/S/L/M proxy baseline |
+| E0-SMOKE | Rolling technical smoke | COMPLETE / VALIDATED | end-to-end candidate generation |
+| E0-HIST | Historical technical candidates on frozen current-compliant universe | COMPLETE | establish candidate event set |
+| E1 | Signal-day shock diagnostics | COMPLETE / EXPLORATORY | T-1->T0 shock mechanism |
+| E2 | H+1 execution-gap diagnostics | COMPLETE / EXPLORATORY | execution gap mechanism |
+| E3 | Pivot extension 3/5/8% | COMPLETE / EXPLORATORY | pre-specified extension diagnostics |
+| E4 | Actual-fill pivot extension | COMPLETE / EXPLORATORY | fill-aware chasing diagnostic |
+| ET1 | **X1-X4 entry timing basis test** | **COMPLETE / VALIDATED** | choose executable daily-EOD entry baseline before fundamental ablation |
+| CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | latest-quarter/FY state selection |
+| CA-HIST | Historical C/A attachment | NEXT | causal C/A state at each signal |
+| R2-C | Preferred technical baseline + C | BLOCKED | incremental value of C after CA-HIST |
+| R2-CA | Preferred technical baseline + C+A | BLOCKED | incremental value of C+A after CA-HIST |
+| PORT1 | Portfolio construction | PLANNED | sizing/max positions/equity curve |
+| ROB1 | Strategy robustness/holdout | BLOCKED | PF ex-top10, DD, subperiod, concentration |
 
-## C1/A1 execution record
+## C1/A1
 
-- Workflow run: `34431101727`
-- Result: **SUCCESS**
-- Fundamentals manifest: `fundamentals/snapshots/2026-09-09/run-34417104650/manifest.json`
-- Fundamentals source run: `34417104650`
-- Production-ready denominator: `901`
-- Trading metrics used: `false`
+Workflow run `34431101727` = **SUCCESS**.
 
-Distribution:
+Pinned fundamentals manifest:
+
+`fundamentals/snapshots/2026-09-09/run-34417104650/manifest.json`
 
 ```text
 C-v1   PASS 69 | FAIL 520 | NOT_EVALUABLE 312
@@ -60,65 +37,97 @@ A-v1   PASS 11 | FAIL 483 | NOT_EVALUABLE 407
 C+A    PASS  3 | FAIL 437 | NOT_EVALUABLE 461
 ```
 
-C+A PASS: `FIX`, `NBIX`, `NVDA`.
+Verdict: thresholds remain frozen; no trading metrics were used.
 
-**Verdict:** distribution study is operationally valid; do not tune frozen C-v1/A-v1 thresholds from these counts.
-
-## TB1 execution record
-
-Specification: `docs/methodology/technical-baseline-v1.md`
+## TB1
 
 Implementation: `src/canslim_research/technical.py`
 
-Unit tests: `tests/test_technical.py`
+CI run `34431906311` = **SUCCESS**.
 
-CI workflow: `Technical baseline v1 tests`
+Verdict: independent technical baseline executable and frozen.
 
-- first CI run `34431864161`: failed on exact 5% floating-point boundary;
-- implementation corrected to compare `close > pivot * 1.05` directly;
-- validation run `34431906311`: **SUCCESS**.
+## E0 / E1-E4
 
-**Verdict:** technical baseline v1 rule semantics are frozen and executable. This is an independent CAN SLIM baseline, not TrendFoll production logic.
+Historical technical candidate engine on research universe frozen at `universe/membership/2026-08-28.json`:
 
-## E0-SMOKE execution record
+- candidate events: **10,731**
+- candidate securities: **860**
 
-Workflow run: `34432960298` = **SUCCESS**.
+E1-E4 workflow run `34433673545` = **SUCCESS**.
 
-Code runner: `scripts/run_e0_rolling_baseline.py`.
-
-Evidence record: `results/e0-rolling-baseline-v1/README.md`.
-
-Pinned ready data:
-- `production/ready/runs/2ef1b2ca8f9f44aba62d0552884e06c6.parquet`
-- SHA256 `c1ed91508642acd604e73f2cb79cf8027fd91ea644acab0bb806cf7e12f237a4`
-- ready snapshot date `2026-08-28`
-
-Pinned SPY:
-- `benchmarks/SPY/runs/97aa9dd852e743da93cc611c6d58c3cb.parquet`
-- SHA256 `1fb495068c5392108cde7d49d4dae8e1d842dde0b01e29af8f64e477525350d4`
-
-Observed smoke counts:
+X1 funnel:
 
 ```text
-ready securities                 1,223
-ready OHLCV rows               366,411
-feature-evaluable rows          58,216
-feature-evaluable dates             77
-technical candidate rows            14
-technical candidate symbols         13
-technical candidate dates            7
+5,777 accepted T+1 entries
+501 T+1 above 5% buy zone
+726 T+1 at/below pivot
+3,727 skipped because security already open
 ```
 
-Entry-quality continuous diagnostics were retained for candidate rows (`T-1->T0`, H+1 gap, T0 pivot extension, H+1 fill extension) but were not used as filters.
+Verdict: fill-aware 5% rule addresses a real chasing mechanism; no post-hoc shock/gap threshold adopted.
 
-**Evidence class:** `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST`.
+## ET1 — Entry Timing Basis Test v1
 
-**Verdict:** PASS as implementation/data-contract smoke. Do not use this run for PF/CAGR/drawdown or strategy-selection claims. Full E0 remains pending historical membership audit and full-history reconstruction.
+Specification: `docs/methodology/entry-timing-basis-test-v1.md`
 
-## Robustness metrics for later trading experiments
+Implementation:
 
-At minimum: trade count, PF, PF ex-top10, return, max drawdown, results by subperiod, sector concentration, symbol concentration. Entry-quality studies also include MAE, MFE, stop rate, trend-exit rate, holding period and continuous-variable distributions.
+- `src/canslim_research/entry_timing.py`
+- `scripts/run_entry_timing_basis_test.py`
+- `tests/test_entry_timing.py`
+
+Workflow run `34464861119` = **SUCCESS**; timing/execution tests: **13 passed**.
+
+Research universe: frozen contemporary/current Musaffa-compliant universe at 2026-08-28. Historical Musaffa status is not a strategy input to this research question.
+
+All variants share:
+
+```text
+stop = actual fill * 0.93
+target = pivot * 1.20
+same-bar ambiguity = stop-first
+no time stop
+```
+
+Results:
+
+| Variant | Entries | Fill rate | PF | PF ex-top10 | Target rate | Stop rate |
+|---|---:|---:|---:|---:|---:|---:|
+| X1 | 5,777 | 53.83% | 1.093 | 1.082 | 30.95% | 68.98% |
+| X2 | 6,158 | 57.39% | 1.096 | 1.086 | 31.02% | 68.89% |
+| **X3** | **3,604** | **33.58%** | **1.163** | **1.146** | **32.77%** | **67.18%** |
+| X4 | 4,216 | 39.29% | 1.109 | 1.093 | 30.95% | 69.00% |
+
+Subperiod robustness: X3 > X1 in 4/5 coarse periods and 22/34 years with observations for both.
+
+Mechanism check:
+
+- 2,775 events traded by both X1 and X3: X1 PF ~1.224; X3 PF ~1.172;
+- 3,002 X1 trades not shared with X3: PF ~0.982.
+
+Interpretation: X3's advantage is mainly **selection by pivot-hold confirmation**, not better delayed fills on the same opportunities.
+
+**Verdict:** promote **X3 pivot-hold** to preferred research execution baseline; retain X1 as control. Do not tune X3/X4 parameters on this same evidence set.
+
+Detailed record: `results/entry-timing-basis-test-v1/README.md`.
+
+## CA period semantics
+
+Audit run `34434268817` = **SUCCESS**.
+
+At each decision cutoff:
+
+- restrict SEC evidence to `accepted_at <= cutoff`;
+- for C, select latest fiscal quarter known at cutoff, then latest accepted state within that quarter;
+- older-period amendments cannot displace newer fiscal periods merely because accepted later;
+- for A, select latest accepted annual state per FY and then latest three consecutive FY growth states;
+- undefined growth remains NOT_EVALUABLE.
+
+## Robustness requirements for later strategy claims
+
+At minimum: trade count, PF, PF ex-top10, portfolio return, max drawdown, subperiod stability, sector/symbol concentration, MAE/MFE, fill rate and opportunity cost.
 
 ## Anti-data-mining rule
 
-Every experiment must distinguish pre-specified rules, exploratory diagnostics, and post-hoc findings. A post-hoc finding is not a production candidate until independently specified and validated on untouched evidence.
+Every experiment must distinguish pre-specified rules, exploratory diagnostics, and post-hoc findings. A changed threshold or rule must be versioned as a new hypothesis and independently validated; it cannot be retrofitted into a completed experiment.

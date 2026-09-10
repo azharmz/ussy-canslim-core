@@ -269,6 +269,26 @@ Production inference is blocked until both are satisfied:
 
 EXH2 remains a separate independently versioned hypothesis. C/A remain descriptors. QQQ/full-M and I remain separate methodology gaps, never implicit PASS.
 
+## 2026-09-10 — FWD1 collector is live; source freshness is a hard gate
+Canonical infrastructure run `34495098994` = SUCCESS. The collector now passes frozen execution tests, recomputes the post-boundary window, applies a source-freshness gate, persists evidence conflict-safely under `evidence/fwd1/`, and uploads a detailed Actions artifact.
+
+The market-regime SPY source is currently only through `2026-09-04`, before the first forward date `2026-09-10`. Frozen interpretation:
+
+```text
+market_data_asof < 2026-09-10
+-> data_gate_pass = false
+-> status = WAITING_FOR_POST_BOUNDARY_DATA
+-> zero candidates/trades are NOT interpretable as zero signals
+```
+
+No fallback M rule is introduced. The blocker must be resolved by advancing/repairing the separate SPY benchmark source while preserving its data-quality contract.
+
+Collector schedule is `04:30 UTC Tuesday-Saturday`, intentionally after upstream daily OHLCV and SPY jobs. Consumer R2 credentials are read-only for `PutObject`, so canonical long-horizon FWD1 evidence uses Git repository history plus Actions artifacts; this persistence change does not alter strategy semantics.
+
+Once the source-freshness gate passes, FWD1 status may become `ACCUMULATING`; formal review still requires both >=12 completed calendar months and >=50 closed X3 portfolio trades. Passing all gates is only `REVIEW_ELIGIBLE`.
+
+Detailed record: `docs/decisions/2026-09-10-forward-validation-v1.md`.
+
 ## Next decision gate
 
-Start FWD1 collection/monitoring with the frozen baseline. Do not change baseline rules from new forward observations until the pre-registered gate is reached. EXH2 may be validated separately, but it must not be silently folded into FWD1 baseline.
+Advance the SPY benchmark source without changing M semantics. After the FWD1 data gate passes, let the frozen collector accumulate genuine post-boundary evidence. Do not change baseline rules from interim forward observations. EXH2 remains separately versioned.

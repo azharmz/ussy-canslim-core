@@ -3,7 +3,8 @@ name: Forward validation v1
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 23 * * 1-5'
+    # 04:30 UTC Tue-Sat: after the upstream US-session OHLCV refresh and SPY benchmark job.
+    - cron: '30 4 * * 2-6'
   push:
     branches: [main]
     paths:

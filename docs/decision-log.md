@@ -45,3 +45,20 @@ Among 901 production-ready securities:
 - C+A PASS symbols: FIX, NBIX, NVDA
 
 Trading-performance metrics were not consulted. **Decision:** keep C-v1/A-v1 frozen; the distribution is evidence about strictness/evaluability, not a reason to tune thresholds.
+
+## 2026-09-10 — Freeze independent technical baseline v1
+CAN SLIM must not inherit TrendFoll technical rules by default. A separate, versioned technical baseline is frozen before performance testing.
+
+Primary v1 rules:
+- historical Musaffa eligibility, using PIT membership;
+- separate $15 price guardrail;
+- N-price proxy: generic prior-35-session consolidation, max depth 40%, T0 close above pivot and within 5% of pivot;
+- S: T0 volume >=1.40x prior 50-session average volume;
+- L: transparent recency-weighted 3/6/9/12-month RS proxy, percentile >=80 within historical eligible universe;
+- M: SPY/QQQ follow-through/distribution proxy; Day 4+ FTD >=1.00% on higher volume, distribution day <=-0.20% on higher volume, block at >=6 active distribution days in 25 sessions;
+- I remains `NOT_IMPLEMENTED`, never implicit PASS.
+
+IBD/O'Neil concepts and our quantitative proxies are explicitly distinguished. Proprietary IBD RS ratings, pattern recognition and market exposure models are not claimed to be replicated.
+
+Implementation: `src/canslim_research/technical.py`.
+CI run `34431906311`: **SUCCESS** after fixing exact 5% boundary floating-point handling. The fix preserved the frozen rule; it did not change the threshold.

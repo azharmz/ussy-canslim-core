@@ -15,9 +15,11 @@ Use this file to register experiments before execution. Completed experiments mu
 | E2 | H+1 execution-gap diagnostics | COMPLETE / EXPLORATORY | execution gap mechanism |
 | E3 | Pivot extension 3/5/8% | COMPLETE / EXPLORATORY | pre-specified extension diagnostics |
 | E4 | Actual-fill pivot extension | COMPLETE / EXPLORATORY | fill-aware chasing diagnostic |
-| ET1 | **X1-X4 entry timing basis test** | **COMPLETE / VALIDATED** | choose executable daily-EOD entry baseline before fundamental ablation |
+| ET1 | X1-X4 entry timing basis test | COMPLETE / VALIDATED | choose executable daily-EOD entry baseline before fundamental ablation |
+| EXH1 | **Post-breakout exhaustion diagnostic** | **COMPLETE / EXPLORATORY** | test T-1->T0 shock × T+1 rejection mechanism |
+| EXH2 | Exhaustion validation | **NEXT / PRE-REGISTRATION REQUIRED** | independently validate exhaustion interaction; no discovery-sample cutoff tuning |
 | CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | latest-quarter/FY state selection |
-| CA-HIST | Historical C/A attachment | NEXT | causal C/A state at each signal |
+| CA-HIST | Historical C/A attachment | QUEUED | causal C/A state at each signal |
 | R2-C | Preferred technical baseline + C | BLOCKED | incremental value of C after CA-HIST |
 | R2-CA | Preferred technical baseline + C+A | BLOCKED | incremental value of C+A after CA-HIST |
 | PORT1 | Portfolio construction | PLANNED | sizing/max positions/equity curve |
@@ -79,18 +81,7 @@ Implementation:
 
 Workflow run `34464861119` = **SUCCESS**; timing/execution tests: **13 passed**.
 
-Research universe: frozen contemporary/current Musaffa-compliant universe at 2026-08-28. Historical Musaffa status is not a strategy input to this research question.
-
-All variants share:
-
-```text
-stop = actual fill * 0.93
-target = pivot * 1.20
-same-bar ambiguity = stop-first
-no time stop
-```
-
-Results:
+All variants share the same 7% stop from actual fill and 20% target from pivot.
 
 | Variant | Entries | Fill rate | PF | PF ex-top10 | Target rate | Stop rate |
 |---|---:|---:|---:|---:|---:|---:|
@@ -99,18 +90,37 @@ Results:
 | **X3** | **3,604** | **33.58%** | **1.163** | **1.146** | **32.77%** | **67.18%** |
 | X4 | 4,216 | 39.29% | 1.109 | 1.093 | 30.95% | 69.00% |
 
-Subperiod robustness: X3 > X1 in 4/5 coarse periods and 22/34 years with observations for both.
+Verdict: X3 pivot-hold is the current preferred research execution baseline; X1 remains mandatory control. This does not end entry-quality research.
 
-Mechanism check:
+## EXH1 — Post-breakout exhaustion diagnostic
 
-- 2,775 events traded by both X1 and X3: X1 PF ~1.224; X3 PF ~1.172;
-- 3,002 X1 trades not shared with X3: PF ~0.982.
+Implementation: `scripts/run_post_breakout_exhaustion_diagnostics.py`
 
-Interpretation: X3's advantage is mainly **selection by pivot-hold confirmation**, not better delayed fills on the same opportunities.
+Workflow: `.github/workflows/post-breakout-exhaustion-v1.yml`
 
-**Verdict:** promote **X3 pivot-hold** to preferred research execution baseline; retain X1 as control. Do not tune X3/X4 parameters on this same evidence set.
+Workflow run `34466747136` = **SUCCESS**.
 
-Detailed record: `results/entry-timing-basis-test-v1/README.md`.
+Research question: does an extreme T-1->T0 expansion become especially vulnerable when T+1 confirms rejection?
+
+Discovery-sample findings:
+
+- top shock decile median move ~8.70%, X1 PF ~1.05;
+- bottom shock decile median move ~0.78%, X1 PF ~1.36;
+- raw return-to-pivot frequency is not monotonic with shock because low-shock breakouts begin mechanically closer to pivot;
+- the interaction with T+1 rejection is much stronger than shock alone.
+
+Highest shock quintile interaction:
+
+| T+1 state | Candidates | X1 PF | Stop rate | Retest pivot by T+3 | Breakdown below pivot by T+3 |
+|---|---:|---:|---:|---:|---:|
+| Bearish + Close < T0 Close | 962 | **0.560** | **80.84%** | 74.32% | 60.60% |
+| Bearish only | 171 | 0.675 | 76.40% | 34.50% | 25.15% |
+| Close < T0 only | 120 | 1.601 | 61.25% | 61.67% | 43.33% |
+| No rejection | 893 | **1.573** | **59.63%** | 21.61% | 14.22% |
+
+**Verdict:** support the mechanism hypothesis `large T0 expansion × T+1 rejection -> exhaustion risk`. Do not derive or adopt a hard momentum cutoff from EXH1. Any rule based on this finding must be separately versioned and validated on independent/forward evidence.
+
+Artifacts: workflow artifact `post-breakout-exhaustion-v1-34466747136` (`candidate_exhaustion_features.csv`, `shock_deciles.csv`, `shock_x_t1_rejection.csv`).
 
 ## CA period semantics
 

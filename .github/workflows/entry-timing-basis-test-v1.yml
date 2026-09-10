@@ -1,0 +1,50 @@
+name: Entry timing basis test v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-entry-timing-basis-test'
+      - '.github/workflows/entry-timing-basis-test-v1.yml'
+      - 'src/canslim_research/entry_timing.py'
+      - 'tests/test_entry_timing.py'
+      - 'scripts/run_entry_timing_basis_test.py'
+
+permissions:
+  contents: read
+
+jobs:
+  basis-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+      - name: Test entry timing semantics
+        run: python -m pytest -q tests/test_entry_timing.py tests/test_execution.py
+      - name: Run X1-X4 basis test
+        run: python scripts/run_entry_timing_basis_test.py
+      - name: Show summary
+        run: cat results/entry-timing-basis-test-v1/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: entry-timing-basis-test-v1-${{ github.run_id }}
+          path: |
+            results/entry-timing-basis-test-v1/summary.json
+            results/entry-timing-basis-test-v1/variant_summary.csv
+            results/entry-timing-basis-test-v1/trades_all_variants.csv
+            results/entry-timing-basis-test-v1/entry_events_all_variants.csv
+            results/entry-timing-basis-test-v1/membership_snapshot.json
+          retention-days: 30

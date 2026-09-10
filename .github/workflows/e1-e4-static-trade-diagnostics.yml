@@ -1,0 +1,46 @@
+name: E1-E4 static trade diagnostics v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/run-e1-e4-static-trade-diagnostics'
+      - '.github/workflows/e1-e4-static-trade-diagnostics.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+      - name: Run E1-E4 diagnostics
+        run: python scripts/run_e1_e4_static_trade_diagnostics.py
+      - name: Show summary
+        run: cat results/e1-e4-static-trade-diagnostics-v1/summary.json
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: e1-e4-static-trade-diagnostics-v1-${{ github.run_id }}
+          path: |
+            results/e1-e4-static-trade-diagnostics-v1/summary.json
+            results/e1-e4-static-trade-diagnostics-v1/trades.csv
+            results/e1-e4-static-trade-diagnostics-v1/entry_events.csv
+            results/e1-e4-static-trade-diagnostics-v1/quantile_diagnostics.csv
+            results/e1-e4-static-trade-diagnostics-v1/fill_extension_3_5_8.csv
+            results/e1-e4-static-trade-diagnostics-v1/membership_snapshot.json
+          retention-days: 30

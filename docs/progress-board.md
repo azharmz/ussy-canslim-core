@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-10
 
-Estimated overall research-program progress: **~75%**.
+Estimated overall research-program progress: **~77%**.
 
 This percentage describes research-program completion, not literal CAN SLIM fidelity and not production readiness.
 
@@ -23,23 +23,20 @@ This percentage describes research-program completion, not literal CAN SLIM fide
 | Technical/execution unit tests | COMPLETE / CI PASS | technical `34431906311`; execution `34433458116` |
 | E0 historical technical candidates | COMPLETE | 10,731 candidates / 860 securities |
 | E1-E4 entry diagnostics | COMPLETE | run `34433673545` |
-| Entry Timing X1-X4 basis test | **COMPLETE / VALIDATED** | run `34464861119`; 13 timing/execution tests pass |
-| Preferred execution baseline | **X3 FROZEN FOR RESEARCH** | pivot-hold confirmation then next valid Open; X1 retained as control |
-| Historical C/A label attachment | NEXT | attach frozen C/A states to signal dates |
-| C / C+A ablation | BLOCKED ON LABEL ATTACHMENT | use X3 primary + X1 control |
+| Entry Timing X1-X4 basis test | COMPLETE / VALIDATED | run `34464861119`; X3 currently preferred, X1 retained control |
+| Post-breakout exhaustion diagnostic | **COMPLETE / EXPLORATORY** | run `34466747136`; high shock × T+1 rejection is the important mechanism |
+| Exhaustion validation protocol | **NEXT** | version hypothesis; do not tune cutoff on discovery sample |
+| Historical C/A label attachment | QUEUED AFTER ENTRY HYPOTHESIS VERSIONING | attach frozen C/A states to signal dates |
+| C / C+A ablation | BLOCKED | avoid mixing fundamental effect with newly discovered entry filter |
 | Portfolio construction | NOT FROZEN | required before portfolio return/max-DD claims |
-| Robustness / holdout | PARTIAL | entry timing subperiod + PF ex-top10 done; strategy-level robustness later |
+| Robustness / holdout | PARTIAL | entry timing PF ex-top10/subperiod done; exhaustion needs independent/forward validation |
 | Institutional sponsorship (I) | DEFERRED | never implicit PASS |
 | QQQ benchmark for full M-v1 | MISSING INPUT | current exploratory engine uses SPY-only proxy |
 | Production integration | BLOCKED | research evidence + forward validation first |
 
 ## Research universe
 
-Primary historical experiments use the selected current/contemporary Musaffa-compliant universe frozen at the research snapshot. The question is how the strategy behaves historically on today's selected compliant securities.
-
-Historical Musaffa eligibility is therefore not required and is not a blocker. This design must not be misrepresented as a reconstruction of which securities were compliant at every historical date.
-
-Point-in-time discipline remains mandatory for actual decision inputs: historical OHLCV/market state and SEC fundamental evidence after `accepted_at` only.
+Primary historical experiments use the selected current/contemporary Musaffa-compliant universe frozen at the research snapshot. Historical Musaffa eligibility is not required and is not a blocker. PIT discipline remains mandatory for actual decision inputs: historical OHLCV/market state and SEC fundamental evidence after `accepted_at` only.
 
 ## C/A foundation
 
@@ -53,13 +50,9 @@ Pinned production snapshot for first distribution:
 | A-v1 | 11 | 483 | 407 |
 | C+A | 3 | 437 | 461 |
 
-C/A thresholds remain frozen.
-
-Period-semantics audit run `34434268817` = **SUCCESS**. Historical selector contract: restrict evidence by cutoff, choose latest fiscal period known by cutoff, then latest accepted state within that period. Older-period amendments do not displace a newer fiscal period merely because accepted later.
+C/A thresholds remain frozen. Period-semantics audit run `34434268817` = **SUCCESS**.
 
 ## Technical candidate baseline
-
-Frozen independent technical rules include $15 price floor, generic prior-35-session base proxy with <=40% depth, close above pivot and <=5% extension, volume >=1.40x prior 50-session average, RS percentile >=80, and M proxy. I remains unimplemented.
 
 Historical candidate engine on the frozen current-compliant universe produced **10,731 candidates across 860 securities**.
 
@@ -74,19 +67,33 @@ Workflow run `34464861119` = **SUCCESS**. All timing variants use the same 7% st
 | **X3 pivot-hold** | **3,604** | **33.58%** | **2** | **1.163** | **1.146** | **32.77%** | **67.18%** |
 | X4 retest-hold | 4,216 | 39.29% | 2 | 1.109 | 1.093 | 30.95% | 69.00% |
 
-X3 beats X1 in 4 of 5 coarse subperiods and in 22 of 34 individual years with observations for both. The result is not concentrated in a few symbols.
+X3 remains the current preferred research execution baseline, not a final production rule.
 
-Mechanism check is important: among 2,775 signal/security events traded by both X1 and X3, X1 PF is about 1.224 while X3 PF is about 1.172. The 3,002 X1 trades not shared with X3 have PF about 0.982. Therefore X3's aggregate advantage comes primarily from the **pivot-hold confirmation gate filtering weaker breakout attempts**, not from delayed entry improving the same trades.
+## Post-breakout exhaustion diagnostic
 
-**Decision:** X3 becomes the preferred research execution baseline for the next fundamental ablation; X1 remains the mandatory control comparator. No production change follows from this decision.
+Workflow run `34466747136` = **SUCCESS**.
 
-Detailed evidence: `results/entry-timing-basis-test-v1/README.md`.
+The raw shock relationship is not sufficient by itself. The strongest result is the interaction between a large T-1->T0 expansion and rejection on T+1.
+
+Within the highest shock quintile:
+
+| T+1 state | Candidates | X1 PF | Stop rate | Retest pivot by T+3 | Breakdown below pivot by T+3 |
+|---|---:|---:|---:|---:|---:|
+| Bearish and Close < T0 Close | 962 | **0.560** | **80.84%** | 74.32% | 60.60% |
+| Bearish only | 171 | 0.675 | 76.40% | 34.50% | 25.15% |
+| Close < T0 only | 120 | 1.601 | 61.25% | 61.67% | 43.33% |
+| No rejection | 893 | **1.573** | **59.63%** | 21.61% | 14.22% |
+
+Top shock decile median move was about **+8.70%**, with X1 PF ~**1.05**, versus bottom shock decile median ~**+0.78%**, PF ~**1.36**. But shock alone is not a sufficient rule because the T+1 state separates weak and strong high-momentum breakouts much more clearly.
+
+**Current interpretation:** the legacy problem is best framed as **post-breakout exhaustion confirmation**, not simply “momentum T-1->T0 too high.” No hard momentum threshold has been adopted.
 
 ## Next sequence
 
-1. Implement historical C/A label attachment at every technical signal using the frozen as-of contract and hard anti-look-ahead assertions.
-2. Validate historical C/A coverage/distribution on the 10,731 candidate events before looking at trading-performance splits.
-3. Run X3 technical baseline vs X3+C vs X3+C+A, with X1 equivalents retained as control/sensitivity.
-4. Freeze portfolio construction and position sizing.
-5. Compute portfolio return/max drawdown plus PF ex-top10, subperiod and concentration robustness.
-6. Holdout/forward validation before any production proposal.
+1. Version the `high shock × T+1 rejection` exhaustion hypothesis and define independent/forward validation without tuning a cutoff on the same discovery sample.
+2. Implement historical C/A label attachment with hard anti-look-ahead assertions.
+3. Validate C/A distribution on the 10,731 candidate events before performance splits.
+4. Run X3 baseline vs X3+C vs X3+C+A; keep X1 as control and keep exhaustion as a separately tracked hypothesis unless independently validated.
+5. Freeze portfolio construction and position sizing.
+6. Compute portfolio return/max drawdown plus PF ex-top10, subperiod and concentration robustness.
+7. Holdout/forward validation before any production proposal.

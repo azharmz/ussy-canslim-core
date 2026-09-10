@@ -83,11 +83,19 @@ The research universe remains the frozen current/contemporary Musaffa-compliant 
 
 Daily OHLCV and market-state calculations may use information only through each signal day T0. Because T0 close and volume are EOD facts, execution remains no earlier than allowed by the frozen X1/X3 definitions.
 
-Each collector run recomputes the entire forward window from the frozen boundary using the then-current source data, but preserves an immutable run snapshot so later source corrections cannot silently overwrite what was observed previously.
+Each collector run recomputes the entire forward window from the frozen boundary using the then-current source data. The observed run is preserved through repository history plus a GitHub Actions evidence artifact so later source corrections cannot silently replace prior observations.
 
 ## Evidence persistence
 
-Each run must produce a local GitHub Actions artifact and attempt immutable publication to R2 under a run-specific key. A mutable `latest.json` pointer may identify the newest immutable FWD1 run, but the pointer is never itself sufficient research evidence.
+Canonical long-horizon persistence is repository history under:
+
+```text
+evidence/fwd1/
+```
+
+Each successful run updates `evidence/fwd1/latest/` and appends one row to `evidence/fwd1/observations.csv`; the Git commit history provides the immutable sequence of observed snapshots. The detailed GitHub Actions artifact is retained as a run mirror.
+
+R2 publication is optional. The first infrastructure smoke run showed that this consumer's R2 credentials are read-only (`PutObject: AccessDenied`). That infrastructure fact does not alter any strategy rule, date boundary, metric, or gate. If write access is granted later, immutable R2 run publication may be enabled without changing FWD1's forward clock.
 
 Minimum evidence per run:
 
@@ -97,7 +105,8 @@ Minimum evidence per run:
 - capital-constrained portfolio entries/skips/equity curves where applicable;
 - censored-position audit;
 - gate status;
-- frozen membership snapshot and SPY pointer evidence.
+- SPY pointer evidence;
+- Actions artifact containing the frozen membership snapshot.
 
 ## Production review gate
 

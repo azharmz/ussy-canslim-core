@@ -9,6 +9,7 @@ on:
     paths:
       - '.github/workflows/forward-validation-v1.yml'
       - 'scripts/run_forward_validation_v1.py'
+      - 'scripts/persist_forward_validation_repo.py'
       - 'scripts/run_portfolio_construction_v1.py'
       - 'scripts/run_robustness_v1.py'
       - 'scripts/run_entry_timing_basis_test.py'
@@ -20,7 +21,7 @@ on:
       - 'docs/methodology/portfolio-construction-v1.md'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: fwd1-forward-validation
@@ -38,6 +39,8 @@ jobs:
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
@@ -47,6 +50,19 @@ jobs:
         run: python -m pytest -q tests/test_entry_timing.py tests/test_execution.py tests/test_labels.py
       - name: Collect complete forward window
         run: python scripts/run_forward_validation_v1.py
+      - name: Persist canonical forward evidence in repository history
+        run: |
+          python scripts/persist_forward_validation_repo.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence/fwd1
+          if git diff --cached --quiet; then
+            echo "No forward evidence changes to commit"
+          else
+            git commit -m "Record FWD1 observation ${GITHUB_RUN_ID}"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
       - name: Show gate status
         run: cat results/forward-validation-v1/gate_status.json
       - name: Upload immutable run evidence mirror

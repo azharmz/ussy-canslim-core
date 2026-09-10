@@ -56,20 +56,24 @@ jobs:
         run: python scripts/finalize_forward_data_gate.py
       - name: Persist canonical forward evidence in repository history
         run: |
-          python scripts/persist_forward_validation_repo.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The scheduled/event SHA can lag a prior FWD evidence commit or a documentation commit.
+          # Refresh the base BEFORE building the append-only ledger so evidence changes do not conflict during rebase.
+          git pull --rebase origin main
+          python scripts/persist_forward_validation_repo.py
           git add evidence/fwd1
           if git diff --cached --quiet; then
             echo "No forward evidence changes to commit"
           else
             git commit -m "Record FWD1 observation ${GITHUB_RUN_ID}"
-            git pull --rebase origin main
             git push origin HEAD:main
           fi
       - name: Show gate status
-        run: cat results/forward-validation-v1/gate_status.json
+        if: always()
+        run: cat results/forward-validation-v1/gate_status.json || true
       - name: Upload immutable run evidence mirror
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: forward-validation-v1-${{ github.run_id }}

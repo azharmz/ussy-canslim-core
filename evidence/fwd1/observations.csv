@@ -1,3 +1,4 @@
 run_id,code_sha,collected_at_utc,market_data_asof,data_gate_pass,forward_candidate_count_interpretable,forward_candidate_count,forward_candidate_symbols,x1_candidate_trades,x1_portfolio_entries,x1_closed_trades,x3_candidate_trades,x3_portfolio_entries,x3_closed_trades,completed_calendar_months,calendar_gate_pass,trade_gate_pass,gate_status
 34493433671,52f9b92c5052ec6361cb01de78561da6eb68d7ab,2026-09-10T15:06:40.664747+00:00,2026-09-04,,,0,0,0,0,0,0,0,0,0,False,False,ACCUMULATING
 34494436017,aea4e12c94b14c700b2bde977410140de597b48c,2026-09-10T15:15:55.603276+00:00,2026-09-04,False,False,0,0,0,0,0,0,0,0,0,False,False,ACCUMULATING
+34494648029,f32e33836e30c98c34ee0cf7b67ee6882c4f6928,2026-09-10T15:18:17.633581+00:00,2026-09-04,False,False,0,0,0,0,0,0,0,0,0,False,False,WAITING_FOR_POST_BOUNDARY_DATA

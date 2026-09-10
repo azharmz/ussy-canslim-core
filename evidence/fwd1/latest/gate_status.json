@@ -1,14 +1,19 @@
 {
   "calendar_gate_pass": false,
+  "candidate_zero_interpretable": false,
   "closed_x3_portfolio_trades": 0,
   "completed_calendar_months": 0,
+  "data_gate_pass": false,
   "forward_boundary_exclusive": "2026-09-09",
   "forward_start": "2026-09-10",
   "market_data_asof": "2026-09-04",
   "minimum_calendar_months": 12,
   "minimum_closed_x3_portfolio_trades": 50,
+  "minimum_market_data_asof": "2026-09-10",
   "note": "Passing both gates makes FWD1 review-eligible only; it never auto-promotes production.",
   "production_ready": false,
-  "status": "ACCUMULATING",
+  "review_eligible": false,
+  "source_freshness_interpretation": "Market-regime source does not yet reach the FWD1 forward boundary. Candidate/trade counts are operationally recorded but must not be interpreted as evidence of no signals.",
+  "status": "WAITING_FOR_POST_BOUNDARY_DATA",
   "trade_gate_pass": false
 }

@@ -1,0 +1,53 @@
+name: Portfolio construction v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/portfolio-construction-v1.yml'
+      - 'scripts/run_portfolio_construction_v1.py'
+      - 'scripts/run_entry_timing_basis_test.py'
+      - 'src/canslim_research/entry_timing.py'
+      - 'src/canslim_research/execution.py'
+      - 'docs/methodology/portfolio-construction-v1.md'
+
+permissions:
+  contents: read
+
+jobs:
+  portfolio:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+      - name: Test frozen execution semantics
+        run: python -m pytest -q tests/test_entry_timing.py tests/test_execution.py
+      - name: Run frozen portfolio construction
+        run: python scripts/run_portfolio_construction_v1.py
+      - name: Show summary
+        run: cat results/portfolio-construction-v1/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: portfolio-construction-v1-${{ github.run_id }}
+          path: |
+            results/portfolio-construction-v1/summary.json
+            results/portfolio-construction-v1/portfolio_summary.csv
+            results/portfolio-construction-v1/portfolio_trades.csv
+            results/portfolio-construction-v1/portfolio_skips.csv
+            results/portfolio-construction-v1/equity_curves.csv
+            results/portfolio-construction-v1/annual_returns.csv
+            results/portfolio-construction-v1/membership_snapshot.json
+          retention-days: 30

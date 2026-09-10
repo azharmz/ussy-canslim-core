@@ -30,7 +30,8 @@ notes
 | C1 | C label distribution | COMPLETE / VALIDATED | Measure C-v1 PASS/FAIL/NOT_EVALUABLE without trading metrics |
 | A1 | A label distribution | COMPLETE / VALIDATED | Measure A-v1 PASS/FAIL/NOT_EVALUABLE without trading metrics |
 | TB1 | Independent technical baseline specification + rule engine | COMPLETE / FROZEN | Freeze transparent N/S/L/M proxies before performance testing |
-| E0 | Independent expanded technical baseline | READY TO IMPLEMENT | Establish baseline performance on expanded PIT universe |
+| E0-SMOKE | Rolling expanded technical baseline | COMPLETE / VALIDATED SMOKE | Validate end-to-end technical candidate generation on current ready universe; not PIT performance evidence |
+| E0 | Independent expanded technical baseline | INPUT AUDIT / FULL PIT PENDING | Establish baseline performance on longest defensible PIT-membership window |
 | E1 | Signal-day shock diagnostics | PLANNED | T-1->T0 move vs post-entry outcomes |
 | E2 | H+1 execution-gap diagnostics | PLANNED | execution gap vs retracement/outcomes |
 | E3 | Pivot extension 3/5/8% | PLANNED | pre-specified signal extension caps |
@@ -78,6 +79,41 @@ CI workflow: `Technical baseline v1 tests`
 - validation run `34431906311`: **SUCCESS**.
 
 **Verdict:** technical baseline v1 rule semantics are frozen and executable. This is an independent CAN SLIM baseline, not TrendFoll production logic.
+
+## E0-SMOKE execution record
+
+Workflow run: `34432960298` = **SUCCESS**.
+
+Code runner: `scripts/run_e0_rolling_baseline.py`.
+
+Evidence record: `results/e0-rolling-baseline-v1/README.md`.
+
+Pinned ready data:
+- `production/ready/runs/2ef1b2ca8f9f44aba62d0552884e06c6.parquet`
+- SHA256 `c1ed91508642acd604e73f2cb79cf8027fd91ea644acab0bb806cf7e12f237a4`
+- ready snapshot date `2026-08-28`
+
+Pinned SPY:
+- `benchmarks/SPY/runs/97aa9dd852e743da93cc611c6d58c3cb.parquet`
+- SHA256 `1fb495068c5392108cde7d49d4dae8e1d842dde0b01e29af8f64e477525350d4`
+
+Observed smoke counts:
+
+```text
+ready securities                 1,223
+ready OHLCV rows               366,411
+feature-evaluable rows          58,216
+feature-evaluable dates             77
+technical candidate rows            14
+technical candidate symbols         13
+technical candidate dates            7
+```
+
+Entry-quality continuous diagnostics were retained for candidate rows (`T-1->T0`, H+1 gap, T0 pivot extension, H+1 fill extension) but were not used as filters.
+
+**Evidence class:** `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST`.
+
+**Verdict:** PASS as implementation/data-contract smoke. Do not use this run for PF/CAGR/drawdown or strategy-selection claims. Full E0 remains pending historical membership audit and full-history reconstruction.
 
 ## Robustness metrics for later trading experiments
 

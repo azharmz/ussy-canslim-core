@@ -2,9 +2,9 @@
 
 Last updated: 2026-09-10
 
-Estimated overall research-program progress: **~63%**.
+Estimated overall research-program progress: **~65%**.
 
-This is project progress (data, methodology, implementation, experiments, robustness, validation), not a claim that the strategy is 63% literal CAN SLIM.
+This is project progress (data, methodology, implementation, experiments, robustness, validation), not a claim that the strategy is 65% literal CAN SLIM.
 
 | Area | Status | Notes |
 |---|---|---|
@@ -18,9 +18,11 @@ This is project progress (data, methodology, implementation, experiments, robust
 | C/A distribution study | COMPLETE / VALIDATED | 901 production-ready symbols, no trading metrics |
 | Independent CAN SLIM technical baseline v1 | COMPLETE / FROZEN | N-price/S/L/M proxy rules versioned; I remains deferred |
 | Technical baseline rule engine + unit tests | COMPLETE / CI PASS | workflow run `34431906311` |
-| Entry Quality & Execution | PENDING | E0-E6 |
+| E0 rolling implementation smoke | COMPLETE / VALIDATED | run `34432960298`; 14 candidate rows / 13 symbols; not a PIT backtest |
+| E0 full PIT historical baseline | INPUT AUDIT IN PROGRESS | full `backtest/ohlcv/{security_id}.parquet` exists; membership-history coverage being audited |
+| Entry Quality E1-E6 | PENDING | diagnostics retained in E0 candidate output |
 | Historical PIT C/A label integration | PENDING | Needs decision-date as-of join |
-| C / C+A strategy ablation | BLOCKED | after E0 + PIT join |
+| C / C+A strategy ablation | BLOCKED | after full E0 + PIT join |
 | Robustness / holdout | BLOCKED | after ablation |
 | Institutional sponsorship (I) | DEFERRED | 13F/ownership not started; never auto-PASS |
 | Forward validation | BLOCKED | after robust backtest |
@@ -56,11 +58,30 @@ Source and implementation distinction is documented in `docs/methodology/technic
 Technical rule engine: `src/canslim_research/technical.py`.
 CI: `Technical baseline v1 tests`, run `34431906311` = **SUCCESS**.
 
+## E0 rolling smoke
+
+Workflow run `34432960298` = **SUCCESS**.
+
+Pinned inputs:
+- `production/ready/runs/2ef1b2ca8f9f44aba62d0552884e06c6.parquet`
+- SHA256 `c1ed91508642acd604e73f2cb79cf8027fd91ea644acab0bb806cf7e12f237a4`
+- SPY `benchmarks/SPY/runs/97aa9dd852e743da93cc611c6d58c3cb.parquet`
+- SHA256 `1fb495068c5392108cde7d49d4dae8e1d842dde0b01e29af8f64e477525350d4`
+
+Results:
+- 1,223 ready securities / 366,411 bars;
+- 58,216 feature-evaluable rows across 77 dates after 252-day RS warm-up;
+- 14 exact technical-candidate rows, 13 symbols, 7 dates.
+
+Evidence classification: **ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST**. No PF/CAGR/drawdown verdict is allowed. M is SPY-only in this smoke because no QQQ benchmark contract is available in `ussy-data`.
+
+Full historical OHLCV is available separately under `backtest/ohlcv/{security_id}.parquet`; the remaining key question is how far back defensible PIT membership snapshots extend.
+
 ## Entry Quality & Execution workstream
 
 | ID | Study | Status |
 |---|---|---|
-| E0 | Independent expanded-universe technical baseline | READY TO BUILD/RUN |
+| E0 | Independent expanded-universe technical baseline | ROLLING SMOKE PASS; FULL PIT PENDING |
 | E1 | T-1 -> T0 signal-day shock | PENDING |
 | E2 | T0 close -> H+1 open execution gap | PENDING |
 | E3 | Pivot extension 3/5/8% | PENDING |
@@ -70,9 +91,10 @@ CI: `Technical baseline v1 tests`, run `34431906311` = **SUCCESS**.
 
 ## Next sequence
 
-1. Build historical E0 runner using PIT Musaffa membership + OHLCV and frozen technical baseline v1.
-2. Build historical PIT C/A as-of labels using `accepted_at` and pinned fundamentals snapshots/history.
-3. Run E0-E6 entry-quality diagnostics on the expanded universe.
-4. Run C and C+A ablations relative to the frozen technical baseline.
-5. Evaluate PF, PF ex-top10, return, max drawdown, trade count, subperiod stability, and sector/symbol concentration.
-6. Holdout and forward validation.
+1. Finish historical-input audit for `universe/membership/*`, `backtest/ohlcv/*`, and benchmark availability.
+2. Build full E0 only over the longest defensible PIT-membership window; never backfill current membership historically.
+3. Build historical PIT C/A as-of labels using `accepted_at` and pinned fundamentals evidence.
+4. Run E1-E6 entry-quality diagnostics.
+5. Run C and C+A ablations relative to the frozen technical baseline.
+6. Evaluate PF, PF ex-top10, return, max drawdown, trade count, subperiod stability, and sector/symbol concentration.
+7. Holdout and forward validation.

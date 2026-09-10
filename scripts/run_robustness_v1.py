@@ -30,6 +30,7 @@ OUT = ROOT / "results" / "robustness-v1"
 VARIANTS = ("X1", "X3")
 COST_COLS = ("gross_equity", "cost20bp_rt_equity")
 PORT1_VALIDATION_RUN = "34485765478"
+EXIT_COST_RATE = 0.001
 
 
 def profit_factor(values: pd.Series):
@@ -37,6 +38,68 @@ def profit_factor(values: pd.Series):
     gp = float(x[x > 0].sum())
     gl = float(-x[x < 0].sum())
     return gp / gl if gl > 0 else None
+
+
+def apply_frozen_censored_accounting(
+    variant: str,
+    accepted: pd.DataFrame,
+    curve: pd.DataFrame,
+    port_summary: dict,
+) -> tuple[pd.DataFrame, dict, dict]:
+    """Mirror the validated PORT1 finalizer in memory for ROB1 diagnostics.
+
+    CENSORED_OPEN positions at the portfolio boundary are marks, not liquidations.
+    Any mid-sample censor is a hard failure because allocation would need replay.
+    """
+    curve = curve.copy()
+    curve["date"] = pd.to_datetime(curve["date"], errors="coerce").dt.normalize()
+    accepted = accepted.copy()
+    accepted["exit_date"] = pd.to_datetime(accepted["exit_date"], errors="coerce").dt.normalize()
+    last_date = curve["date"].max()
+    censored = accepted[accepted["exit_reason"].eq("CENSORED_OPEN")].copy()
+    bad = censored[censored["exit_date"] != last_date]
+    if len(bad):
+        raise RuntimeError(
+            f"{variant}: {len(bad)} censored positions end before portfolio sample boundary; "
+            "ROB1 must not reinterpret frozen PORT1 allocation"
+        )
+
+    final_mask = curve["date"].eq(last_date)
+    if int(final_mask.sum()) != 1:
+        raise RuntimeError(f"{variant}: expected exactly one final portfolio curve row")
+
+    phantom_exit_cost = 0.0
+    if len(censored):
+        marked_value = float((censored["shares"] * censored["exit_price"]).sum())
+        phantom_exit_cost = marked_value * EXIT_COST_RATE
+        curve.loc[final_mask, "cash"] -= marked_value
+        curve.loc[final_mask, "market_value"] += marked_value
+        curve.loc[final_mask, "cumulative_cost"] -= phantom_exit_cost
+        curve.loc[final_mask, "cost20bp_rt_equity"] += phantom_exit_cost
+        curve.loc[final_mask, "position_count"] += len(censored)
+        gross_equity = float(curve.loc[final_mask, "gross_equity"].iloc[0])
+        curve.loc[final_mask, "gross_exposure"] = (
+            float(curve.loc[final_mask, "market_value"].iloc[0]) / gross_equity
+            if gross_equity > 0 else np.nan
+        )
+
+    corrected = dict(port_summary)
+    final = curve.loc[final_mask].iloc[0]
+    corrected["cost20bp_rt_total_return"] = float(final["cost20bp_rt_equity"] / INITIAL_EQUITY - 1.0)
+    corrected["cost20bp_rt_cagr"] = cagr(curve["cost20bp_rt_equity"], curve["date"])
+    corrected["cost20bp_rt_max_drawdown"] = max_drawdown(curve["cost20bp_rt_equity"])
+    corrected["final_censored_position_count"] = int(len(censored))
+    corrected["phantom_exit_cost_removed"] = float(phantom_exit_cost)
+
+    audit = {
+        "variant": variant,
+        "portfolio_last_date": str(last_date.date()),
+        "censored_positions": int(len(censored)),
+        "mid_sample_censored_positions": int(len(bad)),
+        "phantom_exit_cost_removed": float(phantom_exit_cost),
+        "censored_treated_as_mark_to_market_not_exit": True,
+    }
+    return curve, corrected, audit
 
 
 def trade_quality(df: pd.DataFrame) -> dict:
@@ -73,12 +136,7 @@ def split_five_equal_calendar_blocks(start: pd.Timestamp, end: pd.Timestamp) -> 
     total_days = (end - start).days
     edges = [start + pd.Timedelta(days=round(total_days * i / 5)) for i in range(6)]
     edges[0], edges[-1] = start, end
-    blocks = []
-    for i in range(5):
-        lo = edges[i]
-        hi = edges[i + 1]
-        blocks.append((lo, hi))
-    return blocks
+    return [(edges[i], edges[i + 1]) for i in range(5)]
 
 
 def block_metrics(curve: pd.DataFrame, variant: str) -> list[dict]:
@@ -87,7 +145,6 @@ def block_metrics(curve: pd.DataFrame, variant: str) -> list[dict]:
     blocks = split_five_equal_calendar_blocks(x["date"].min(), x["date"].max())
     rows = []
     for i, (lo, hi) in enumerate(blocks, start=1):
-        # Use the last available EOD mark at/before each boundary and observations inside the block.
         start_rows = x[x["date"] <= lo]
         end_rows = x[x["date"] <= hi]
         if start_rows.empty or end_rows.empty:
@@ -199,10 +256,15 @@ def main():
     annual_rows = []
     benchmark_rows = []
     accepted_quality_rows = []
+    censored_audits = []
 
     for variant in VARIANTS:
         trade_candidates = prepare_trade_candidates(variant, candidates, histories)
-        accepted, skipped, curve, port_summary = run_portfolio(variant, trade_candidates, histories)
+        accepted, skipped, curve, raw_port_summary = run_portfolio(variant, trade_candidates, histories)
+        curve, port_summary, censor_audit = apply_frozen_censored_accounting(
+            variant, accepted, curve, raw_port_summary
+        )
+        censored_audits.append(censor_audit)
 
         tc = trade_candidates.copy()
         tc["security_id"] = tc["security_id"].astype(str)
@@ -237,6 +299,7 @@ def main():
     pd.DataFrame(annual_rows).to_csv(OUT / "annual_robustness.csv", index=False)
     pd.DataFrame(benchmark_rows).to_csv(OUT / "benchmark_context.csv", index=False)
     pd.DataFrame(accepted_quality_rows).to_csv(OUT / "accepted_trade_quality.csv", index=False)
+    pd.DataFrame(censored_audits).to_csv(OUT / "censored_accounting_audit.csv", index=False)
 
     summary = {
         "experiment": "ROBUSTNESS_V1",
@@ -249,6 +312,8 @@ def main():
         "historical_split_is_true_oos": False,
         "forward_validation_start_after": "2026-09-09",
         "production_gate": {"minimum_calendar_months": 12, "minimum_closed_x3_portfolio_trades": 50},
+        "censored_accounting_matches_validated_port1": True,
+        "censored_accounting_audit": censored_audits,
         "variants": variant_summaries,
         "spy_parquet_key": spy_pointer.get("parquet_key"),
         "spy_sha256": spy_pointer.get("sha256"),

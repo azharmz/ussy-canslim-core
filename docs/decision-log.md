@@ -164,35 +164,9 @@ Detailed record: `results/entry-timing-basis-test-v1/README.md`.
 ## 2026-09-10 — Post-breakout exhaustion diagnostic: interaction matters more than shock alone
 Run `34466747136` = SUCCESS on the same 10,731 technical candidates.
 
-The legacy concern was tested explicitly: a large T-1->T0 expansion may be followed by T+1 rejection/profit-taking and subsequent weakness.
+Within the highest shock quintile, T+1 bearish rejection plus Close < T0 Close is strongly associated with poor outcomes, while high shock without rejection is not. This supports the *mechanism hypothesis* that large T0 expansion becomes dangerous when the following session confirms rejection, rather than a simplistic rule that all large T0 momentum is bad.
 
-Key descriptive findings:
-
-- bottom shock decile median T-1->T0 move ~0.78%, X1 PF ~1.36;
-- top shock decile median move ~8.70%, X1 PF ~1.05;
-- however extreme shock alone did **not** produce a higher raw T+1..T+3 pivot-retest rate; low-shock candidates were actually closer to the pivot and retested it more often mechanically;
-- the important interaction appears when a high-shock breakout is followed by T+1 rejection.
-
-Within the **highest shock quintile**:
-
-| T+1 state | Candidates | X1 PF | Stop rate | Retest pivot by T+3 | Breakdown below pivot by T+3 |
-|---|---:|---:|---:|---:|---:|
-| Bearish **and** Close < T0 Close | 962 | **0.560** | **80.84%** | 74.32% | 60.60% |
-| Bearish only | 171 | 0.675 | 76.40% | 34.50% | 25.15% |
-| Close < T0 only | 120 | 1.601 | 61.25% | 61.67% | 43.33% |
-| No rejection | 893 | **1.573** | **59.63%** | 21.61% | 14.22% |
-
-This strongly supports the *mechanism hypothesis* that **large T0 expansion becomes dangerous when the following session confirms rejection**, rather than a simplistic rule that all large T0 momentum is bad.
-
-**Decision:**
-
-- do **not** add a hard T-1->T0 momentum cutoff from this same sample;
-- do **not** treat raw return-to-pivot frequency as the sole exhaustion definition, because distance from pivot mechanically differs by shock size;
-- register `high shock × T+1 rejection` as an exploratory exhaustion hypothesis for independent/forward validation;
-- X3 remains preferred for current research, but is not declared the final execution model solely from ET1; its pivot-hold behavior is directionally consistent with avoiding the identified T+1 rejection mechanism;
-- C/A ablation should wait until this entry-quality hypothesis is clearly versioned so fundamental effects are not confused with a newly discovered execution filter.
-
-Artifacts: `candidate_exhaustion_features.csv`, `shock_deciles.csv`, `shock_x_t1_rejection.csv` from workflow artifact `post-breakout-exhaustion-v1-34466747136`.
+**Decision:** no hard T-1->T0 momentum cutoff is adopted from this discovery sample; register `high shock × T+1 rejection` as EXH2 for independent validation.
 
 ## 2026-09-10 — Historical C/A identity and as-of contract
 Fundamental PIT rows are keyed by symbol+CIK, while the pinned universe bridge exposes security_id. Historical research uses:
@@ -215,6 +189,86 @@ Hard invariant: `max(source accepted_at used) <= signal_cutoff_utc`.
 ## 2026-09-10 — C/A period-semantics audit passed
 Run `34434268817` = SUCCESS. The dataset supports the frozen latest-period/latest-accepted-within-period selector. Q4 and amendments remain governed by upstream semantics; downstream must not reinterpret missing Q4 EPS as zero.
 
+## 2026-09-10 — Historical C/A attachment validated
+Run `34479060107` = SUCCESS. All 10,731 technical candidates receive exactly one C/A attachment; future accepted-at violations = 0. A-PASS requires three resolved consecutive SEC fiscal years. Historical distribution:
+
+```text
+C-v1   PASS 703 | FAIL 3,475 | NOT_EVALUABLE 6,553
+A-v1   PASS  34 | FAIL   768 | NOT_EVALUABLE 9,929
+C+A    PASS   2 | FAIL   650 | NOT_EVALUABLE 10,079
+```
+
+## 2026-09-10 — Fundamental ablation result
+Run `34481587218` = SUCCESS.
+
+Hard C filtering does not improve X3 or X1. For X3, PF falls from ~1.163 to ~1.020 and PF ex-top10 from ~1.146 to ~0.861. C+A is too sparse for strategy inference with only two historical events.
+
+**Decision:** C and A remain frozen CAN SLIM descriptors; do not promote hard C/C+A filters as additive edge and do not tune the 25% thresholds post hoc.
+
+## 2026-09-10 — Portfolio construction validated
+Canonical run `34488197400` = SUCCESS. Frozen PORT1 specification: 100,000 initial equity, long-only/no leverage, max 7 positions, 1/7 prior-close-equity sizing, deterministic RS/volume priority, entries before same-day exits, X3 BASE primary, X1 BASE mandatory control.
+
+Canonical X3 results:
+
+```text
+gross total return  +172.90%
+gross CAGR           +3.04%
+gross max DD        -43.36%
+20bp RT CAGR          +2.40%
+20bp RT max DD       -50.94%
+```
+
+X3 retains a clear relative advantage over X1 under capital constraints, but the absolute profile is not production-ready. Censored positions at the sample boundary remain mark-to-market, not forced exits.
+
+## 2026-09-10 — ROB1 historical robustness validated
+Run `34488295631` = SUCCESS. Artifact SHA-256 `5e1ff152b9e0cb75ebb517e716dede8624dfac01885d6d898efd1274d02977eb`.
+
+ROB1 is retrospective historical robustness evidence only and must **not** be described as true OOS because X3 was selected using historical evidence before ROB1.
+
+Key findings:
+
+```text
+accepted portfolio PF:
+X1 ~1.060
+X3 ~1.162
+
+capital-constrained not-accepted PF:
+X1 ~1.104
+X3 ~1.164
+```
+
+The frozen RS/volume priority therefore shows essentially no incremental selection edge for X3.
+
+X3 gross five coarse calendar-block returns:
+
+```text
++63.45%
+ -8.30%
+ -9.09%
++33.74%
++49.89%
+```
+
+Two of five blocks lose money. Across 34 calendar years, X3 gross has 21 positive and 13 negative years, with median annual return ~+2.38%.
+
+Comparable SPY price-only context is ~8.80% CAGR with ~-56.47% max DD, versus X3 gross ~3.04% CAGR with ~-43.36% max DD. SPY dividends are excluded, so a total-return benchmark would widen the return gap.
+
+**Decision:** retain X3 as research baseline versus X1 control, but do not tune X3/PORT1 from ROB1, do not promote to production, and do not relabel any retrospective split as OOS.
+
+Detailed record: `docs/decisions/2026-09-10-robustness-v1.md`.
+
+## 2026-09-10 — Genuine forward-validation gate frozen
+The next evidentiary stage is FWD1. Forward observations begin strictly after 2026-09-09 using unchanged X3/PORT1 rules.
+
+Production inference is blocked until both are satisfied:
+
+```text
+>= 12 calendar months
+>= 50 closed X3 portfolio trades
+```
+
+EXH2 remains a separate independently versioned hypothesis. C/A remain descriptors. QQQ/full-M and I remain separate methodology gaps, never implicit PASS.
+
 ## Next decision gate
 
-Version the post-breakout exhaustion hypothesis without tuning a cutoff on the discovery sample, define its independent/forward validation protocol, then implement historical C/A attachment. After that compare X3 baseline vs X3+C vs X3+C+A with X1 retained as control. Portfolio construction must be frozen before portfolio-return/max-drawdown claims.
+Start FWD1 collection/monitoring with the frozen baseline. Do not change baseline rules from new forward observations until the pre-registered gate is reached. EXH2 may be validated separately, but it must not be silently folded into FWD1 baseline.

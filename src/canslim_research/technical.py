@@ -42,8 +42,7 @@ def n_price_label(*, close: Optional[float], pivot: Optional[float], base_depth:
         return TechnicalResult(False, "FAIL", "BASE_TOO_DEEP")
     if close <= pivot:
         return TechnicalResult(False, "FAIL", "NO_BREAKOUT")
-    extension = close / pivot - 1.0
-    if extension > BUY_ZONE_MAX:
+    if close > pivot * (1.0 + BUY_ZONE_MAX):
         return TechnicalResult(False, "FAIL", "ABOVE_5PCT_BUY_ZONE")
     return TechnicalResult(True, "PASS", "N_PRICE_V1")
 

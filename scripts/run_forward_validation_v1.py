@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+from botocore.exceptions import ClientError
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -106,24 +107,22 @@ def persist_r2(s3, bucket: str, run_id: str, files: list[Path], metadata: dict) 
         s3.put_object(Bucket=bucket, Key=key, Body=data)
         published.append({"key": key, "sha256": sha256_bytes(data), "bytes": len(data)})
 
-    manifest = {
-        **metadata,
-        "immutable_prefix": immutable_prefix,
-        "files": published,
-    }
+    manifest = {**metadata, "immutable_prefix": immutable_prefix, "files": published}
     manifest_bytes = json.dumps(manifest, indent=2, sort_keys=True, default=str).encode("utf-8")
     manifest_key = f"{immutable_prefix}/manifest.json"
     s3.put_object(Bucket=bucket, Key=manifest_key, Body=manifest_bytes)
-
     pointer = {
         "run_id": run_id,
         "manifest_key": manifest_key,
         "manifest_sha256": sha256_bytes(manifest_bytes),
         "updated_at_utc": datetime.now(timezone.utc).isoformat(),
     }
-    pointer_bytes = json.dumps(pointer, indent=2, sort_keys=True).encode("utf-8")
-    s3.put_object(Bucket=bucket, Key=f"{R2_PREFIX}/latest.json", Body=pointer_bytes)
-    return {**pointer, "immutable_prefix": immutable_prefix, "published_file_count": len(published)}
+    s3.put_object(
+        Bucket=bucket,
+        Key=f"{R2_PREFIX}/latest.json",
+        Body=json.dumps(pointer, indent=2, sort_keys=True).encode("utf-8"),
+    )
+    return {"status": "PUBLISHED", **pointer, "immutable_prefix": immutable_prefix, "published_file_count": len(published)}
 
 
 def main() -> None:
@@ -174,15 +173,12 @@ def main() -> None:
             t = trade_candidates.copy()
             t.insert(0, "variant", variant)
             trade_frames.append(t)
-
         if trade_candidates.empty:
             variants.append(empty_portfolio_summary(variant, spy_asof))
             continue
 
         accepted, skipped, curve, port_summary = run_portfolio(variant, trade_candidates, histories)
-        curve, port_summary, censor_audit = apply_frozen_censored_accounting(
-            variant, accepted, curve, port_summary
-        )
+        curve, port_summary, censor_audit = apply_frozen_censored_accounting(variant, accepted, curve, port_summary)
         censor_audits.append(censor_audit)
 
         accepted = accepted.copy()
@@ -193,8 +189,7 @@ def main() -> None:
         curve = curve.copy()
         curve["variant"] = variant
 
-        closed = int((~accepted["exit_reason"].eq("CENSORED_OPEN")).sum()) if len(accepted) else 0
-        port_summary["closed_portfolio_trade_count"] = closed
+        port_summary["closed_portfolio_trade_count"] = int((~accepted["exit_reason"].eq("CENSORED_OPEN")).sum()) if len(accepted) else 0
         variants.append(port_summary)
         portfolio_trade_frames.append(accepted)
         if not skipped.empty:
@@ -256,31 +251,30 @@ def main() -> None:
     json_dump(OUT / "summary.json", summary)
 
     evidence_files = [
-        OUT / "summary.json",
-        OUT / "gate_status.json",
-        OUT / "forward_candidates.csv",
-        OUT / "forward_trade_candidates.csv",
-        OUT / "portfolio_trades.csv",
-        OUT / "portfolio_skips.csv",
-        OUT / "equity_curves.csv",
-        OUT / "censored_accounting_audit.csv",
-        OUT / "membership_snapshot.json",
+        OUT / "summary.json", OUT / "gate_status.json", OUT / "forward_candidates.csv",
+        OUT / "forward_trade_candidates.csv", OUT / "portfolio_trades.csv", OUT / "portfolio_skips.csv",
+        OUT / "equity_curves.csv", OUT / "censored_accounting_audit.csv", OUT / "membership_snapshot.json",
         OUT / "spy_pointer.json",
     ]
-    publication = persist_r2(
-        s3,
-        bucket,
-        str(run_id),
-        evidence_files,
-        {
-            "experiment": "FWD1_FORWARD_VALIDATION",
-            "code_sha": code_sha,
-            "collected_at_utc": collected_at,
-            "market_data_asof": str(spy_asof.date()),
-            "forward_candidate_count": int(len(forward)),
-            "gate_status": gate["status"],
-        },
-    )
+    try:
+        publication = persist_r2(
+            s3, bucket, str(run_id), evidence_files,
+            {
+                "experiment": "FWD1_FORWARD_VALIDATION",
+                "code_sha": code_sha,
+                "collected_at_utc": collected_at,
+                "market_data_asof": str(spy_asof.date()),
+                "forward_candidate_count": int(len(forward)),
+                "gate_status": gate["status"],
+            },
+        )
+    except ClientError as exc:
+        code = str(exc.response.get("Error", {}).get("Code") or "CLIENT_ERROR")
+        publication = {
+            "status": "NOT_PUBLISHED",
+            "reason": code,
+            "note": "R2 credentials are read-only for this consumer. Canonical persistence is Git repository history; Actions artifact is the detailed mirror.",
+        }
     json_dump(OUT / "r2_publication.json", publication)
     print(json.dumps(summary, indent=2, sort_keys=True, default=str))
     print(json.dumps(publication, indent=2, sort_keys=True, default=str))

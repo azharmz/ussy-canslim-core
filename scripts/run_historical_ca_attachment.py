@@ -61,16 +61,39 @@ def latest_quarter_asof(q: pd.DataFrame, cutoff: pd.Timestamp):
     return x.iloc[-1] if len(x) else None
 
 
+def build_annual_states(wide: pd.DataFrame) -> pd.DataFrame:
+    """Recover annual PIT states from the production wide-table contract.
+
+    The production PIT parquet intentionally exposes the latest annual state on
+    each quarterly row via annual_eps_accepted_at/source_accession; it does not
+    expose an FY column.  Treat each annual source accession as one immutable
+    annual state, rather than inventing FY from quarterly rows.
+    """
+    required = {"annual_eps_accepted_at", "annual_eps_source_accession", "annual_eps_growth"}
+    missing = required.difference(wide.columns)
+    if missing:
+        raise RuntimeError(f"Missing annual PIT state columns: {sorted(missing)}")
+
+    cols = ["cik_norm", "annual_eps_accepted_at", "annual_eps_source_accession", "annual_eps_growth"]
+    if "annual_eps" in wide.columns:
+        cols.append("annual_eps")
+    x = wide[cols].copy()
+    x["annual_eps_accepted_at"] = pd.to_datetime(x["annual_eps_accepted_at"], errors="coerce", utc=True)
+    x = x.dropna(subset=["cik_norm", "annual_eps_accepted_at", "annual_eps_source_accession"])
+    x = x.sort_values("annual_eps_accepted_at").drop_duplicates(
+        ["cik_norm", "annual_eps_source_accession"], keep="last"
+    )
+    return x
+
+
 def annual_growths_asof(a: pd.DataFrame, cutoff: pd.Timestamp):
-    x = a.loc[a["accepted_at"].le(cutoff)].copy()
+    x = a.loc[a["annual_eps_accepted_at"].le(cutoff)].copy()
     if x.empty:
         return [], []
-    x = x.sort_values(["fy_num", "accepted_at"]).groupby("fy_num", as_index=False).tail(1)
-    x = x.sort_values("fy_num")
-    latest = x.tail(3)
-    years = latest["fy_num"].astype(int).tolist()
-    growths = [scalar(r, "annual_eps_growth") for _, r in latest.iterrows()]
-    return years, growths
+    x = x.sort_values("annual_eps_accepted_at").tail(3)
+    states = x["annual_eps_source_accession"].astype(str).tolist()
+    growths = [scalar(r, "annual_eps_growth") for _, r in x.iterrows()]
+    return states, growths
 
 
 def main() -> None:
@@ -93,12 +116,7 @@ def main() -> None:
     wide["accepted_at"] = pd.to_datetime(wide["accepted_at"], errors="coerce", utc=True)
     wide["fiscal_period_end"] = pd.to_datetime(wide["fiscal_period_end"], errors="coerce")
     wide["cik_norm"] = wide["cik"].map(normalize_cik)
-    if "fy" in wide.columns:
-        wide["fy_num"] = pd.to_numeric(wide["fy"], errors="coerce")
-    elif "fiscal_year" in wide.columns:
-        wide["fy_num"] = pd.to_numeric(wide["fiscal_year"], errors="coerce")
-    else:
-        raise RuntimeError("No FY column in fundamentals PIT")
+    annual_states = build_annual_states(wide)
 
     sid_col = "security_id"
     symbol_col = "symbol" if "symbol" in bridge.columns else "ticker"
@@ -114,9 +132,8 @@ def main() -> None:
     candidates = candidates.merge(identity, on=sid_col, how="left", validate="many_to_one")
 
     quarterly_mask = wide[["quarterly_eps", "quarterly_revenue", "quarterly_eps_yoy", "quarterly_revenue_yoy"]].notna().any(axis=1)
-    annual_mask = wide[["annual_eps", "annual_eps_growth"]].notna().any(axis=1)
     q_by_cik = {k: g.sort_values(["fiscal_period_end", "accepted_at"]) for k, g in wide.loc[quarterly_mask & wide["cik_norm"].notna()].groupby("cik_norm")}
-    a_by_cik = {k: g.dropna(subset=["fy_num"]).sort_values(["fy_num", "accepted_at"]) for k, g in wide.loc[annual_mask & wide["cik_norm"].notna()].groupby("cik_norm")}
+    a_by_cik = {k: g.sort_values("annual_eps_accepted_at") for k, g in annual_states.groupby("cik_norm")}
 
     rows = []
     leakage = 0
@@ -126,7 +143,7 @@ def main() -> None:
         cutoff = base["signal_cutoff_utc"]
         ready = base.get("production_status") in READY
         qrow = latest_quarter_asof(q_by_cik.get(cik, pd.DataFrame(columns=wide.columns)), cutoff) if cik else None
-        years, growths = annual_growths_asof(a_by_cik.get(cik, pd.DataFrame(columns=wide.columns)), cutoff) if cik else ([], [])
+        annual_state_ids, growths = annual_growths_asof(a_by_cik.get(cik, pd.DataFrame(columns=annual_states.columns)), cutoff) if cik else ([], [])
 
         if qrow is None:
             c = c_label(None, None, data_ready=False if not ready else True)
@@ -145,10 +162,13 @@ def main() -> None:
         a = a_label(growths, data_ready=ready, fallback_3y=fallback)
         annual_used = a_by_cik.get(cik, pd.DataFrame())
         max_a_acc = None
-        if cik and len(years) and not annual_used.empty:
-            tmp = annual_used.loc[annual_used["accepted_at"].le(cutoff) & annual_used["fy_num"].isin(years)]
+        if cik and len(annual_state_ids) and not annual_used.empty:
+            tmp = annual_used.loc[
+                annual_used["annual_eps_accepted_at"].le(cutoff)
+                & annual_used["annual_eps_source_accession"].astype(str).isin(annual_state_ids)
+            ]
             if not tmp.empty:
-                max_a_acc = tmp["accepted_at"].max()
+                max_a_acc = tmp["annual_eps_accepted_at"].max()
                 if max_a_acc > cutoff:
                     leakage += 1
 
@@ -160,7 +180,7 @@ def main() -> None:
             "c_quarter_end": q_end, "c_source_accepted_at": q_acc,
             "quarterly_eps_yoy": eps_yoy, "quarterly_revenue_yoy": rev_yoy,
             "a_state": a.state, "a_reason": a.reason, "a_pass": a.value,
-            "a_fiscal_years": ",".join(map(str, years)), "a_growths": json.dumps(growths),
+            "a_source_accessions": ",".join(annual_state_ids), "a_growths": json.dumps(growths),
             "a_max_source_accepted_at": max_a_acc,
         })
 
@@ -182,14 +202,16 @@ def main() -> None:
         "critical_future_accepted_at_violations": int(leakage),
         "cutoff": "16:00 America/New_York on signal T0, DST-aware",
         "quarter_selection": "latest fiscal_period_end known by cutoff; latest accepted state within that period",
-        "annual_selection": "latest accepted state per FY known by cutoff; latest three FY",
+        "annual_selection": "latest three annual source-accession states known by cutoff, using upstream annual_eps_accepted_at",
+        "annual_schema_note": "production PIT has no FY column; annual states are identified by annual_eps_source_accession and upstream accepted_at",
         "thresholds_changed": False,
         "performance_metrics_computed": False,
         "research_universe": "CURRENT_COMPLIANT_UNIVERSE_FROZEN_AT_2026_08_28",
         "spy_parquet_key": spy_pointer.get("parquet_key"),
     }
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True, default=str))
-    (OUT / "fundamentals_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True))
+    (OUT / "fundamentals_current_pointer.json").write_text(json.dumps(pointer, indent=2, sort_keys=True))
+    (OUT / "fundamentals_snapshot_manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True))
     (OUT / "membership_snapshot.json").write_text(json.dumps(membership, indent=2, sort_keys=True))
     print(json.dumps(summary, indent=2, sort_keys=True, default=str))
     if leakage:

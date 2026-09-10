@@ -1,0 +1,68 @@
+name: Forward validation v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 23 * * 1-5'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/forward-validation-v1.yml'
+      - 'scripts/run_forward_validation_v1.py'
+      - 'scripts/run_portfolio_construction_v1.py'
+      - 'scripts/run_robustness_v1.py'
+      - 'scripts/run_entry_timing_basis_test.py'
+      - 'scripts/run_e1_e4_static_trade_diagnostics.py'
+      - 'src/canslim_research/entry_timing.py'
+      - 'src/canslim_research/execution.py'
+      - 'src/canslim_research/technical.py'
+      - 'docs/methodology/forward-validation-v1.md'
+      - 'docs/methodology/portfolio-construction-v1.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fwd1-forward-validation
+  cancel-in-progress: false
+
+jobs:
+  forward-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+      - name: Test frozen execution semantics
+        run: python -m pytest -q tests/test_entry_timing.py tests/test_execution.py tests/test_labels.py
+      - name: Collect complete forward window
+        run: python scripts/run_forward_validation_v1.py
+      - name: Show gate status
+        run: cat results/forward-validation-v1/gate_status.json
+      - name: Upload immutable run evidence mirror
+        uses: actions/upload-artifact@v7
+        with:
+          name: forward-validation-v1-${{ github.run_id }}
+          path: |
+            results/forward-validation-v1/summary.json
+            results/forward-validation-v1/gate_status.json
+            results/forward-validation-v1/forward_candidates.csv
+            results/forward-validation-v1/forward_trade_candidates.csv
+            results/forward-validation-v1/portfolio_trades.csv
+            results/forward-validation-v1/portfolio_skips.csv
+            results/forward-validation-v1/equity_curves.csv
+            results/forward-validation-v1/censored_accounting_audit.csv
+            results/forward-validation-v1/membership_snapshot.json
+            results/forward-validation-v1/spy_pointer.json
+            results/forward-validation-v1/r2_publication.json
+          retention-days: 90

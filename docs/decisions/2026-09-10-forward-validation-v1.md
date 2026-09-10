@@ -2,7 +2,7 @@
 
 Date: 2026-09-10
 
-Status: FROZEN / ACCUMULATION GATE
+Status: FROZEN / WAITING FOR POST-BOUNDARY DATA
 
 ## Decision
 
@@ -26,9 +26,17 @@ Technical Baseline v1
 
 No TrendFoll rule is inherited. C/A are not hard filters and EXH2 remains a separate hypothesis.
 
-## Frozen gate
+## Frozen gates
 
-A formal evidence review is allowed only after both conditions are true:
+Before any forward candidate/trade count is interpreted, the market-regime source must reach the forward period:
+
+```text
+SPY market_data_asof >= 2026-09-10
+```
+
+If this data gate fails, status is `WAITING_FOR_POST_BOUNDARY_DATA`; zero candidates are not evidence of zero signals.
+
+After the data gate passes, a formal evidence review is allowed only after both conditions are also true:
 
 ```text
 >= 12 completed calendar months since 2026-09-10
@@ -36,15 +44,19 @@ AND
 >= 50 closed X3 portfolio trades
 ```
 
-Passing the gate means `REVIEW_ELIGIBLE`, not `PRODUCTION_READY`.
+Passing all gates means `REVIEW_ELIGIBLE`, not `PRODUCTION_READY`.
 
 ## Collector
 
 Workflow: `.github/workflows/forward-validation-v1.yml`
 
-Schedule: weekdays at 23:30 UTC, after the US regular-session close, plus manual dispatch.
+Scheduled collection: `04:30 UTC Tuesday-Saturday`, plus manual dispatch. The timing is deliberately after the upstream daily OHLCV refresh and SPY benchmark job for the prior US session.
 
 The collector recomputes the complete forward window on every run from the fixed boundary. This makes each observation reproducible from the frozen logic while allowing source data to advance naturally.
+
+The first successful collector smoke, run `34493433671`, found the SPY market-regime source only through `2026-09-04`, before the forward start. Its `forward_candidate_count = 0` is therefore an infrastructure/data-readiness observation only and must not be treated as trading evidence.
+
+The upstream `ussy-data` production updater does incrementally maintain `backtest/ohlcv/{security_id}.parquet`, so the security-history path used by the frozen historical engine is also advanced by production. The identified blocker is the separate SPY benchmark pointer required by M, whose scheduled updater failed conservatively rather than overwrite a potentially revised series.
 
 ## Persistent evidence
 

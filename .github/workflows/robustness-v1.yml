@@ -8,6 +8,7 @@ on:
       - '.github/workflows/robustness-v1.yml'
       - 'scripts/run_robustness_v1.py'
       - 'scripts/run_portfolio_construction_v1.py'
+      - 'scripts/finalize_portfolio_construction_v1.py'
       - 'scripts/run_entry_timing_basis_test.py'
       - 'src/canslim_research/entry_timing.py'
       - 'src/canslim_research/execution.py'
@@ -51,5 +52,6 @@ jobs:
             results/robustness-v1/annual_robustness.csv
             results/robustness-v1/benchmark_context.csv
             results/robustness-v1/accepted_trade_quality.csv
+            results/robustness-v1/censored_accounting_audit.csv
             results/robustness-v1/membership_snapshot.json
           retention-days: 30

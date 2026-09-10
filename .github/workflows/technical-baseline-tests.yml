@@ -1,0 +1,26 @@
+name: Technical baseline v1 tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/technical-baseline-tests.yml'
+      - 'src/canslim_research/technical.py'
+      - 'tests/test_technical.py'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run technical baseline tests
+        run: python -m pytest -q tests/test_technical.py

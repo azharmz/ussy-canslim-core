@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-10
 
-Estimated overall research-program progress: **~77%**.
+Estimated overall research-program progress: **~80%**.
 
 This percentage describes research-program completion, not literal CAN SLIM fidelity and not production readiness.
 
@@ -19,15 +19,15 @@ This percentage describes research-program completion, not literal CAN SLIM fide
 | C/A distribution study | COMPLETE / VALIDATED | 901 production-ready symbols |
 | C/A period-semantics audit | COMPLETE / PASS | run `34434268817` |
 | Historical C/A as-of methodology | COMPLETE / FROZEN | `accepted_at <= T0 16:00 ET`; stable identity bridge |
+| Historical C/A label attachment | **COMPLETE / VALIDATED** | run `34479060107`; explicit SEC FY identity + anti-look-ahead audit |
 | Independent technical baseline v1 | COMPLETE / FROZEN | N-price/S/L/M proxies; I deferred |
 | Technical/execution unit tests | COMPLETE / CI PASS | technical `34431906311`; execution `34433458116` |
 | E0 historical technical candidates | COMPLETE | 10,731 candidates / 860 securities |
 | E1-E4 entry diagnostics | COMPLETE | run `34433673545` |
 | Entry Timing X1-X4 basis test | COMPLETE / VALIDATED | run `34464861119`; X3 currently preferred, X1 retained control |
-| Post-breakout exhaustion diagnostic | **COMPLETE / EXPLORATORY** | run `34466747136`; high shock × T+1 rejection is the important mechanism |
-| Exhaustion validation protocol | **NEXT** | version hypothesis; do not tune cutoff on discovery sample |
-| Historical C/A label attachment | QUEUED AFTER ENTRY HYPOTHESIS VERSIONING | attach frozen C/A states to signal dates |
-| C / C+A ablation | BLOCKED | avoid mixing fundamental effect with newly discovered entry filter |
+| Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | run `34466747136`; high shock × T+1 rejection is the important mechanism |
+| Exhaustion validation protocol | PRE-REGISTRATION REQUIRED | separate workstream; do not tune cutoff on discovery sample |
+| C / C+A ablation | **NEXT / UNBLOCKED** | X3 baseline vs X3+C vs X3+C+A; X1 equivalents mandatory control |
 | Portfolio construction | NOT FROZEN | required before portfolio return/max-DD claims |
 | Robustness / holdout | PARTIAL | entry timing PF ex-top10/subperiod done; exhaustion needs independent/forward validation |
 | Institutional sponsorship (I) | DEFERRED | never implicit PASS |
@@ -40,7 +40,7 @@ Primary historical experiments use the selected current/contemporary Musaffa-com
 
 ## C/A foundation
 
-Pinned production snapshot for first distribution:
+Pinned production snapshot for first current-state distribution:
 
 `fundamentals/snapshots/2026-09-09/run-34417104650/manifest.json`
 
@@ -51,6 +51,39 @@ Pinned production snapshot for first distribution:
 | C+A | 3 | 437 | 461 |
 
 C/A thresholds remain frozen. Period-semantics audit run `34434268817` = **SUCCESS**.
+
+## Historical C/A attachment v1
+
+Validated workflow run `34479060107` on the 10,731 historical technical candidates. Pinned fundamentals snapshot:
+
+`fundamentals/snapshots/2026-09-10/run-34470910341/manifest.json`
+
+The consumer resolves annual source accession to explicit SEC fiscal year from the immutable long PIT artifact, chooses latest accepted state per FY, and requires the latest three resolved FY to be consecutive before A can PASS. Unresolved FY identity remains `NOT_EVALUABLE`; calendar-year guessing is prohibited.
+
+Structural audit:
+
+```text
+candidate rows                         10,731
+candidate securities                      860
+duplicate attachment rows                   0
+future accepted_at violations               0
+identity-missing-CIK rows                   56
+annual states                           11,703
+annual FY resolved                     10,307
+annual FY unresolved                    1,396
+```
+
+Historical distribution:
+
+| Label | PASS | FAIL | NOT_EVALUABLE |
+|---|---:|---:|---:|
+| C-v1 | 703 | 3,475 | 6,553 |
+| A-v1 | 34 | 768 | 9,929 |
+| C+A | 2 | 650 | 10,079 |
+
+All A-PASS rows contain exactly three resolved consecutive FY and zero unresolved FY states. The two C+A PASS candidate events are CRUS on 2022-08-03 and MEDP on 2023-07-25. No performance metric was used in this validation.
+
+Decision record: `docs/decisions/2026-09-10-historical-ca-attachment-v1.md`.
 
 ## Technical candidate baseline
 
@@ -86,14 +119,13 @@ Within the highest shock quintile:
 
 Top shock decile median move was about **+8.70%**, with X1 PF ~**1.05**, versus bottom shock decile median ~**+0.78%**, PF ~**1.36**. But shock alone is not a sufficient rule because the T+1 state separates weak and strong high-momentum breakouts much more clearly.
 
-**Current interpretation:** the legacy problem is best framed as **post-breakout exhaustion confirmation**, not simply “momentum T-1->T0 too high.” No hard momentum threshold has been adopted.
+**Current interpretation:** the legacy problem is best framed as **post-breakout exhaustion confirmation**, not simply “momentum T-1->T0 too high.” No hard momentum threshold has been adopted. EXH2 remains separate from the fundamental ablation and cannot be silently added to X3/X1.
 
 ## Next sequence
 
-1. Version the `high shock × T+1 rejection` exhaustion hypothesis and define independent/forward validation without tuning a cutoff on the same discovery sample.
-2. Implement historical C/A label attachment with hard anti-look-ahead assertions.
-3. Validate C/A distribution on the 10,731 candidate events before performance splits.
-4. Run X3 baseline vs X3+C vs X3+C+A; keep X1 as control and keep exhaustion as a separately tracked hypothesis unless independently validated.
-5. Freeze portfolio construction and position sizing.
-6. Compute portfolio return/max drawdown plus PF ex-top10, subperiod and concentration robustness.
-7. Holdout/forward validation before any production proposal.
+1. Run the pre-specified fundamental ablation: X3 baseline vs X3+C vs X3+C+A, with X1 equivalents as mandatory control.
+2. Report trade count, PF, PF ex-top10, fill/opportunity effects, subperiod stability, and symbol/sector concentration; do not tune C/A thresholds from the result.
+3. Keep EXH2 as a separately pre-registered independent/forward validation workstream.
+4. Freeze portfolio construction and position sizing before portfolio-return/max-drawdown claims.
+5. Compute portfolio return/max drawdown and remaining robustness diagnostics.
+6. Holdout/forward validation before any production proposal.

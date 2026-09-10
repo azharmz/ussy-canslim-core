@@ -41,6 +41,7 @@ jobs:
           path: |
             results/historical-ca-attachment-v1/summary.json
             results/historical-ca-attachment-v1/candidate_ca_labels.csv
-            results/historical-ca-attachment-v1/fundamentals_manifest.json
+            results/historical-ca-attachment-v1/fundamentals_current_pointer.json
+            results/historical-ca-attachment-v1/fundamentals_snapshot_manifest.json
             results/historical-ca-attachment-v1/membership_snapshot.json
           retention-days: 30

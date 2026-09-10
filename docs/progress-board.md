@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-10
 
-Estimated overall research-program progress: **~91%**.
+Estimated overall research-program progress: **~92%**.
 
 This percentage describes research-program completion, not literal CAN SLIM fidelity and not production readiness.
 
@@ -25,10 +25,10 @@ This percentage describes research-program completion, not literal CAN SLIM fide
 | C / C+A ablation | COMPLETE / VALIDATED DESCRIPTIVE | run `34481587218`; hard C does not improve X3/X1; C+A too sparse |
 | Portfolio construction | **COMPLETE / VALIDATED DESCRIPTIVE** | canonical run `34488197400`; X3 survives capital constraints but absolute CAGR/DD remain weak |
 | Historical robustness ROB1 | **COMPLETE / VALIDATED HISTORICAL** | run `34488295631`; X3 remains > X1 but materially lags SPY CAGR; retrospective, not true OOS |
-| Genuine forward validation | **NEXT / FROZEN GATE** | rules frozen after 2026-09-09; minimum 12 calendar months + 50 closed X3 portfolio trades before production inference |
+| Genuine forward validation FWD1 | **LIVE / WAITING_FOR_POST_BOUNDARY_DATA** | collector run `34495098994` succeeds; data gate blocks inference because SPY M source is only through 2026-09-04 |
 | Institutional sponsorship (I) | DEFERRED | never implicit PASS |
 | QQQ benchmark for full M-v1 | MISSING INPUT | current exploratory engine uses SPY-only proxy |
-| Production integration | BLOCKED | strategy evidence remains economically weak; forward validation required |
+| Production integration | BLOCKED | strategy evidence remains economically weak; genuine forward evidence not yet accumulating |
 
 ## Research universe
 
@@ -159,15 +159,38 @@ X3 gross is ~3.04% CAGR with ~-43.36% max DD. Therefore X3 gives up a large amou
 
 Decision record: `docs/decisions/2026-09-10-robustness-v1.md`.
 
+## FWD1 — Genuine Forward Validation v1
+
+Methodology is frozen in `docs/methodology/forward-validation-v1.md`. Historical boundary is exclusive `2026-09-09`; first possible forward signal date is `2026-09-10`.
+
+Canonical collector workflow is live and scheduled at `04:30 UTC Tuesday-Saturday`, after upstream daily OHLCV and SPY jobs. Latest validated infrastructure run `34495098994` = SUCCESS, including execution tests, source-freshness gate, conflict-safe repository persistence, and Actions artifact upload.
+
+Current gate:
+
+```text
+status = WAITING_FOR_POST_BOUNDARY_DATA
+market_data_asof = 2026-09-04
+data_gate_pass = false
+forward_candidate_count_interpretable = false
+```
+
+The zero forward candidates currently recorded are therefore **not evidence of zero strategy signals**. The SPY market-regime source required by M predates the forward boundary. The separate upstream SPY updater has failed conservatively; no fallback M rule is introduced.
+
+Once SPY reaches at least 2026-09-10, FWD1 may enter `ACCUMULATING`. Formal review still requires both >=12 completed calendar months and >=50 closed X3 portfolio trades. Passing those gates means `REVIEW_ELIGIBLE`, not production-ready.
+
+Canonical long-horizon evidence is preserved in `evidence/fwd1/` plus GitHub history; detailed run mirrors remain in Actions artifacts. R2 publication is optional because this consumer's R2 credential is read-only for `PutObject`.
+
+Decision record: `docs/decisions/2026-09-10-forward-validation-v1.md`.
+
 ## Post-breakout exhaustion diagnostic
 
 Workflow `34466747136` = SUCCESS. The key discovery is not high T0 momentum alone but high shock followed by T+1 rejection. No cutoff is adopted from the discovery sample. EXH2 remains separately pre-registered/forward-validation work.
 
 ## Next sequence
 
-1. Freeze the historical research track; do not tune X3 or PORT1 from ROB1 outcomes.
-2. Start genuine forward validation only on observations after 2026-09-09 using unchanged rules.
-3. Do not make production inference until at least 12 calendar months and 50 closed X3 portfolio trades are accumulated.
+1. Repair/advance the separate SPY benchmark source without changing the frozen M semantics; until then FWD1 remains data-blocked.
+2. Let the scheduled FWD1 collector accumulate genuine post-boundary evidence once the source-freshness gate passes.
+3. Do not make production inference until at least 12 completed calendar months and 50 closed X3 portfolio trades are accumulated.
 4. Keep EXH2 separate from the baseline and validate it independently.
 5. Continue to treat C/A as descriptors, not hard performance filters.
 6. QQQ/full-M and institutional sponsorship I remain separate methodology gaps, not implicit PASS states.

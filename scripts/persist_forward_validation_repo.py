@@ -41,6 +41,7 @@ def main() -> None:
 
     fields = [
         "run_id", "code_sha", "collected_at_utc", "market_data_asof",
+        "data_gate_pass", "forward_candidate_count_interpretable",
         "forward_candidate_count", "forward_candidate_symbols",
         "x1_candidate_trades", "x1_portfolio_entries", "x1_closed_trades",
         "x3_candidate_trades", "x3_portfolio_entries", "x3_closed_trades",
@@ -52,6 +53,8 @@ def main() -> None:
         "code_sha": summary["code_sha"],
         "collected_at_utc": summary["collected_at_utc"],
         "market_data_asof": summary["market_data_asof"],
+        "data_gate_pass": gate.get("data_gate_pass", False),
+        "forward_candidate_count_interpretable": summary.get("forward_candidate_count_interpretable", False),
         "forward_candidate_count": summary["forward_candidate_count"],
         "forward_candidate_symbols": summary["forward_candidate_symbols"],
         "x1_candidate_trades": x1.get("candidate_trade_count", 0),
@@ -69,7 +72,8 @@ def main() -> None:
     existing = []
     if LEDGER.exists() and LEDGER.stat().st_size:
         with LEDGER.open(newline="") as f:
-            existing = list(csv.DictReader(f))
+            for old in csv.DictReader(f):
+                existing.append({k: old.get(k, "") for k in fields})
     if not any(str(r.get("run_id")) == str(row["run_id"]) for r in existing):
         existing.append({k: str(row[k]) for k in fields})
 

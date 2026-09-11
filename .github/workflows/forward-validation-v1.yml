@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # 04:30 UTC Tue-Sat: after the upstream US-session OHLCV refresh and SPY benchmark job.
+    # Recovery note: workflow-file-only pushes may be used to validate FWD1 after a missed schedule; frozen strategy semantics remain unchanged.
     - cron: '30 4 * * 2-6'
   push:
     branches: [main]

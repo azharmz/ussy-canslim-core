@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-11
 
-Estimated infrastructure/methodology progress: **~97%**.
+Estimated infrastructure/methodology progress: **~98%**.
 
 This is not production readiness. FWD1 forward-evidence maturity remains near zero because the genuine forward clock only began on 2026-09-10.
 
@@ -26,8 +26,9 @@ This is not production readiness. FWD1 forward-evidence maturity remains near ze
 | FWD1 genuine forward validation | **LIVE / ACCUMULATING** | run `34568992370`; SPY/data gate passed with `market_data_asof=2026-09-10` |
 | QQQ benchmark infrastructure | COMPLETE / VALIDATED | immutable QQQ benchmark pointer through 2026-09-10 |
 | QQQ/full-M enhancement | **COMPLETE / NOT PROMOTED** | run `34576910915`; risk throttle, lower CAGR; frozen FWD1 remains SPY-only |
-| Institutional sponsorship I0 | **COMPLETE / DATA BLOCKED** | run `34593720220`; 1,010/1,327 deterministic US-ISIN→CUSIP9 coverage; SEC bulk blocked 403 on GitHub runner |
-| Institutional sponsorship I-v1 | NOT IMPLEMENTED | historical/live 13F ingestion + PIT amendment semantics still required; never implicit PASS |
+| Institutional sponsorship I0 | **COMPLETE / FEASIBILITY AUDITED** | run `34593720220`; 1,010/1,327 deterministic US-ISIN→CUSIP9 coverage |
+| Institutional sponsorship I1 architecture | **IMPLEMENTED / EXECUTION VALIDATION BLOCKED** | SEC/13F ownership moved upstream to `ussy-fundamentals`; EDGAR index + accepted-at collector implemented; new Actions jobs currently fail before runner allocation |
+| Institutional sponsorship I-v1 strategy state | **NOT IMPLEMENTED** | no hard I filter; PIT amendment semantics and complete holdings ingestion must validate first |
 | Production integration | BLOCKED | historical economics weak and FWD1 review gate not met |
 
 ## Historical conclusions
@@ -51,24 +52,27 @@ Compared with frozen M0 SPY-only, M1 retained 7,694 of 10,731 candidates, remove
 
 Verdict: dual-index M is a historical risk throttle, not an incremental edge source. It is **not promoted** and does not alter FWD1. No post-hoc search of alternative SPY/QQQ thresholds or Boolean combinations is opened. Decision record: `docs/decisions/2026-09-11-full-m-validation-v1.md`.
 
-## Institutional sponsorship — I0 feasibility
+## Institutional sponsorship — I0/I1
 
-Canonical confirmation run `34593720220` = SUCCESS.
-
-This stage is data-quality feasibility only. It does not test strategy performance and cannot promote an I hard filter.
+I0 canonical confirmation run `34593720220` = SUCCESS. This stage is data-quality feasibility only; no strategy performance was inspected.
 
 ```text
 frozen compliant universe = 1,327
 US-ISIN deterministic CUSIP9 mapping = 1,010 (76.1%)
 non-US ISIN deferred = 317
-SEC bulk ZIP access from GitHub runner = HTTP 403 / BLOCKED_HTTP
 strategy returns inspected = false
 FWD1 modified = false
 ```
 
-For `US...` ISIN securities, CUSIP9 is deterministically derivable from the ISIN body. The remaining 317 securities must stay `NOT_EVALUABLE` until a validated identifier crosswalk exists; fuzzy issuer-name matching is prohibited.
+For `US...` ISIN securities, CUSIP9 is deterministically derivable from the ISIN body. The remaining 317 securities stay `NOT_EVALUABLE` until a validated identifier crosswalk exists; fuzzy issuer-name matching remains prohibited.
 
-The intended source remains SEC Form 13F, but a valid I implementation requires both historical/live ingestion and point-in-time availability semantics based on filing acceptance/publication time, including amendment handling. Because the official bulk ZIP is blocked from the GitHub-hosted runner, I-v1 remains **NOT IMPLEMENTED** rather than being approximated or silently passed.
+I1 architecture is now assigned upstream to `azharmz/ussy-fundamentals`, which already owns the production SEC/PIT client and `accepted_at` semantics. The upstream work now includes SEC text/bytes access support, EDGAR quarterly `master.idx` parsing for `13F-HR` and `13F-HR/A`, and exact `<ACCEPTANCE-DATETIME>` extraction from filing submissions. `ussy-canslim-research` remains the consumer of PIT output rather than a second SEC ingestion owner.
+
+Current blocker is execution validation, not strategy logic. Recent new probe jobs in both `ussy-canslim-research` and `ussy-fundamentals` failed before GitHub allocated a hosted runner (`runner_id=0`, no workflow steps executed). Separately, the earlier I0 run that did receive a runner observed HTTP 403 for the official SEC bulk ZIP. Therefore SEC endpoint reachability for the new EDGAR index path is **not yet adjudicated**.
+
+I remains `NOT_IMPLEMENTED` in frozen FWD1. No filing date, quarter end, stale ownership snapshot, fuzzy identifier, or missing record may be treated as implicit PASS. Any future I-enabled strategy must be separately versioned and validated.
+
+Decision record: `docs/decisions/2026-09-11-i1-upstream-ownership-and-runner-blocker.md`.
 
 ## FWD1
 
@@ -122,10 +126,18 @@ A row becomes mature only after T+1, T+2, and T+3 exist. Review requires at leas
 
 Important execution constraint: T+1 rejection is known only after T+1 close, so EXH2 cannot be retrofitted into the frozen T+1 Open execution rule. Any future trading rule inspired by EXH2 must be separately versioned and validated.
 
+## Periodic control policy
+
+On each scheduled control cycle, audit latest runs and evidence for `azharmz/ussy-data`, `azharmz/ussy-fundamentals`, and `azharmz/ussy-canslim-research`.
+
+Update this board and the experiment/decision records only when there is a meaningful state transition, new canonical evidence, a resolved blocker, or a newly diagnosed infrastructure/data-quality issue. Do not create noisy commits when nothing changed.
+
+Frozen strategy semantics must never be altered by the monitoring loop. Infrastructure/data-quality repairs are allowed when necessary, but historical tuning, FWD1 rule changes, implicit I promotion, or reinterpretation of stale/invalid evidence are prohibited.
+
 ## Next sequence
 
-1. Let FWD1 continue accumulating unchanged.
-2. Run EXH2 prospectively as a separate diagnostic validation track.
-3. Keep QQQ benchmark infrastructure available; Full-M v1 remains closed and not promoted.
-4. Resolve I-v1 ingestion/access only if a first-party SEC path with accepted-at/amendment semantics is available; do not substitute fuzzy identifiers or stale ownership snapshots.
+1. Keep FWD1 accumulating unchanged and audit its data gate/candidate/trade counts as new sessions arrive.
+2. Keep EXH2 prospective sidecar accumulating independently.
+3. Keep Full-M v1 closed/not promoted while retaining QQQ benchmark infrastructure.
+4. Retry/validate upstream 13F EDGAR ingestion once GitHub-hosted runners execute normally; then complete accepted-at hydration and amendment-lineage audit before any I ablation.
 5. Do not reopen historical tuning merely to improve benchmark-relative results.

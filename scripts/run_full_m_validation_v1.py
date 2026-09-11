@@ -177,7 +177,7 @@ def main() -> None:
                 "portfolio_entries": int(port["portfolio_entry_count"]),
                 "gross_cagr": port.get("gross_cagr"), "gross_max_drawdown": port.get("gross_max_drawdown"),
                 "cost20bp_cagr": port.get("cost20bp_rt_cagr"), "cost20bp_max_drawdown": port.get("cost20bp_rt_max_drawdown"),
-                "final_censored_positions": censor.get("final_censored_position_count", 0),
+                "final_censored_positions": port.get("final_censored_position_count", 0),
             })
     result = pd.DataFrame(rows)
     result.to_csv(OUT / "comparison.csv", index=False)

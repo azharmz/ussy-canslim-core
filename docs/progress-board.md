@@ -1,8 +1,8 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-11
+Last updated: 2026-09-12
 
-Estimated infrastructure/methodology progress: **~98%**.
+Estimated infrastructure/methodology progress: **~99%**.
 
 This is not production readiness. FWD1 forward-evidence maturity remains near zero because the genuine forward clock only began on 2026-09-10.
 
@@ -15,46 +15,34 @@ This is not production readiness. FWD1 forward-evidence maturity remains near ze
 | A-v1 | COMPLETE / FROZEN | latest 3 consecutive annual EPS YoY each >=25% |
 | C/A period semantics | COMPLETE / PASS | run `34434268817` |
 | Historical C/A attachment | COMPLETE / VALIDATED | run `34479060107`; anti-look-ahead clean |
-| Technical baseline | COMPLETE / FROZEN | price/N/S/L/M proxy baseline; I explicitly not implemented |
+| Technical baseline | COMPLETE / FROZEN | price/N/S/L/M proxy baseline; I remains separate |
 | Historical technical candidates | COMPLETE | 10,731 candidates / 860 securities |
 | Entry timing X1-X4 | COMPLETE / VALIDATED | run `34464861119`; X3 preferred, X1 mandatory control |
-| EXH1 exhaustion discovery | COMPLETE / EXPLORATORY | run `34466747136`; high shock × T+1 rejection mechanism |
-| EXH2 exhaustion validation | **PRE-REGISTERED / LIVE** | prospective boundary after `2026-09-11`; separate sidecar; does not modify FWD1 |
+| EXH1 exhaustion discovery | COMPLETE / EXPLORATORY | run `34466747136` |
+| EXH2 exhaustion validation | PRE-REGISTERED / LIVE | prospective boundary after 2026-09-11; separate sidecar |
 | Fundamental ablation | COMPLETE / VALIDATED DESCRIPTIVE | run `34481587218`; hard C not additive; C+A sparse |
 | Portfolio construction | COMPLETE / VALIDATED DESCRIPTIVE | run `34488197400` |
 | Historical robustness ROB1 | COMPLETE / VALIDATED HISTORICAL | run `34488295631`; retrospective, not OOS |
-| FWD1 genuine forward validation | **LIVE / ACCUMULATING** | run `34568992370`; SPY/data gate passed with `market_data_asof=2026-09-10` |
-| QQQ benchmark infrastructure | COMPLETE / VALIDATED | immutable QQQ benchmark pointer through 2026-09-10 |
-| QQQ/full-M enhancement | **COMPLETE / NOT PROMOTED** | run `34576910915`; risk throttle, lower CAGR; frozen FWD1 remains SPY-only |
-| Institutional sponsorship I0 | **COMPLETE / FEASIBILITY AUDITED** | run `34593720220`; 1,010/1,327 deterministic US-ISIN→CUSIP9 coverage |
-| Institutional sponsorship I1 architecture | **IMPLEMENTED / EXECUTION VALIDATION BLOCKED** | SEC/13F ownership moved upstream to `ussy-fundamentals`; EDGAR index + accepted-at collector implemented; new Actions jobs currently fail before runner allocation |
-| Institutional sponsorship I-v1 strategy state | **NOT IMPLEMENTED** | no hard I filter; PIT amendment semantics and complete holdings ingestion must validate first |
+| FWD1 genuine forward validation | LIVE / ACCUMULATING | run `34568992370`; frozen semantics unchanged |
+| QQQ/full-M enhancement | COMPLETE / NOT PROMOTED | run `34576910915`; historical risk throttle only |
+| Institutional sponsorship I0 | COMPLETE / FEASIBILITY AUDITED | run `34593720220`; 1,010/1,327 deterministic US-ISIN→CUSIP9 coverage |
+| I1 current/live PIT ingestion | **COMPLETE / DATA GATE PASS** | run `34603142916`; exact accepted_at, 9,731 filings, 100% fetch/period/amendment classification |
+| I1 historical PIT engine smoke | **COMPLETE / PASS** | run `34604836077`; first 3 official SEC bulk datasets |
+| I1 historical full build | **RUNNING** | run `34624132399`; all 53 official SEC datasets, 2013–2026 |
+| I-v1 strategy rule | **NOT YET FROZEN** | threshold cannot be chosen until full historical coverage gate completes; no I returns inspected |
 | Production integration | BLOCKED | historical economics weak and FWD1 review gate not met |
 
-## Historical conclusions
+## Historical strategy conclusions
 
 X3 remains preferable to X1, but historical economics are not compelling enough for production. PORT1 X3 gross CAGR is about 3.04% with max drawdown about -43.36%; under 20 bps round-trip cost sensitivity CAGR is about 2.40% with max drawdown about -50.94%. Comparable SPY price-only context is about 8.80% CAGR with about -56.47% max drawdown.
 
 C/A remain CAN SLIM descriptors, not hard performance filters. Historical C-v1 hard filtering did not improve the preferred X3 edge; C+A had only two historical PASS events.
 
-## Full-M SPY+QQQ sidecar
-
-Canonical confirmation run `34576910915` = SUCCESS. Frozen execution tests, sidecar, summary, and artifact upload all passed. The confirmation also fixed and verified the censored-position evidence metadata; performance calculations were unchanged.
-
-M1 definition:
-
-```text
-(SPY OR QQQ FTD active)
-AND max(SPY, QQQ distribution_count_25) < 6
-```
-
-Compared with frozen M0 SPY-only, M1 retained 7,694 of 10,731 candidates, removed 3,037, and added zero. For X3, PF moved only from about 1.1627 to 1.1701 and PF ex-top10 from 1.1454 to 1.1468, while gross CAGR fell from about 3.02% to 2.40%. Gross max drawdown improved from about -43.36% to -37.76%. At 20 bps round-trip, CAGR fell from about 2.38% to 1.74% while max drawdown improved from about -50.94% to -42.44%.
-
-Verdict: dual-index M is a historical risk throttle, not an incremental edge source. It is **not promoted** and does not alter FWD1. No post-hoc search of alternative SPY/QQQ thresholds or Boolean combinations is opened. Decision record: `docs/decisions/2026-09-11-full-m-validation-v1.md`.
+Full-M SPY+QQQ validation run `34576910915` remains closed/not promoted. It reduced drawdown but reduced CAGR and supplied negligible PF improvement ex-top10. Frozen FWD1 remains SPY-only.
 
 ## Institutional sponsorship — I0/I1
 
-I0 canonical confirmation run `34593720220` = SUCCESS. This stage is data-quality feasibility only; no strategy performance was inspected.
+I0 established deterministic identity coverage only:
 
 ```text
 frozen compliant universe = 1,327
@@ -64,23 +52,45 @@ strategy returns inspected = false
 FWD1 modified = false
 ```
 
-For `US...` ISIN securities, CUSIP9 is deterministically derivable from the ISIN body. The remaining 317 securities stay `NOT_EVALUABLE` until a validated identifier crosswalk exists; fuzzy issuer-name matching remains prohibited.
+The old runner/SEC-access blocker is resolved. Official SEC filing-level and bulk paths both execute successfully on GitHub-hosted runners.
 
-I1 architecture is now assigned upstream to `azharmz/ussy-fundamentals`, which already owns the production SEC/PIT client and `accepted_at` semantics. The upstream work now includes SEC text/bytes access support, EDGAR quarterly `master.idx` parsing for `13F-HR` and `13F-HR/A`, and exact `<ACCEPTANCE-DATETIME>` extraction from filing submissions. `ussy-canslim-research` remains the consumer of PIT output rather than a second SEC ingestion owner.
+Current/live filing-level canonical validation is run `34603142916` = SUCCESS:
 
-Current blocker is execution validation, not strategy logic. Recent new probe jobs in both `ussy-canslim-research` and `ussy-fundamentals` failed before GitHub allocated a hosted runner (`runner_id=0`, no workflow steps executed). Separately, the earlier I0 run that did receive a runner observed HTTP 403 for the official SEC bulk ZIP. Therefore SEC endpoint reachability for the new EDGAR index path is **not yet adjudicated**.
+```text
+Q3-2026 index filings = 9,731
+filing success count = 9,731
+filing failure count = 0
+fetch success rate = 100%
+accepted_at complete rate = 100%
+period_of_report complete rate = 100%
+amendment count = 383
+amendment classified count = 383
+amendment classified rate = 100%
+ambiguous lineage events = 0
+latest period_of_report = 2026-06-30
+latest-period mapped securities = 996 / 1,010 deterministic mappings
+data_gate_pass = true
+strategy returns inspected = false
+FWD1 modified = false
+```
 
-I remains `NOT_IMPLEMENTED` in frozen FWD1. No filing date, quarter end, stale ownership snapshot, fuzzy identifier, or missing record may be treated as implicit PASS. Any future I-enabled strategy must be separately versioned and validated.
+Historical bulk access is also validated. The historical event-state engine processes filings in information-availability order rather than attaching final snapshots backward through time. Frozen historical I-v1 availability is deliberately conservative:
 
-Decision record: `docs/decisions/2026-09-11-i1-upstream-ownership-and-runner-blocker.md`.
+```text
+historical_available_on = SEC filing_date + 1 calendar day
+```
+
+Quarter-end is never used as information availability. BASE and RESTATEMENT replace manager-period state; NEW HOLDINGS adds only to a valid base; unresolved/ambiguous manager-period lineages are excluded until restored by a valid replacing filing. Options are excluded from common-share sponsorship counts.
+
+Historical smoke run `34604836077` = SUCCESS on the first three official SEC data sets. Full-history workflow `34624132399` is now processing all 53 official datasets (SEC history begins in 2013). No performance ablation may start until its data-quality summary is audited.
+
+Methodology: `docs/methodology/institutional-sponsorship-v1.md`.
 
 ## FWD1
 
 Historical boundary is exclusive `2026-09-09`; first forward session is `2026-09-10`.
 
-Canonical run `34568992370` = SUCCESS. Frozen execution tests, complete forward-window collection, freshness gate, repository evidence persistence, and artifact upload all passed.
-
-Current gate:
+Canonical run `34568992370` = SUCCESS. Current frozen gate remains:
 
 ```text
 status = ACCUMULATING
@@ -92,26 +102,11 @@ completed_calendar_months = 0
 review_eligible = false
 ```
 
-The zero candidate count for 2026-09-10 is interpretable as a genuine no-signal observation because the data gate is now valid.
+Formal FWD1 review requires both >=12 completed calendar months and >=50 closed X3 portfolio trades. Passing those gates means REVIEW_ELIGIBLE, never automatic production promotion. Frozen X3/PORT1/FWD1 semantics must not change from interim forward outcomes.
 
-Formal FWD1 review still requires both:
+## EXH2
 
-```text
->= 12 completed calendar months
->= 50 closed X3 portfolio trades
-```
-
-Passing those gates means `REVIEW_ELIGIBLE`, never automatic production promotion. Frozen X3/PORT1/FWD1 semantics must not change from interim forward outcomes.
-
-Decision record: `docs/decisions/2026-09-11-fwd1-accumulating.md`.
-
-## EXH2 — prospective exhaustion validation
-
-EXH2 is a separate sidecar validation of the EXH1 discovery. It does not alter FWD1.
-
-Pre-registration: `docs/methodology/exhaustion-validation-v2.md`.
-
-Frozen prospective definitions:
+EXH2 remains a prospective diagnostic sidecar and cannot alter FWD1. Frozen definition:
 
 ```text
 validation signal_date > 2026-09-11
@@ -120,24 +115,18 @@ T+1 rejection = Close(T+1) < Open(T+1) AND Close(T+1) < Close(T0)
 primary endpoint = breakdown below pivot by T+3
 ```
 
-The +5.3333% shock threshold is the exact EXH1 top-quintile boundary transferred once into the prospective protocol; no alternative cutoff search is permitted.
-
-A row becomes mature only after T+1, T+2, and T+3 exist. Review requires at least 50 mature extreme-shock rejected observations and 50 mature extreme-shock non-rejected controls.
-
-Important execution constraint: T+1 rejection is known only after T+1 close, so EXH2 cannot be retrofitted into the frozen T+1 Open execution rule. Any future trading rule inspired by EXH2 must be separately versioned and validated.
+Review requires at least 50 mature extreme-shock rejected observations and 50 mature extreme-shock non-rejected controls.
 
 ## Periodic control policy
 
-On each scheduled control cycle, audit latest runs and evidence for `azharmz/ussy-data`, `azharmz/ussy-fundamentals`, and `azharmz/ussy-canslim-research`.
+On each control cycle, audit latest runs/evidence for `azharmz/ussy-data`, `azharmz/ussy-fundamentals`, and `azharmz/ussy-canslim-research`. Update this board only on meaningful state transitions, resolved blockers, new canonical evidence, or diagnosed data-quality issues.
 
-Update this board and the experiment/decision records only when there is a meaningful state transition, new canonical evidence, a resolved blocker, or a newly diagnosed infrastructure/data-quality issue. Do not create noisy commits when nothing changed.
-
-Frozen strategy semantics must never be altered by the monitoring loop. Infrastructure/data-quality repairs are allowed when necessary, but historical tuning, FWD1 rule changes, implicit I promotion, or reinterpretation of stale/invalid evidence are prohibited.
+Frozen strategy semantics must never be altered by monitoring. Infrastructure/data-quality repairs are allowed, but historical tuning, FWD1 rule changes, implicit I promotion, or reinterpretation of invalid/stale evidence are prohibited.
 
 ## Next sequence
 
-1. Keep FWD1 accumulating unchanged and audit its data gate/candidate/trade counts as new sessions arrive.
-2. Keep EXH2 prospective sidecar accumulating independently.
-3. Keep Full-M v1 closed/not promoted while retaining QQQ benchmark infrastructure.
-4. Retry/validate upstream 13F EDGAR ingestion once GitHub-hosted runners execute normally; then complete accepted-at hydration and amendment-lineage audit before any I ablation.
-5. Do not reopen historical tuning merely to improve benchmark-relative results.
+1. Complete and audit full 53-dataset historical I1 PIT build (`34624132399`).
+2. Quantify historical evaluable coverage, unresolved lineage, and QoQ manager-count availability without inspecting strategy returns.
+3. Freeze a simple I-v1 sponsorship-growth rule in a new preregistration **before** any I performance ablation.
+4. Run I-v1 historical ablation as a separate sidecar; never modify frozen FWD1 from retrospective results.
+5. Keep FWD1 and EXH2 accumulating unchanged.

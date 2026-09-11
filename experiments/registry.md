@@ -25,6 +25,7 @@ Use this file to register experiments before execution. Completed experiments mu
 | PORT1 | Frozen portfolio construction | COMPLETE / VALIDATED DESCRIPTIVE | capital-constrained X3 vs X1 |
 | ROB1 | Historical strategy robustness | COMPLETE / VALIDATED HISTORICAL | retrospective robustness; not true OOS |
 | FULL-M1 | SPY+QQQ market-regime sidecar | **COMPLETE / VALIDATED HISTORICAL** | test dual-index M against frozen SPY-only M; not promoted |
+| I0 | SEC 13F sponsorship feasibility/coverage audit | **COMPLETE / DATA BLOCKED** | validate PIT-safe identifier/data feasibility without strategy performance |
 | FWD1 | Genuine forward validation | **LIVE / ACCUMULATING** | frozen post-2026-09-09 validation; data gate passed |
 
 ## Core frozen evidence
@@ -169,6 +170,25 @@ M1 CAGR / DD @20bp RT  ≈ 1.74% / -42.44%
 
 M1 acts as a risk throttle: it lowers drawdown but does not add candidates, gives negligible PF improvement ex-top10, and lowers CAGR. It is not promoted. Frozen FWD1 remains SPY-only. Decision: `docs/decisions/2026-09-11-full-m-validation-v1.md`.
 
+## I0 — Institutional Sponsorship data feasibility
+
+Methodology: `docs/methodology/institutional-sponsorship-v1.md`.
+
+Canonical confirmation workflow `34593720220` = SUCCESS.
+
+Evidence class: data-quality feasibility only. Strategy PF/CAGR/returns were not inspected and FWD1 was not modified.
+
+```text
+frozen compliant universe       = 1,327
+US-ISIN deterministic mapping   = 1,010 (76.1%)
+non-US ISIN deferred            = 317
+SEC bulk download               = BLOCKED_HTTP (403 on GitHub-hosted runner)
+```
+
+For `US...` ISINs, CUSIP9 can be derived deterministically as `security_id[2:11]`. Non-US ISIN securities remain `NOT_EVALUABLE` until a validated security-identifier mapping exists; fuzzy issuer-name matching is forbidden.
+
+SEC 13F remains the intended primary source because point-in-time attachment must be based on filing acceptance/publication timing, not report quarter-end. The current blocker is ingestion infrastructure/access, not strategy logic. No I hard filter is promoted from I0.
+
 ## FWD1 — Genuine forward validation
 
 Methodology: `docs/methodology/forward-validation-v1.md`.
@@ -199,4 +219,4 @@ Passing the gate means `REVIEW_ELIGIBLE`, never automatic production promotion.
 
 ## Anti-data-mining rule
 
-Every experiment must distinguish pre-specified rules, exploratory diagnostics, and post-hoc findings. A changed threshold or rule must be versioned as a new hypothesis and independently validated. EXH2 cannot modify FWD1, FULL-M1 cannot modify FWD1, and FWD1 interim outcomes cannot change frozen FWD1 rules.
+Every experiment must distinguish pre-specified rules, exploratory diagnostics, and post-hoc findings. A changed threshold or rule must be versioned as a new hypothesis and independently validated. EXH2 cannot modify FWD1, FULL-M1 cannot modify FWD1, I0 cannot promote an I hard filter, and FWD1 interim outcomes cannot change frozen FWD1 rules.

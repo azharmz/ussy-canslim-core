@@ -56,7 +56,17 @@ The collector recomputes the complete forward window on every run from the fixed
 
 The first successful collector smoke, run `34493433671`, found the SPY market-regime source only through `2026-09-04`, before the forward start. Its `forward_candidate_count = 0` is therefore an infrastructure/data-readiness observation only and must not be treated as trading evidence.
 
-The upstream `ussy-data` production updater does incrementally maintain `backtest/ohlcv/{security_id}.parquet`, so the security-history path used by the frozen historical engine is also advanced by production. The identified blocker is the separate SPY benchmark pointer required by M, whose scheduled updater failed conservatively rather than overwrite a potentially revised series.
+The upstream `ussy-data` production updater does incrementally maintain `backtest/ohlcv/{security_id}.parquet`, so the security-history path used by the frozen historical engine is also advanced by production. The identified blocker is the separate SPY benchmark pointer required by M.
+
+## Upstream SPY repair status — 2026-09-11
+
+The `ussy-data` SPY updater failure was diagnosed from workflow `34425500954`: the actual failure was `Normalization dropped rows; source requires review`, not an adjustment-basis or historical-close revision.
+
+The upstream repair preserves all existing safeguards. Yahoo rows with incomplete required OHLC are now explicitly audited to `discarded-incomplete-source-rows.csv`; only valid source rows may be normalized/published, while duplicate valid dates, adjustment-ratio changes, historical-close revisions, hash failures, or unexplained valid-row loss still stop publication.
+
+Upstream workflow `34545442393` = SUCCESS. It advanced the immutable SPY pointer from `last_date=2026-09-04` to `last_date=2026-09-09`, with QC PASS. The run received 12 Yahoo source rows: 11 valid and one incomplete. The incomplete row was `2026-09-10`, where Open/High/Low/Volume were present but Close/Adj Close were absent, so it was correctly not manufactured into a market bar.
+
+Confirmation run `34545529977` = SUCCESS / unchanged and observed the same incomplete 2026-09-10 row. The upstream SPY schedule was therefore moved to `03:45 UTC Tuesday-Saturday`, after the production OHLCV refresh and with a larger Yahoo EOD-settlement buffer. FWD1 remains `WAITING_FOR_POST_BOUNDARY_DATA` until a valid SPY bar dated at least 2026-09-10 is published. This is a source-freshness state only and does not change any FWD1/CAN SLIM rule or forward boundary.
 
 ## Persistent evidence
 

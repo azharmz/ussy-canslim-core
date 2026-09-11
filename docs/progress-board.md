@@ -27,9 +27,10 @@ This is not production readiness. FWD1 forward-evidence maturity remains near ze
 | QQQ/full-M enhancement | COMPLETE / NOT PROMOTED | run `34576910915`; historical risk throttle only |
 | Institutional sponsorship I0 | COMPLETE / FEASIBILITY AUDITED | run `34593720220`; 1,010/1,327 deterministic US-ISIN→CUSIP9 coverage |
 | I1 current/live PIT ingestion | **COMPLETE / DATA GATE PASS** | run `34603142916`; exact accepted_at, 9,731 filings, 100% fetch/period/amendment classification |
-| I1 historical PIT engine smoke | **COMPLETE / PASS** | run `34604836077`; first 3 official SEC bulk datasets |
-| I1 historical full build | **RUNNING** | run `34624132399`; all 53 official SEC datasets, 2013–2026 |
-| I-v1 strategy rule | **NOT YET FROZEN** | threshold cannot be chosen until full historical coverage gate completes; no I returns inspected |
+| I1 historical PIT engine | **COMPLETE / VALIDATED WITH UNCERTAINTY EXCEPTIONS** | canonical run `34654725293`; 53/53 SEC datasets, 313,055 filings, 14,529,166 state changes |
+| I1 historical uncertainty mask | **RUNNING** | run `34656995462`; masks only CUSIP/periods affected by unresolved amendment lineage |
+| I-v1 sponsorship-growth rule | **PRE-REGISTERED / FROZEN** | `I_delta = latest manager count - prior manager count`; PASS iff delta > 0; no threshold tuning |
+| I-v1 performance ablation | **BLOCKED ON UNCERTAINTY MASK + PERSISTENT SNAPSHOT** | no I PF/CAGR inspected yet |
 | Production integration | BLOCKED | historical economics weak and FWD1 review gate not met |
 
 ## Historical strategy conclusions
@@ -52,7 +53,7 @@ strategy returns inspected = false
 FWD1 modified = false
 ```
 
-The old runner/SEC-access blocker is resolved. Official SEC filing-level and bulk paths both execute successfully on GitHub-hosted runners.
+The old runner/SEC-access blocker is resolved. Official SEC filing-level and bulk paths execute successfully on GitHub-hosted runners.
 
 Current/live filing-level canonical validation is run `34603142916` = SUCCESS:
 
@@ -74,17 +75,46 @@ strategy returns inspected = false
 FWD1 modified = false
 ```
 
-Historical bulk access is also validated. The historical event-state engine processes filings in information-availability order rather than attaching final snapshots backward through time. Frozen historical I-v1 availability is deliberately conservative:
+Historical full canonical run is now `34654725293` = SUCCESS. It supersedes failed partial run `34624132399`.
+
+```text
+official SEC datasets processed = 53 / 53
+total 13F filings processed = 313,055
+state-change events = 14,529,166
+unclassified amendment filings = 53
+ambiguous filing events = 53
+new-holdings without valid base = 0
+deterministic US-ISIN mappings = 1,010
+non-US ISIN NOT_EVALUABLE = 317
+quarter-end used as availability = false
+strategy returns inspected = false
+FWD1 modified = false
+```
+
+The 53 unresolved amendments are approximately 0.017% of processed filings. They are not interpreted as zero sponsorship and they do not invalidate the entire historical dataset. The event engine excludes affected manager-period lineages until a valid filing restores them. A dedicated uncertainty-mask workflow (`34656995462`) is now building CUSIP/period masks so only potentially affected states become `NOT_EVALUABLE`.
+
+Frozen historical availability remains conservative:
 
 ```text
 historical_available_on = SEC filing_date + 1 calendar day
 ```
 
-Quarter-end is never used as information availability. BASE and RESTATEMENT replace manager-period state; NEW HOLDINGS adds only to a valid base; unresolved/ambiguous manager-period lineages are excluded until restored by a valid replacing filing. Options are excluded from common-share sponsorship counts.
+Live/current uses exact EDGAR `accepted_at`. Quarter-end is never information availability. BASE and RESTATEMENT replace manager-period state; NEW HOLDINGS adds only to a valid base; put/call rows are excluded.
 
-Historical smoke run `34604836077` = SUCCESS on the first three official SEC data sets. Full-history workflow `34624132399` is now processing all 53 official datasets (SEC history begins in 2013). No performance ablation may start until its data-quality summary is audited.
+### Frozen I-v1 sponsorship-growth rule
 
-Methodology: `docs/methodology/institutional-sponsorship-v1.md`.
+Pre-registration: `docs/methodology/institutional-sponsorship-growth-v1.md`.
+
+At each T0 use the latest two consecutive report periods whose states are available by the decision cutoff:
+
+```text
+I_delta = I_manager_count_latest - I_manager_count_prior
+PASS = I_delta > 0
+FAIL = I_delta <= 0
+NOT_EVALUABLE = missing/non-consecutive/unmapped/uncertain state
+```
+
+There is no minimum manager-count threshold, percentage-growth threshold, share threshold, or value threshold. This definition was frozen before inspecting I-v1 strategy PF/CAGR.
 
 ## FWD1
 
@@ -125,8 +155,8 @@ Frozen strategy semantics must never be altered by monitoring. Infrastructure/da
 
 ## Next sequence
 
-1. Complete and audit full 53-dataset historical I1 PIT build (`34624132399`).
-2. Quantify historical evaluable coverage, unresolved lineage, and QoQ manager-count availability without inspecting strategy returns.
-3. Freeze a simple I-v1 sponsorship-growth rule in a new preregistration **before** any I performance ablation.
-4. Run I-v1 historical ablation as a separate sidecar; never modify frozen FWD1 from retrospective results.
+1. Complete and audit historical uncertainty mask (`34656995462`).
+2. Publish canonical historical I state + uncertainty mask to immutable R2 snapshot/pointer.
+3. Build PIT attachment of manager-count growth to historical technical candidates without inspecting outcomes during the join audit.
+4. Run the pre-registered I-v1 historical ablation as a separate sidecar; never modify frozen FWD1 from retrospective results.
 5. Keep FWD1 and EXH2 accumulating unchanged.

@@ -1,0 +1,30 @@
+name: SEC EDGAR access probe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/probe_sec_edgar_access.py'
+      - '.github/workflows/sec-edgar-access-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Probe first-party SEC endpoints
+        run: python scripts/probe_sec_edgar_access.py
+      - name: Show summary
+        run: cat results/sec-edgar-access-probe/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: sec-edgar-access-probe-${{ github.run_id }}
+          path: results/sec-edgar-access-probe/

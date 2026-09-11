@@ -22,6 +22,12 @@ OUT = ROOT / "results" / "exhaustion-validation-v2"
 BOUNDARY = pd.Timestamp("2026-09-11")
 EXTREME_SHOCK = 0.0533333333333332
 MIN_GROUP_N = 50
+OBS_COLUMNS = [
+    "signal_date", "security_id", "ticker", "pivot", "shock_tminus1_t0",
+    "extreme_shock", "mature", "t1_bearish", "t1_below_t0_close",
+    "t1_rejection", "retest_pivot_by_t3", "breakdown_below_pivot_by_t3",
+    "t3_close_vs_t0",
+]
 
 
 def load_history(s3, bucket: str, sid: str) -> pd.DataFrame:
@@ -92,13 +98,13 @@ def main() -> None:
             "t3_close_vs_t0": float(b3.close) / float(b0.close) - 1.0,
         })
 
-    obs = pd.DataFrame(rows)
+    obs = pd.DataFrame(rows, columns=OBS_COLUMNS)
     obs.to_csv(OUT / "observations.csv", index=False)
 
-    mature = obs[(obs.get("mature", False) == True) & (obs.get("extreme_shock", False) == True)].copy() if len(obs) else pd.DataFrame()
+    mature = obs[(obs["mature"] == True) & (obs["extreme_shock"] == True)].copy() if len(obs) else pd.DataFrame(columns=OBS_COLUMNS)
     groups = []
     for rejection in (True, False):
-        g = mature[mature["t1_rejection"] == rejection] if len(mature) else pd.DataFrame()
+        g = mature[mature["t1_rejection"] == rejection] if len(mature) else pd.DataFrame(columns=OBS_COLUMNS)
         groups.append({
             "group": "EXTREME_REJECTED" if rejection else "EXTREME_NOT_REJECTED",
             "n": int(len(g)),
@@ -119,7 +125,7 @@ def main() -> None:
         "extreme_shock_cutoff": EXTREME_SHOCK,
         "source_discovery_run": "34466747136",
         "candidate_count_post_boundary": int(len(obs)),
-        "mature_candidate_count": int(obs["mature"].sum()) if len(obs) else 0,
+        "mature_candidate_count": int(obs["mature"].fillna(False).sum()) if len(obs) else 0,
         "mature_extreme_shock_count": int(len(mature)),
         "rejected_extreme_mature_n": rejected_n,
         "non_rejected_extreme_mature_n": control_n,

@@ -1,6 +1,6 @@
 # Institutional Sponsorship v1 — SEC 13F Research Contract
 
-Status: **PRE-REGISTERED / COVERAGE AUDIT FIRST**
+Status: **PRE-REGISTERED / PIT INGESTION VALIDATED, HISTORICAL FULL BUILD RUNNING**
 
 Date: 2026-09-11
 
@@ -20,21 +20,41 @@ Bulk SEC data are treated as as-filed source records, not as a ready-made PIT si
 
 The economic holding period (`period_of_report`) is **not** the date at which the information becomes usable.
 
-For any strategy decision at signal date T0:
+For current/live filing-level data:
 
 ```text
 usable filing state requires accepted_at <= decision_cutoff(T0)
 ```
 
-If exact EDGAR `accepted_at` is unavailable for a filing, that filing cannot be used for same-day T0 decisions. A conservative later availability date may be used only if explicitly versioned and documented; quarter-end must never be substituted as availability time.
+Exact EDGAR `<ACCEPTANCE-DATETIME>` is the canonical live availability timestamp.
 
-For historical bulk data, filing metadata must ultimately be reconciled back to the EDGAR accession and acceptance timestamp before strategy attachment.
+For historical bulk data, I-v1 freezes a deliberately conservative availability approximation **before any I performance ablation**:
+
+```text
+historical_available_on = SEC filing_date + 1 calendar day
+```
+
+Rationale: the official bulk datasets preserve filing date/accession but not the exact acceptance timestamp needed for intraday same-day use. Waiting until the next calendar day cannot make historical information available earlier than the filing date and therefore avoids quarter-end or same-day look-ahead. This historical approximation is explicitly versioned as `filing_date_plus_1_calendar_day_conservative_v1`.
+
+Historical I-v1 may use this conservative approximation for daily T0 attachment. Exact accession-level acceptance-time reconstruction remains a possible later refinement, but it is **not required to retroactively alter I-v1 after performance is observed**. Any such refinement must be a separately versioned methodology.
+
+Quarter-end must never be substituted as availability time.
 
 ## Amendments
 
 Submission types `13F-HR` and `13F-HR/A` must be preserved. Amendments may restate or add holdings. No rule may simply "take the latest row" without resolving the amendment type and accession lineage.
 
-Until amendment semantics are audited, records affected by unresolved amendments are `NOT_EVALUABLE` for I-v1.
+Frozen lineage semantics:
+
+```text
+BASE                    -> replace manager-period state
+AMENDMENT_RESTATEMENT   -> replace manager-period state
+AMENDMENT_NEW_HOLDINGS  -> add to an already-valid manager-period state
+unclassified amendment  -> manager-period becomes NOT_EVALUABLE until a later valid replacement restores it
+new-holdings without valid base -> NOT_EVALUABLE
+```
+
+Records affected by unresolved amendments are never implicit zero or PASS.
 
 ## Security identity
 
@@ -42,7 +62,7 @@ Until amendment semantics are audited, records affected by unresolved amendments
 
 Frozen universe identity remains `security_id`.
 
-Deterministic mapping allowed in v1 coverage audit:
+Deterministic mapping allowed in v1:
 
 ```text
 if security_id is a valid US ISIN:
@@ -53,9 +73,31 @@ No fuzzy issuer-name matching is allowed for production research attachment.
 
 Foreign/ADR listings whose frozen `security_id` is not a US ISIN are `NOT_EVALUABLE` until a separately audited CUSIP/FIGI mapping is available.
 
+## Validated ingestion evidence
+
+Current/live filing-level canonical validation:
+
+```text
+workflow run = 34603142916
+Q3-2026 index filings = 9,731
+fetch success rate = 100%
+accepted_at complete rate = 100%
+period_of_report complete rate = 100%
+amendments = 383
+amendments classified = 383 (100%)
+ambiguous lineage events = 0
+data_gate_pass = true
+latest period_of_report = 2026-06-30
+latest-period mapped securities = 996
+strategy returns inspected = false
+FWD1 modified = false
+```
+
+Historical event-state smoke run `34604836077` = SUCCESS for the first three official SEC bulk datasets. Full official-history build is separately versioned and must complete its data-quality gate before I ablation.
+
 ## I-v1 candidate descriptors
 
-Once PIT reconstruction is validated, each security-date state may expose:
+Once full historical PIT reconstruction validates, each security-date state may expose:
 
 ```text
 I_manager_count
@@ -70,33 +112,35 @@ I_amendment_state
 I_state = EVALUABLE | NOT_EVALUABLE
 ```
 
-The first core proxy will emphasize **change in the number of reporting managers**, because IBD educational material describes institutional sponsorship using the number of funds owning a stock over recent quarters and whether sponsorship is increasing. Reported shares/value are descriptors and require split/class handling before any hard rule.
+The first core proxy will emphasize **change in the number of reporting managers**. Reported shares/value remain descriptors and are not used for the first hard rule because split/class handling can contaminate raw share deltas.
 
 ## No hard PASS rule yet
 
-This document deliberately does **not** freeze an `I_pass` threshold before the data-quality/coverage audit. The first experiment (`I0`) is feasibility only and may not inspect strategy returns.
+This document deliberately does **not** freeze an `I_pass` threshold yet. The historical full-build gate must first quantify evaluable coverage, unresolved lineage, and usable quarter-over-quarter manager-count deltas.
 
 A later `I1` methodology may freeze a simple sponsorship-growth rule only after:
 
 1. identifier mapping coverage is quantified;
-2. EDGAR accepted-time availability is reproducible;
-3. 13F-HR/A amendment semantics are resolved;
-4. stock vs put/call rows are separated;
-5. duplicate manager/accession handling is audited;
-6. corporate-action sensitivity of reported share changes is understood.
+2. current/live EDGAR accepted-time availability is reproducible;
+3. historical conservative availability semantics are validated;
+4. 13F-HR/A amendment semantics are resolved or quarantined;
+5. stock vs put/call rows are separated;
+6. duplicate manager/accession handling is audited;
+7. usable QoQ manager-count coverage is quantified.
 
-The I1 threshold must be preregistered **before** any performance ablation.
+The I1 threshold must be preregistered **before** any performance ablation. No PF/CAGR/return inspection may be used to choose the threshold.
 
 ## Live-data limitation
 
-Official bulk 13F datasets are published quarterly and can lag individual EDGAR filings. They are suitable for historical reconstruction but are not sufficient as the sole live source. A future live collector must use filing-level EDGAR metadata and preserve accession + acceptance timestamps.
+Official bulk 13F datasets are published quarterly and can lag individual EDGAR filings. They are suitable for historical reconstruction but are not sufficient as the sole live source. Live/current collection therefore uses filing-level EDGAR metadata and preserves accession + exact acceptance timestamp.
 
 ## Guardrails
 
 - `I_state` remains `NOT_IMPLEMENTED` in frozen FWD1.
 - Missing/unmapped ownership is never implicit PASS or zero sponsorship.
-- Options must not be counted as common-share sponsorship.
+- Options are excluded from common-share sponsorship counts.
 - No fuzzy issuer-name matching.
 - No quarter-end look-ahead.
+- No same-day historical use from bulk filing date; historical I-v1 waits until filing date + 1 calendar day.
 - No post-hoc threshold search against PF/CAGR.
 - Any future I-enabled strategy is a new versioned validation track with a new forward clock.

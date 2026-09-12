@@ -24,8 +24,6 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | EXH2 | LIVE / PROSPECTIVE | separate exhaustion sidecar |
 | Production integration | BLOCKED | FWD1 review gate not met |
 
-Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PORT1 gross CAGR 3.02–3.04%, gross max DD -43.36%, and SPY price-only CAGR context ~8.80%. These figures must not be used to tune the theory-faithful path.
-
 ## Theory Fidelity / v2 path — #25 onward
 
 | # | Workstream | Status |
@@ -37,8 +35,8 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 29 | RS / leadership fidelity | **COMPLETE** |
 | 30 | C/A/S/I/M role fidelity | **COMPLETE** |
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
-| 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
-| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — P8 v0.3 authoritative DEVELOPMENT validation** |
+| 32 | Theory-faithful candidate specification | **COMPLETE / FROZEN v1** |
+| 33 | O'Neil Pattern Recognition Engine | **IN PROGRESS — P8 v0.3 detector / v0.6 authoritative DEVELOPMENT evaluator** |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
@@ -47,9 +45,7 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 
 Canonical specification: `docs/methodology/theory-faithful-candidate-spec-v1.md`.
 
-Decision record: `docs/decisions/2026-09-12-theory-faithful-candidate-spec-v1.md`.
-
-The spec deliberately avoids a single universal Boolean candidate flag. It preserves staged semantics:
+The staged contract remains:
 
 ```text
 BASE_RECOGNIZED
@@ -59,50 +55,15 @@ BREAKOUT_CONFIRMED
 CANSLIM_ELIGIBLE
 ```
 
-The initial `CANSLIM_ELIGIBLE` contract requires:
-
-```text
-valid named proper base
-+ pattern-specific pivot
-+ pivot crossing
-+ breakout-day volume >=1.40x prior-50-session average
-+ C primary screen PASS
-+ A primary screen PASS
-+ individual L screen PASS (transparent RS proxy >=80)
-+ M permits new buys
-```
-
-Attached evidence that is intentionally not promoted to a universal additional hard gate in this first theory-faithful candidate contract includes broader S supply descriptors, I sponsorship state, RS-line confirmation/divergence, industry-group leadership, non-price N catalyst state, close-above-pivot quality and 5% extension/buy-zone state.
-
-Important fundamental distinction:
-
-- C freezes recent quarterly EPS growth around >=25% as the core screen; revenue growth/acceleration remains required quality evidence, not a universal mandatory `revenue>=25%` conjunction.
-- A freezes sustained multi-year annual EPS growth around >=25% as the theory requirement; the exact reproducible aggregation/consistency adapter must be versioned before #35 and cannot be chosen from return optimization. The old v1 rule requiring each of three annual YoY observations individually >=25% is not treated as canonical O'Neil identity.
-
-Missing/stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
+Initial `CANSLIM_ELIGIBLE` requires a valid named proper base, pattern-specific pivot, pivot crossing, breakout-day volume >=1.40x prior-50-session average, C PASS, A PASS, individual L screen PASS (transparent RS proxy >=80), and M permitting new buys. S/I and other quality descriptors remain attached evidence unless separately promoted by a versioned specification decision.
 
 ## #33 — O'Neil Pattern Recognition Engine
 
-#33 is active against frozen #32. Core morphology infrastructure is implemented; the current gate is independent authoritative DEVELOPMENT validation before detector freeze and untouched VALIDATION.
+Core morphology infrastructure is implemented for `CUP_WITH_HANDLE`, `CUP_WITHOUT_HANDLE`, `DOUBLE_BOTTOM`, and `FLAT_BASE`, with strict R2 -> Yahoo -> Tiingo routing, DEVELOPMENT/VALIDATION separation, v0.3 prior-uptrend semantics, v0.3 established-left-high flat pivot semantics, raw-window persistence, deterministic structural identities, PIT/prefix-stable lineages, and explicit conflicts/ambiguity.
 
-Implemented:
+The authoritative evaluator is now **v0.6**. It scores raw emitted windows and maps the selected raw candidate back to stable identity/lineage. Source dimensions are never invented: an authoritative example may omit exact `window_end`, in which case end fidelity is not scored and `boundary_validation_state=START_ONLY_SOURCE_ANCHOR`. At least a source-anchored start is still required in v0.6.
 
-- strict R2 -> Yahoo -> Tiingo OHLCV routing, with fallback only on explicit `UNAVAILABLE`;
-- historical labelled examples may fall through from R2 when absent from the current membership snapshot without altering the frozen Musaffa universe;
-- DEVELOPMENT-only tuning/validation guardrail;
-- preregistered geometry policy;
-- `CUP_WITH_HANDLE`, `CUP_WITHOUT_HANDLE`, `DOUBLE_BOTTOM`, and `FLAT_BASE` detectors;
-- v0.3 prior-uptrend semantics: lowest low in 120 completed pre-base sessions to base-start high >=30%;
-- v0.3 flat-base pivot semantics: established first-third left-side high, so an optional breakout-day new high cannot redefine the pivot;
-- pattern-specific landmark persistence and pivot derivation;
-- fault flags and explicit ambiguity state;
-- synthetic morphology regression fixtures;
-- deterministic structural `base_id` clustering;
-- structural lineage clustering with PIT/prefix-stable lineage IDs;
-- explicit cross-pattern conflict records and cup-family hierarchy;
-- authoritative `LabelEvidence` DEVELOPMENT/VALIDATION split;
-- authoritative evaluator v0.5 that scores raw windows emitted by the frozen detector, persists the selected raw candidate, maps it back to stable `base_id`/lineage, and explicitly distinguishes source-provided vs missing pivot validation;
-- reproducible v0.3 structural-identity audit against the same raw candidate population.
+CI for the v0.6 partial-boundary semantics passed on branch run `34705192430` at commit `ce7b68378b7bf2e3147a176843ac307497fd726c`.
 
 ### Authoritative validation status
 
@@ -110,42 +71,32 @@ Implemented:
 |---|---|---|---|---|
 | SNPS (`p8-label-0001`) | DEVELOPMENT | FLAT_BASE | **MATCH / FROZEN** | start error 0d; end error 1d; pivot date error 0d; pivot price error ~0; pivot VALIDATED |
 | NFLX (`p8-label-0002`) | VALIDATION | CUP_WITH_HANDLE | **LOCKED / UNTOUCHED** | do not inspect for tuning |
-| TW candidate | ADJUDICATION | FLAT_BASE | **WITHDRAWN FROM DEVELOPMENT** | IBD supports Nov. 20 breakout / 136.13 entry, but inspected source evidence does not support the previously inferred exact Oct. 9 base start |
+| TW candidate | ADJUDICATION | FLAT_BASE | **WITHDRAWN** | source supports breakout/entry but not previously inferred exact start |
+| TSM late-2024 candidate | ADJUDICATION | CUP_WITH_HANDLE | **NOT PROMOTED** | IBD supports named CWH and 205.63 buy point; inspected text does not explicitly publish exact base start |
+| OLED 2019 candidate | ADJUDICATION | CUP_WITH_HANDLE | **NOT PROMOTED** | IBD supports second-stage CWH, Jun. 18 breakout and 177.05 buy point; inspected text does not explicitly publish exact base start |
 
-SNPS final emitted detector window remains `2023-04-04 -> 2023-05-17` with pivot `2023-04-04 @ ~392.79000854`, matching the authoritative IBD anchor `2023-04-04 -> 2023-05-18` and pivot `392.79`. The selected emitted window maps to `base_f4e321a93cf8dce2` / `lineage_dead150a96867922`. Validation record: `docs/p8-snps-development-validation-v0.md`.
+Source adjudication record: `docs/p8-next-cwh-source-adjudication-v0.md`.
 
-The evaluator correction from identity-representative scoring to raw-emitted-window scoring is a data-model correction, not detector tuning: `BaseIdentity`/lineage intentionally summarize multiple rolling windows and can lose an individual member's exact boundaries. No synthetic window is created and no tolerance is relaxed.
-
-The v0.3 flat-pivot correction is also semantic rather than outcome-driven: v0.1/v0.2 already used a left-side high for flat-base containment but could persist the full-window maximum high as the pivot. v0.3 makes the stored pivot consistent with the established high that the breakout must clear. Decision record: `docs/decisions/2026-09-13-p8-flat-pivot-and-tw-label-audit.md`.
+SNPS emitted detector window remains `2023-04-04 -> 2023-05-17` with pivot `2023-04-04 @ ~392.79000854`, matching the authoritative IBD anchor `2023-04-04 -> 2023-05-18` and pivot `392.79`. Validation record: `docs/p8-snps-development-validation-v0.md`.
 
 ### v0.3 structural-identity audit
 
-The v0.3 correction was audited against the **same 1,387 raw SNPS 2023 candidate windows**, so candidate membership was unchanged by construction. Of 975 flat-base windows, 615 receive a corrected persisted pivot under v0.3.
-
-Structural clustering changes as follows:
-
-- identities: **104 -> 111** overall, entirely from flat-base **60 -> 67**;
-- lineages: **39 -> 38** overall, entirely from flat-base **26 -> 25**;
-- 23 legacy flat identities split across multiple v0.3 identities, while 18 v0.3 identities combine windows from multiple legacy identities;
-- 8 legacy flat lineages split across multiple v0.3 lineages, while 10 v0.3 lineages combine windows from multiple legacy lineages;
-- maximum identity split fan-out is 7 and merge fan-in is 5; maximum lineage split fan-out is 5 and merge fan-in is 4.
-
-The aggregate lineage count staying near-flat is reassuring, but the assignment churn is material. Therefore v0.3 is **not reverted**, while the BaseIdentity/Lineage layer is **not yet frozen**. `base_id` stability is conditional on the detector's landmark semantics/version and is not promised across a semantic detector revision. No identity/lineage algorithm is changed from this single-symbol audit. Decision record: `docs/decisions/2026-09-13-p8-v03-structural-identity-audit.md`.
+The v0.3 correction was audited against the same 1,387 raw SNPS 2023 candidate windows. Candidate membership was unchanged. Of 975 flat-base windows, 615 receive a corrected persisted pivot. Structural identities changed 104 -> 111 overall (flat 60 -> 67), while lineages changed 39 -> 38 overall (flat 26 -> 25). Split/merge assignment churn is material, so v0.3 is retained but BaseIdentity/Lineage is not yet frozen. Decision record: `docs/decisions/2026-09-13-p8-v03-structural-identity-audit.md`.
 
 This remains morphology evidence, not trading-performance evidence.
 
 ### Current #33 next slice
 
-1. promote the next source-first P0 authoritative example into DEVELOPMENT only after exact source anchors/window are independently supported and frozen;
-2. prioritize a non-FLAT core pattern family so DEVELOPMENT tests more than the SNPS flat-base path without touching NFLX VALIDATION;
-3. repeat raw-window plus identity/lineage audits across multiple symbols and pattern families;
-4. version any morphology/lineage correction only when independently justified by source/theory and cross-example evidence, never by candidate counts or returns;
-5. expand the DEVELOPMENT corpus before detector freeze;
+1. continue source-first search for a non-FLAT authoritative DEVELOPMENT example with an explicitly published detector-comparable start anchor;
+2. do not promote TSM/OLED by inferring a start from their charts or record highs;
+3. if high-quality authoritative sources repeatedly publish pattern/pivot but not exact boundaries, consider a separately documented evaluator v0.7 allowing independently optional source dimensions; this must be a semantic evidence-model decision, not an accommodation for a desired detector result;
+4. repeat raw-window plus identity/lineage audits across multiple symbols and pattern families once additional DEVELOPMENT labels are defensible;
+5. freeze detector semantics only after broader DEVELOPMENT agreement/disagreement evidence;
 6. keep NFLX VALIDATION locked until DEVELOPMENT semantics are frozen;
-7. after freeze, open untouched VALIDATION once and issue the final P8 verdict;
+7. after freeze, open untouched VALIDATION once and issue final P8 verdict;
 8. only after defensible P8 validation may #34 consume #33 output.
 
-Secondary `ASCENDING_BASE`, `BASE_ON_BASE`, and `IPO_BASE` remain deferred until the current core-pattern validation gate is sufficiently mature.
+Secondary `ASCENDING_BASE`, `BASE_ON_BASE`, and `IPO_BASE` remain deferred.
 
 Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
 
@@ -160,18 +111,14 @@ Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
 - Component roles: C/A screens; S/I evidence/confirmation; M timing/context/risk gate.
 - Sell/risk: downstream state machine; v1 does not contain a canonical O'Neil sell engine.
 
-Canonical audit detail: `docs/methodology/oneil-theory-fidelity-audit-v1.md`.
-
 ## Forward tracks remain frozen
 
 FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/specification findings must not be retrofitted into either track.
 
 ## Active work from here
 
-1. **Continue #33 P8 authoritative DEVELOPMENT validation** with additional source-first examples and cross-symbol/pattern-family identity-lineage audits.
-2. Freeze detector semantics only after a broader DEVELOPMENT corpus and explicit disagreement analysis.
-3. Open untouched VALIDATION once after freeze and issue final P8 verdict.
-4. Then implement #34 theory-faithful candidate generator.
-5. Run #35 semantic/morphology/candidate validation before performance research.
-6. Keep #36 execution/entry research parked and keep FWD1/EXH2 accumulating unchanged.
-7. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.
+1. Continue #33 source-first DEVELOPMENT corpus expansion without weakening evidence provenance.
+2. Decide v0.7 evidence-dimension semantics only if source coverage demonstrates the need independently of detector outcomes.
+3. Freeze detector semantics after broader DEVELOPMENT evidence, then open VALIDATION once.
+4. Then implement #34 and run #35 before performance research.
+5. Keep #36 parked and FWD1/EXH2 accumulating unchanged.

@@ -16,7 +16,7 @@ on:
         required: true
         default: "2023-12-31"
   push:
-    branches: [main, feat/p8-pattern-engine-v0]
+    branches: [main]
     paths:
       - '.github/workflows/p8-pattern-engine-v0.yml'
       - 'src/canslim_research/pattern_engine.py'

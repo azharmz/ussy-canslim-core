@@ -1,6 +1,11 @@
+from pathlib import Path
+import sys
+
 import pytest
 
-from canslim_research.ohlcv_router import (
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from canslim_research.ohlcv_router import (  # noqa: E402
     DEFAULT_SOURCE_ORDER,
     NoSourceAvailable,
     ProviderResult,

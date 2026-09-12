@@ -26,6 +26,10 @@ from canslim_research.pattern_engine import (  # noqa: E402
     PATTERN_ENGINE_VERSION,
     detect_patterns,
 )
+from canslim_research.pattern_identity import (  # noqa: E402
+    BASE_IDENTITY_VERSION,
+    cluster_base_identities,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,11 +62,20 @@ def run(args: argparse.Namespace) -> dict:
     )
     rows = list(routed.rows)
     candidates = detect_patterns(rows, min_confidence=args.min_confidence)
+    bases = cluster_base_identities(candidates, security_id=security_id)
+
     counts = Counter(candidate.pattern_type for candidate in candidates)
+    base_counts = Counter(base.pattern_type for base in bases)
     ambiguous = sum(candidate.pattern_evidence_state == "AMBIGUOUS" for candidate in candidates)
+    ambiguous_bases = sum(base.pattern_evidence_state == "AMBIGUOUS" for base in bases)
     latest = sorted(
         candidates,
         key=lambda candidate: (candidate.base_end_or_breakout_ready_date, candidate.confidence),
+        reverse=True,
+    )[:25]
+    latest_bases = sorted(
+        bases,
+        key=lambda base: (base.last_supported_date, base.confidence),
         reverse=True,
     )[:25]
 
@@ -78,18 +91,26 @@ def run(args: argparse.Namespace) -> dict:
         "source_metadata": dict(routed.metadata),
         "input_row_count": len(rows),
         "pattern_engine_version": PATTERN_ENGINE_VERSION,
+        "base_identity_version": BASE_IDENTITY_VERSION,
         "policy": DEFAULT_POLICY.__dict__,
         "min_confidence": args.min_confidence,
-        "candidate_count": len(candidates),
-        "ambiguous_candidate_count": ambiguous,
-        "pattern_counts": dict(sorted(counts.items())),
-        "latest_candidates": [candidate.to_dict() for candidate in latest],
+        "raw_candidate_window_count": len(candidates),
+        "raw_ambiguous_window_count": ambiguous,
+        "raw_pattern_counts": dict(sorted(counts.items())),
+        "base_identity_count": len(bases),
+        "ambiguous_base_count": ambiguous_bases,
+        "base_pattern_counts": dict(sorted(base_counts.items())),
+        "latest_base_identities": [base.to_dict() for base in latest_bases],
+        "latest_raw_candidates": [candidate.to_dict() for candidate in latest],
+        "all_base_identities": [base.to_dict() for base in bases],
         "all_candidates": [candidate.to_dict() for candidate in candidates],
         "guardrails": [
             "DEVELOPMENT only",
             "OHLCV morphology only; no return/CAGR/PF labels",
             "named pattern is not forced when rules are unmet",
             "pattern-specific pivot is persisted with landmarks",
+            "rolling windows sharing the same pattern-specific structural landmarks collapse to one stable base_id",
+            "first_recognized_date is the earliest as-of date the frozen detector could recognize that structural identity",
         ],
     }
 
@@ -100,7 +121,8 @@ def main() -> int:
     output = ROOT / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({key: value for key, value in report.items() if key != "all_candidates"}, indent=2))
+    hidden = {"all_candidates", "all_base_identities"}
+    print(json.dumps({key: value for key, value in report.items() if key not in hidden}, indent=2))
     return 0
 
 

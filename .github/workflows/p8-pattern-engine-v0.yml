@@ -16,14 +16,16 @@ on:
         required: true
         default: "2023-12-31"
   push:
-    branches: [main, feat/p8-base-identity-v0]
+    branches: [main, feat/p8-base-lineage-v0]
     paths:
       - '.github/workflows/p8-pattern-engine-v0.yml'
       - 'src/canslim_research/pattern_engine.py'
       - 'src/canslim_research/pattern_identity.py'
+      - 'src/canslim_research/pattern_lineage.py'
       - 'scripts/run_p8_pattern_engine.py'
       - 'tests/test_pattern_engine.py'
       - 'tests/test_pattern_identity.py'
+      - 'tests/test_pattern_lineage.py'
       - 'docs/methodology/p8-pattern-engine-design-v0.md'
 
 permissions:
@@ -55,8 +57,8 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 yfinance
 
-      - name: Run morphology and identity regression tests
-        run: python -m pytest -q tests/test_pattern_engine.py tests/test_pattern_identity.py
+      - name: Run morphology identity and lineage regression tests
+        run: python -m pytest -q tests/test_pattern_engine.py tests/test_pattern_identity.py tests/test_pattern_lineage.py
 
       - name: Run SNPS DEVELOPMENT morphology engine
         run: |

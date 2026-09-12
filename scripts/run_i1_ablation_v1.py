@@ -23,7 +23,7 @@ from run_portfolio_construction_v1 import prepare_trade_candidates, run_portfoli
 OUT = ROOT / "results" / "i1-ablation-v1"
 PINNED_SPONSORSHIP_PUBLISH_RUN = "34663714292"
 VARIANTS = ("X1", "X3")
-FILTERS = ("BASE", "I_PASS")
+FILTERS = ("BASE_ALL", "I_EVALUABLE", "I_PASS")
 
 
 def trade_summary(variant: str, filt: str, eligible: pd.DataFrame, trades: pd.DataFrame) -> dict:
@@ -99,7 +99,13 @@ def main(labels_csv: Path, attachment_summary_json: Path) -> None:
     equity_curves = []
 
     for filt in FILTERS:
-        eligible = merged.copy() if filt == "BASE" else merged[merged["I_v1_label"].eq("PASS")].copy()
+        if filt == "BASE_ALL":
+            eligible = merged.copy()
+        elif filt == "I_EVALUABLE":
+            eligible = merged[merged["I_v1_label"].isin(["PASS", "FAIL"])].copy()
+        else:
+            eligible = merged[merged["I_v1_label"].eq("PASS")].copy()
+
         sim_candidates = eligible[candidates.columns].copy()
         for variant in VARIANTS:
             trades, _ = simulate_variant(variant, sim_candidates, histories)
@@ -143,6 +149,7 @@ def main(labels_csv: Path, attachment_summary_json: Path) -> None:
         "sponsorship_manifest_key": manifest_key,
         "attachment_label_distribution": attachment.get("label_distribution"),
         "candidate_count": int(len(merged)),
+        "i_evaluable_candidate_count": int(merged["I_v1_label"].isin(["PASS", "FAIL"]).sum()),
         "i_pass_candidate_count": int(merged["I_v1_label"].eq("PASS").sum()),
         "i_fail_candidate_count": int(merged["I_v1_label"].eq("FAIL").sum()),
         "i_not_evaluable_candidate_count": int(merged["I_v1_label"].eq("NOT_EVALUABLE").sum()),
@@ -153,6 +160,7 @@ def main(labels_csv: Path, attachment_summary_json: Path) -> None:
         "fwd1_modified": False,
         "spy_parquet_key": spy_pointer.get("parquet_key"),
         "spy_sha256": spy_pointer.get("sha256"),
+        "comparison_guardrail": "I_PASS must be judged primarily against I_EVALUABLE, which uses the same I-data support. BASE_ALL is context only because SEC 13F history starts in 2013.",
         "guardrail": "Historical I-v1 ablation is descriptive retrospective evidence only. It cannot modify frozen FWD1 or justify production promotion by itself.",
     }
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True, default=str), encoding="utf-8")

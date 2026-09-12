@@ -6,49 +6,35 @@ Use this file to register experiments before execution. Completed experiments mu
 
 | ID | Experiment | Status | Primary purpose |
 |---|---|---|---|
-| C1 | C label distribution | COMPLETE / VALIDATED | C-v1 PASS/FAIL/NOT_EVALUABLE distribution |
-| A1 | A label distribution | COMPLETE / VALIDATED | A-v1 PASS/FAIL/NOT_EVALUABLE distribution |
+| C1 | C label distribution | COMPLETE / VALIDATED | C-v1 distribution |
+| A1 | A label distribution | COMPLETE / VALIDATED | A-v1 distribution |
 | TB1 | Independent technical baseline | COMPLETE / FROZEN | transparent N/S/L/M proxy baseline |
 | E0-SMOKE | Rolling technical smoke | COMPLETE / VALIDATED | end-to-end candidate generation |
-| E0-HIST | Historical technical candidates on frozen current-compliant universe | COMPLETE | establish candidate event set |
-| E1 | Signal-day shock diagnostics | COMPLETE / EXPLORATORY | T-1→T0 shock mechanism |
-| E2 | H+1 execution-gap diagnostics | COMPLETE / EXPLORATORY | execution gap mechanism |
-| E3 | Pivot extension 3/5/8% | COMPLETE / EXPLORATORY | pre-specified extension diagnostics |
-| E4 | Actual-fill pivot extension | COMPLETE / EXPLORATORY | fill-aware chasing diagnostic |
+| E0-HIST | Historical technical candidates | COMPLETE | establish frozen event set |
+| E1-E4 | Entry-quality diagnostics | COMPLETE / EXPLORATORY | shock/gap/extension mechanisms |
 | ET1 | X1-X4 entry timing basis test | COMPLETE / VALIDATED | executable daily-EOD entry baseline |
-| EXH1 | Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | T-1→T0 shock × T+1 rejection discovery |
-| EXH2 | Prospective exhaustion validation | **PRE-REGISTERED / LIVE** | independently validate EXH1 mechanism on post-2026-09-11 evidence |
-| CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | latest-quarter/FY state selection |
-| CA-HIST | Historical C/A attachment | COMPLETE / VALIDATED | causal C/A state with SEC FY identity |
+| EXH1 | Post-breakout exhaustion diagnostic | COMPLETE / EXPLORATORY | high-shock × T+1 rejection discovery |
+| EXH2 | Prospective exhaustion validation | PRE-REGISTERED / LIVE | independent post-2026-09-11 validation |
+| CA-PERIOD | C/A period-semantics audit | COMPLETE / PASS | PIT period selection |
+| CA-HIST | Historical C/A attachment | COMPLETE / VALIDATED | causal C/A states |
 | R2-C | Preferred baseline + C | COMPLETE / VALIDATED DESCRIPTIVE | incremental value of C |
 | R2-CA | Preferred baseline + C+A | COMPLETE / SPARSE | incremental value of C+A |
 | PORT1 | Frozen portfolio construction | COMPLETE / VALIDATED DESCRIPTIVE | capital-constrained X3 vs X1 |
-| ROB1 | Historical strategy robustness | COMPLETE / VALIDATED HISTORICAL | retrospective robustness; not true OOS |
-| FULL-M1 | SPY+QQQ market-regime sidecar | **COMPLETE / VALIDATED HISTORICAL** | test dual-index M against frozen SPY-only M; not promoted |
-| I0 | SEC 13F sponsorship feasibility/coverage audit | **COMPLETE / DATA BLOCKED** | validate PIT-safe identifier/data feasibility without strategy performance |
-| FWD1 | Genuine forward validation | **LIVE / ACCUMULATING** | frozen post-2026-09-09 validation; data gate passed |
+| ROB1 | Historical strategy robustness | COMPLETE / VALIDATED HISTORICAL | retrospective robustness; not OOS |
+| FULL-M1 | SPY+QQQ market-regime sidecar | COMPLETE / NOT PROMOTED | dual-index M test |
+| I0 | SEC 13F sponsorship feasibility | COMPLETE / VALIDATED | identity/source feasibility |
+| I1-DATA | SEC 13F PIT data pipeline | COMPLETE / VALIDATED | current + historical + uncertainty + R2 pointer |
+| I1-ATTACH | Historical I-v1 PIT attachment | COMPLETE / VALIDATED | attach preregistered I state to candidates |
+| I1-ABL | I-v1 hard-filter ablation | **COMPLETE / NOT PROMOTED** | test sponsorship-growth hard filter on X1/X3/PORT1 |
+| FWD1 | Genuine forward validation | LIVE / ACCUMULATING | frozen post-2026-09-09 validation |
 
 ## Core frozen evidence
 
-### C1 / A1
+### Technical / execution baseline
 
-Workflow `34431101727` = SUCCESS. Pinned manifest: `fundamentals/snapshots/2026-09-09/run-34417104650/manifest.json`.
+Historical engine: **10,731 candidates / 860 securities**.
 
-```text
-C-v1   PASS 69 | FAIL 520 | NOT_EVALUABLE 312
-A-v1   PASS 11 | FAIL 483 | NOT_EVALUABLE 407
-C+A    PASS  3 | FAIL 437 | NOT_EVALUABLE 461
-```
-
-Thresholds remain frozen.
-
-### TB1 / E0
-
-Historical engine produced 10,731 technical candidates across 860 securities on the frozen current-compliant research universe.
-
-### ET1 — Entry Timing Basis Test v1
-
-Workflow `34464861119` = SUCCESS.
+ET1 run `34464861119`:
 
 | Variant | Entries | PF | PF ex-top10 |
 |---|---:|---:|---:|
@@ -57,44 +43,11 @@ Workflow `34464861119` = SUCCESS.
 | **X3** | **3,604** | **1.163** | **1.146** |
 | X4 | 4,216 | 1.109 | 1.093 |
 
-X3 pivot-hold is the preferred frozen research execution baseline; X1 remains mandatory control.
+X3 pivot-hold remains preferred; X1 remains mandatory control.
 
-### EXH1 — Post-breakout exhaustion discovery
+### C/A
 
-Workflow `34466747136` = SUCCESS. Highest shock quintile plus T+1 bearish-and-below-T0 rejection had X1 PF about 0.56 and stop rate about 80.8%. High-shock observations without that rejection were materially stronger. This remains exploratory discovery evidence.
-
-The EXH1 80th-percentile shock boundary is `0.0533333333333332` (+5.3333%). It is transferred once into EXH2 as the frozen operational definition of “extreme shock”; EXH2 does not search alternative cutoffs.
-
-### EXH2 — Prospective exhaustion validation
-
-Pre-registration: `docs/methodology/exhaustion-validation-v2.md`.
-
-Collector: `scripts/run_exhaustion_validation_v2.py`.
-
-Workflow: `.github/workflows/exhaustion-validation-v2.yml`.
-
-Prospective signal boundary:
-
-```text
-signal_date > 2026-09-11
-```
-
-Frozen hypothesis:
-
-```text
-extreme_shock = T0/T-1 - 1 >= 0.0533333333333332
-T+1 rejection = Close(T+1) < Open(T+1) AND Close(T+1) < Close(T0)
-primary endpoint = breakdown below pivot by T+3
-expected direction = rejected rate > non-rejected rate
-```
-
-A row is mature only when T+1, T+2, and T+3 exist. Review eligibility requires >=50 mature extreme-shock rejected observations and >=50 mature extreme-shock non-rejected controls.
-
-EXH2 is diagnostic only. Because T+1 rejection is not observable at T+1 Open, it cannot alter frozen FWD1 execution. Any trading rule inspired by EXH2 requires a new versioned validation track.
-
-### CA-PERIOD / CA-HIST
-
-CA period-semantics audit `34434268817` = SUCCESS. Historical attachment `34479060107` = SUCCESS.
+CA-HIST run `34479060107`:
 
 ```text
 C-v1   PASS 703 | FAIL 3,475 | NOT_EVALUABLE 6,553
@@ -102,24 +55,11 @@ A-v1   PASS  34 | FAIL   768 | NOT_EVALUABLE 9,929
 C+A    PASS   2 | FAIL   650 | NOT_EVALUABLE 10,079
 ```
 
-### R2-C / R2-CA — Fundamental Ablation v1
+Fundamental ablation run `34481587218` showed hard C did not improve X3; C+A was too sparse. C/A remain descriptors.
 
-Workflow `34481587218` = SUCCESS.
+### PORT1 / ROB1
 
-| Execution | Filter | Entries | PF | PF ex-top10 |
-|---|---|---:|---:|---:|
-| X1 | BASE | 5,777 | 1.093 | 1.082 |
-| X1 | C | 382 | 1.056 | 0.949 |
-| X1 | C+A | 2 | 0.000 | n/a |
-| X3 | BASE | 3,604 | 1.163 | 1.146 |
-| X3 | C | 238 | 1.020 | 0.861 |
-| X3 | C+A | 2 | 0.000 | n/a |
-
-C/A remain descriptors, not hard performance filters.
-
-## PORT1 — Portfolio Construction v1
-
-Canonical workflow `34488197400` = SUCCESS.
+PORT1 run `34488197400`:
 
 ```text
 X1 portfolio entries = 1,424
@@ -130,93 +70,138 @@ X3 CAGR @20bp RT ≈ 2.40%
 X3 max DD @20bp RT ≈ -50.94%
 ```
 
-Absolute historical economics remain weak.
+ROB1 run `34488295631` is retrospective historical evidence only. SPY price-only context CAGR ≈ 8.80%.
 
-## ROB1 — Historical Robustness v1
+### FULL-M1
 
-Workflow `34488295631` = SUCCESS. ROB1 is retrospective historical evidence only, not OOS.
+Run `34576910915` = SUCCESS. Dual SPY+QQQ M retained 7,694 of 10,731 candidates, added none, reduced X3 drawdown but reduced CAGR. It is a risk throttle, not an incremental edge source, and was not promoted. FWD1 remains SPY-only.
 
-```text
-X1 accepted PF ≈ 1.060
-X3 accepted PF ≈ 1.162
-SPY price-only CAGR ≈ 8.80%
-X3 gross CAGR ≈ 3.04%
-```
+### EXH2
 
-No historical tuning is reopened from ROB1.
-
-## FULL-M1 — SPY+QQQ Market-Regime Validation v1
-
-Canonical confirmation workflow `34576910915` = SUCCESS. Evidence class is retrospective historical sidecar, not OOS.
+Pre-registration: `docs/methodology/exhaustion-validation-v2.md`.
 
 ```text
-M0_SPY_ONLY candidates = 10,731
-M1_DUAL candidates     = 7,694
-both                   = 7,694
-M0 only                = 3,037
-M1 only                = 0
+signal_date > 2026-09-11
+extreme shock >= +5.3333%
+T+1 rejection = Close(T+1) < Open(T+1) AND Close(T+1) < Close(T0)
+primary endpoint = breakdown below pivot by T+3
 ```
+
+EXH2 is diagnostic only and cannot alter frozen T+1 Open execution/FWD1.
+
+## Institutional Sponsorship I-v1
+
+### I0 feasibility
+
+Run `34593720220` = SUCCESS. Deterministic mapping coverage:
+
+```text
+universe = 1,327
+US-ISIN -> CUSIP9 = 1,010 (76.1%)
+non-US deferred = 317
+```
+
+The earlier SEC/GitHub-runner blocker was resolved; do not treat it as current.
+
+### I1 data pipeline
+
+Current/live filing-level validation `34603142916` = SUCCESS:
+
+```text
+9,731 filings
+100% fetch success
+100% accepted_at coverage
+100% period_of_report coverage
+383/383 amendments classified
+0 ambiguous lineage events
+```
+
+Historical event-state run `34654725293` = SUCCESS:
+
+```text
+53 / 53 official SEC datasets
+313,055 filings
+14,529,166 state-change events
+53 unclassified amendment filings
+0 new-holdings-without-valid-base
+```
+
+Uncertainty run `34656995462` = SUCCESS. Affected CUSIP-period states are quarantined rather than interpreted as zero.
+
+Canonical R2 publish run `34663714292` = SUCCESS:
+
+```text
+pointer = institutional_sponsorship/current.json
+manifest = institutional_sponsorship/snapshots/2026-09-12/run-34663714292/manifest.json
+history source = 34654725293
+uncertainty source = 34656995462
+```
+
+Historical information availability is conservatively `filing_date + 1 calendar day`; live uses exact EDGAR `accepted_at`.
+
+### I-v1 frozen rule
+
+Preregistered in `docs/methodology/institutional-sponsorship-growth-v1.md` before performance review:
+
+```text
+I_delta = latest manager count - prior manager count
+PASS = I_delta > 0
+FAIL = I_delta <= 0
+NOT_EVALUABLE = missing / non-consecutive / unmapped / uncertain
+```
+
+No manager-count minimum, percentage-growth, shares, or value threshold was searched.
+
+### I1-ATTACH
+
+Run `34663929577` = SUCCESS:
+
+```text
+candidate count = 10,731
+PASS = 1,902
+FAIL = 2,888
+NOT_EVALUABLE = 5,941
+I-evaluable = 4,790
+future-availability violations = 0
+```
+
+### I1-ABL
+
+Canonical run `34664388792` = SUCCESS. Evidence is retrospective historical, not OOS.
+
+Because SEC 13F history begins in 2013, the primary comparison is I_PASS against the **I_EVALUABLE control** (PASS+FAIL), not against the 1993–2026 all-history baseline.
 
 Preferred X3:
 
-```text
-M0 PF / ex-top10       ≈ 1.1627 / 1.1454
-M1 PF / ex-top10       ≈ 1.1701 / 1.1468
-M0 gross CAGR / DD     ≈ 3.02% / -43.36%
-M1 gross CAGR / DD     ≈ 2.40% / -37.76%
-M0 CAGR / DD @20bp RT  ≈ 2.38% / -50.94%
-M1 CAGR / DD @20bp RT  ≈ 1.74% / -42.44%
-```
+| Metric | I_EVALUABLE | I_PASS |
+|---|---:|---:|
+| Candidates | 4,790 | 1,902 |
+| X3 candidate trades | 1,596 | 671 |
+| PF | 1.1194 | 1.1465 |
+| PF ex-top10 | **1.0856** | **1.0711** |
+| Portfolio entries | 475 | 331 |
+| Gross CAGR | **2.96%** | **2.17%** |
+| Gross max DD | **-28.19%** | **-39.02%** |
+| CAGR @20bp RT | **2.07%** | **1.57%** |
+| Max DD @20bp RT | **-31.97%** | **-43.08%** |
 
-M1 acts as a risk throttle: it lowers drawdown but does not add candidates, gives negligible PF improvement ex-top10, and lowers CAGR. It is not promoted. Frozen FWD1 remains SPY-only. Decision: `docs/decisions/2026-09-11-full-m-validation-v1.md`.
+Verdict: **NOT PROMOTED as a hard filter**. Raw PF rises slightly, but PF ex-top10 declines and preferred X3 portfolio CAGR/drawdown both worsen. Institutional sponsorship remains a descriptor. No post-hoc I threshold search is opened.
 
-## I0 — Institutional Sponsorship data feasibility
+Decision: `docs/decisions/2026-09-12-i1-historical-ablation.md`.
 
-Methodology: `docs/methodology/institutional-sponsorship-v1.md`.
+## FWD1
 
-Canonical confirmation workflow `34593720220` = SUCCESS.
-
-Evidence class: data-quality feasibility only. Strategy PF/CAGR/returns were not inspected and FWD1 was not modified.
-
-```text
-frozen compliant universe       = 1,327
-US-ISIN deterministic mapping   = 1,010 (76.1%)
-non-US ISIN deferred            = 317
-SEC bulk download               = BLOCKED_HTTP (403 on GitHub-hosted runner)
-```
-
-For `US...` ISINs, CUSIP9 can be derived deterministically as `security_id[2:11]`. Non-US ISIN securities remain `NOT_EVALUABLE` until a validated security-identifier mapping exists; fuzzy issuer-name matching is forbidden.
-
-SEC 13F remains the intended primary source because point-in-time attachment must be based on filing acceptance/publication timing, not report quarter-end. The current blocker is ingestion infrastructure/access, not strategy logic. No I hard filter is promoted from I0.
-
-## FWD1 — Genuine forward validation
-
-Methodology: `docs/methodology/forward-validation-v1.md`.
-
-Canonical current run `34568992370` = SUCCESS.
+FWD1 remains frozen and unchanged:
 
 ```text
 forward boundary exclusive = 2026-09-09
 first forward session = 2026-09-10
-market_data_asof = 2026-09-10
-data_gate_pass = true
 status = ACCUMULATING
-forward_candidate_count = 0
-closed_x3_portfolio_trades = 0
-completed_calendar_months = 0
+data_gate_pass = true
 ```
 
-The zero candidate observation for 2026-09-10 is interpretable because the source-freshness gate passed.
-
-Formal review requires both:
-
-```text
->= 12 completed calendar months
->= 50 closed X3 portfolio trades
-```
-
-Passing the gate means `REVIEW_ELIGIBLE`, never automatic production promotion.
+Formal review requires both >=12 completed calendar months AND >=50 closed X3 portfolio trades. Review eligibility is not automatic production promotion.
 
 ## Anti-data-mining rule
 
-Every experiment must distinguish pre-specified rules, exploratory diagnostics, and post-hoc findings. A changed threshold or rule must be versioned as a new hypothesis and independently validated. EXH2 cannot modify FWD1, FULL-M1 cannot modify FWD1, I0 cannot promote an I hard filter, and FWD1 interim outcomes cannot change frozen FWD1 rules.
+Every changed threshold/rule is a new hypothesis and requires preregistration plus independent validation. Historical C/A, FULL-M1, and I1 results cannot alter FWD1. Interim FWD1 outcomes cannot change frozen FWD1 rules. No retrospective tuning is reopened merely to improve benchmark-relative performance.

@@ -16,7 +16,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from canslim_research.labelled_morphology import LABELLED_EVAL_VERSION, MorphologyLabel, evaluate_positive_label
-from canslim_research.ohlcv_providers import r2_provider, resolve_security_id_from_r2, tiingo_provider, yahoo_provider
+from canslim_research.ohlcv_providers import r2_ticker_provider, tiingo_provider, yahoo_provider
 from canslim_research.ohlcv_router import route_ohlcv
 from canslim_research.pattern_engine_v02 import PATTERN_ENGINE_VERSION, detect_patterns_v02
 from canslim_research.pattern_identity import BASE_IDENTITY_VERSION, cluster_base_identities
@@ -59,14 +59,28 @@ def _load_labels(path: Path) -> list[MorphologyLabel]:
     return labels
 
 
+def _evaluation_security_id(label: MorphologyLabel, routed) -> tuple[str, str]:
+    """Return a stable clustering key without pretending external data is R2 membership.
+
+    R2-selected examples retain the canonical security_id. When the current R2
+    membership genuinely lacks a source-first historical example, the evaluator
+    uses an explicit ticker-scoped identity. This identity is local to P8
+    morphology validation and does not mutate or broaden the frozen universe.
+    """
+    security_id = routed.metadata.get("security_id")
+    if security_id:
+        return str(security_id), "R2_SECURITY_ID"
+    return f"P8-TICKER:{label.symbol.upper()}", "P8_EXTERNAL_TICKER"
+
+
 def _run_label(label, *, context_days, boundary_tolerance, pivot_date_tolerance, pivot_price_tolerance):
     context_start = (date.fromisoformat(label.window_start) - timedelta(days=context_days)).isoformat()
-    security_id = resolve_security_id_from_r2(label.symbol, "current")
     routed = route_ohlcv({
-        "r2": lambda: r2_provider(security_id=security_id, start=context_start, end=label.asof_date),
+        "r2": lambda: r2_ticker_provider(ticker=label.symbol, start=context_start, end=label.asof_date),
         "yahoo": lambda: yahoo_provider(ticker=label.symbol, start=context_start, end=label.asof_date),
         "tiingo": lambda: tiingo_provider(ticker=label.symbol, start=context_start, end=label.asof_date),
     })
+    security_id, security_identity_kind = _evaluation_security_id(label, routed)
     candidates = detect_patterns_v02(routed.rows)
     identities = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(identities)
@@ -77,10 +91,10 @@ def _run_label(label, *, context_days, boundary_tolerance, pivot_date_tolerance,
         pivot_price_tolerance_pct=pivot_price_tolerance,
     )
     return {
-        "label": label.__dict__, "security_id": security_id, "context_start": context_start,
-        "selected_source": routed.source, "source_metadata": dict(routed.metadata), "input_row_count": len(routed.rows),
-        "candidate_count": len(candidates), "base_identity_count": len(identities), "base_lineage_count": len(lineages),
-        "agreement": agreement.to_dict(),
+        "label": label.__dict__, "security_id": security_id, "security_identity_kind": security_identity_kind,
+        "context_start": context_start, "selected_source": routed.source, "source_metadata": dict(routed.metadata),
+        "input_row_count": len(routed.rows), "candidate_count": len(candidates), "base_identity_count": len(identities),
+        "base_lineage_count": len(lineages), "agreement": agreement.to_dict(),
         "same_pattern_lineages": [item.to_dict() for item in lineages if item.pattern_type == label.pattern],
     }
 
@@ -108,6 +122,8 @@ def main() -> int:
             "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
             "reference-first authoritative labels and pivot anchors are frozen before detector comparison",
             "OHLCV is truncated at each label asof_date; no future bars are supplied",
+            "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal",
+            "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe",
             "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage",
             "agreement requires pattern/boundary fidelity and source pivot fidelity when that evidence is available",
             "no return/CAGR/PF outcome is inspected",

@@ -13,8 +13,8 @@ Audit frozen CAN SLIM quantitative v1 against William J. O'Neil / IBD methodolog
 | 26 | Proper-base definitions | COMPLETE — theory audit |
 | 27 | Pivot / buy-point definition | COMPLETE — theory audit |
 | 28 | Breakout + volume confirmation | COMPLETE — theory audit |
-| 29 | RS / leadership fidelity | NEXT |
-| 30 | C/A/S/I/M role fidelity | NOT STARTED |
+| 29 | RS / leadership fidelity | COMPLETE — theory audit |
+| 30 | C/A/S/I/M role fidelity | NEXT |
 | 31 | Sell / risk-management fidelity | NOT STARTED |
 | 32 | Theory-faithful candidate specification | NOT STARTED |
 | 33 | O'Neil Pattern Recognition Engine | NOT STARTED |
@@ -47,7 +47,7 @@ Legacy fixed-price buffers above resistance must remain documented as legacy. Th
 Overall v1 breakout/volume fidelity: **REASONABLE_PROXY**. Its volume rule is highly faithful; its daily-close condition is stricter than the theory trigger and it conflates the 5% execution zone with candidate-day screening.
 
 ### Breakout event vs breakout quality
-A conventional breakout begins when price **passes/clears the proper pattern-specific buy point**. IBD material supports acting as the stock reaches/moves through the buy point during the session. A close above resistance and a close high in the day's range are desirable strength evidence, but daily close above pivot is not the universal definition of whether a pivot crossing occurred.
+A conventional breakout begins when price **passes/clears the proper pattern-specific buy point**. A close above resistance and a close high in the day's range are desirable strength evidence, but daily close above pivot is not the universal definition of whether a pivot crossing occurred.
 
 Carry separately into #32:
 
@@ -57,65 +57,122 @@ close_above_pivot
 close_position_quality
 ```
 
-A theory-faithful engine must preserve the first pivot-cross event even if the stock later closes below the pivot; the close can downgrade breakout quality rather than erase the event.
-
 ### Volume confirmation
-Current IBD guidance repeatedly uses **at least 40% above average volume** as the normal minimum for a proper breakout. Detailed IBD educational material identifies the reference as the **50-day average daily volume**. Historical IBD material often said 40–50%; current material commonly states >=40%.
-
-Canonical daily-EOD measure for #32:
+Canonical daily-EOD strong-volume confirmation:
 
 ```text
 volume_ratio = Volume(T0) / mean(Volume of prior 50 completed sessions)
 strong_volume_confirmed = volume_ratio >= 1.40
 ```
 
-T0 must be excluded from its own baseline. The threshold is a general minimum, not a guarantee; small/mid-cap leaders may be expected to show materially greater expansion.
+Initial-breakout-day volume confirmation is preferred. If later volume confirms an initially light pivot cross, chronology must be preserved rather than backdating confirmation.
 
-### Initial-day vs later confirmation
-Strong volume on the **initial breakout day** is preferred and is the canonical textbook confirmation. IBD also recognizes an initially light breakout that receives stronger volume in the next few sessions. Preserve chronology:
-
-```text
-breakout_date
-volume_confirmed_on_breakout
-later_volume_confirmation_date  # optional
-```
-
-A low-volume pivot cross is not equivalent to a fully confirmed textbook breakout. #32 must define a short explicit confirmation window if later confirmation is supported; implementation must never backdate later volume to make T0 appear confirmed.
-
-### Gap breakouts
-A gap through a proper pivot can be a legitimate and powerful breakout. Daily OHLCV R2 can identify `Open > pivot`, gap magnitude, daily price action and daily volume. Current IBD also describes special breakaway-gap entry protocols using 5/15-minute bars when the gap opens far beyond the traditional buy zone. Daily R2 **cannot** reproduce that intraday entry protocol; that belongs to #36 and must not be fabricated.
-
-### 5% buy zone
-The normal range `[pivot, pivot*1.05]` is an execution/extension concept, not breakout identity. A stock may validly break out and then become >5% extended; that makes a traditional entry unattractive, not the breakout nonexistent.
+### Gap breakouts and extension
+A gap through a proper pivot can be a legitimate breakout. Daily OHLCV R2 can identify `Open > pivot`, gap magnitude, daily price action and daily volume. Intraday breakaway-gap protocols using 5/15-minute bars belong to #36. The normal 5% buy zone is execution/extension state, not breakout identity.
 
 ### Audit of frozen v1
+| v1 component | Verdict |
+|---|---|
+| `Close > pivot` | **OVER-STRICT PROXY** |
+| `Close <= pivot*1.05` | **SEMANTIC MISMATCH / REASONABLE EXECUTION PROXY** |
+| `Volume >=1.40x prior 50d avg` | **HIGH FIDELITY** |
+| confirmation only on T0 | **TOO STRICT FOR FULL THEORY** |
+| gap handling | **PARTIAL** |
+
+## #29 RS / Leadership Fidelity — conclusion
+Overall v1 L/leadership fidelity: **REASONABLE_PROXY, INCOMPLETE**.
+
+The frozen v1 correctly captures one important O'Neil/IBD idea: leaders should rank near the top of the market by relative price performance. But **L is not exhausted by a single cross-sectional percentile threshold**. Authoritative IBD material distinguishes at least three related but non-identical objects:
+
+1. **RS Rating** — cross-sectional price-performance rank versus other stocks;
+2. **RS line** — stock price performance versus a benchmark, conventionally the S&P 500;
+3. **industry-group leadership** — whether the stock is a leader within a strong/leading group rather than a sympathy laggard.
+
+### RS Rating
+IBD's traditional RS Rating is a 1–99 percentile-style rank of price performance over roughly the prior 12 months, with greater emphasis on recent performance. IBD guidance commonly treats **80 or higher** as desirable for emerging leaders; some historical educational material uses 85 or 90 as a stronger screening preference rather than a universal identity rule.
+
 Frozen v1 uses:
 
 ```text
-T0 Close > pivot
-T0 Close <= pivot * 1.05
-T0 Volume >= 1.40 * prior-50-session average Volume
+RS_proxy_raw =
+    0.40 * return_63d
+  + 0.20 * return_126d
+  + 0.20 * return_189d
+  + 0.20 * return_252d
+
+RS_proxy_percentile >= 80
 ```
 
+This is a transparent approximation and not the proprietary IBD formula. It is conceptually aligned with the historical idea of a recency-weighted 12-month rank and the >=80 leadership threshold.
+
+Important methodology evolution: in 2026 IBD publicly revised the Relative Strength Rating methodology. The 12-month, 6-month and 3-month ratings now use **more data points, multiple comparison periods and adjusted weightings** to respond faster and reduce drop-off effects. Therefore the simple 40/20/20/20 formula must remain labelled a **legacy-aligned proxy**, not an exact current-IBD replication.
+
+### RS line
+The RS line is separate from the RS Rating. Conceptually:
+
+```text
+RS_line_t ∝ StockPrice_t / Benchmark_t
+```
+
+IBD conventionally compares with the S&P 500. A rising line means the stock is outperforming the benchmark; a falling line means underperformance.
+
+For a proper breakout, IBD prefers the RS line to be at or near a new high. A particularly bullish condition is the RS line reaching new high ground **before** the stock's own price breakout. Current IBD guidance also clarifies that the line need not be at an all-time high: being at the highest level of the base-forming period is acceptable, and if short of that level it should at least be trending upward. A falling RS line as price approaches highs is a bearish divergence.
+
+Carry separately into #32 rather than collapsing into `RS_percentile`:
+
+```text
+rs_rating_proxy_percentile
+rs_line_value
+rs_line_slope
+rs_line_base_period_high
+rs_line_at_base_period_high
+rs_line_new_high_before_price
+rs_line_bearish_divergence
+```
+
+A stock can have a high trailing RS Rating while its current RS line is deteriorating. Therefore `RS percentile >=80` alone can retain former leaders that are weakening now.
+
+### Industry leadership
+O'Neil/IBD methodology prefers **leading stocks in leading industry groups**, not weaker sympathy plays. This is distinct from individual-stock RS Rating.
+
+IBD's industry taxonomy/ranking is itself an evolving proprietary data product. In April 2026 IBD consolidated its long-standing 197 industry groups to **145 groups**; 142 groups currently participate in performance ranking. The refreshed ranking uses market-cap weighting and a six-month performance horizon with more data points for responsiveness. This means a faithful research specification must distinguish the enduring theory concept (strong group / strong stock within group) from any specific historical IBD taxonomy or proprietary current ranking.
+
+The current project does not have a PIT-compatible replica of IBD's proprietary industry-group history. Therefore #29 does **not** authorize inventing a hard industry-group threshold from incompatible classifications. Industry leadership should remain an explicit evidence state until a defensible PIT group/ranking contract exists.
+
+### Leader vs laggard semantics
+`L` should be interpreted as **leadership evidence**, not merely "RS >= 80 = PASS, otherwise FAIL." A theory-faithful representation should preserve at least:
+
+```text
+individual_RS_rating_strength
+RS_line_confirmation_or_divergence
+industry_group_strength
+stock_rank_within_group
+```
+
+These may ultimately have different roles (screening criterion, confirmation, descriptor or disqualifier); #30 will audit that role taxonomy across CAN SLIM components before #32 freezes Boolean semantics.
+
+### Audit of frozen v1 L
 | v1 component | Verdict | Reason |
 |---|---|---|
-| `Close > pivot` | **OVER-STRICT PROXY** | end-of-day hold is quality evidence; crossing the proper pivot is the underlying breakout event |
-| `Close <= pivot*1.05` | **SEMANTIC MISMATCH / REASONABLE EXECUTION PROXY** | 5% is buy-zone/anti-chasing guidance, not breakout definition |
-| `Volume >=1.40x prior 50d avg` | **HIGH FIDELITY** | matches current general IBD minimum and comparison concept |
-| confirmation only on T0 | **TOO STRICT FOR FULL THEORY** | initial-day confirmation preferred, but later volume can confirm an initially light move |
-| gap handling | **PARTIAL** | daily OHLCV can detect a gap breakout; special intraday gap entry cannot be reconstructed |
+| recency-weighted ~12-month price-strength score | **REASONABLE_PROXY** | captures historical RS Rating concept, but not proprietary/current 2026 formula |
+| cross-sectional percentile rank | **HIGH CONCEPTUAL FIDELITY** | RS Rating is fundamentally a relative rank vs other stocks |
+| threshold `>=80` | **HIGH FIDELITY AS GENERAL LEADER SCREEN** | current/historical IBD commonly uses 80+ as desirable, not a universal standalone buy rule |
+| RS line vs S&P 500 | **NOT_IMPLEMENTED** | distinct leadership evidence missing |
+| RS line new high / base-period high | **NOT_IMPLEMENTED** | important breakout confirmation / early leadership evidence missing |
+| RS line bearish divergence | **NOT_IMPLEMENTED** | weakening leader state not represented |
+| industry-group strength | **NOT_IMPLEMENTED as strategy input** | v1 diagnostic-only; proprietary/PIT taxonomy not replicated |
+| stock leadership within group | **NOT_IMPLEMENTED** | leader-vs-laggard group context missing |
 
-### Frozen #28 principles for #32
-1. Separate breakout event from breakout quality.
-2. Tie breakout to the pattern-specific pivot from #27.
-3. Do not require daily close above pivot merely to acknowledge a pivot cross.
-4. Preserve close-above-pivot and close-in-range as quality evidence.
-5. Use >=1.40x prior 50-session average daily volume as canonical strong-volume confirmation.
-6. Prefer initial-day confirmation; preserve any later confirmation with its true date/state.
-7. A low-volume cross is not a fully confirmed textbook breakout.
-8. Gap-through-pivot can be valid; daily data cannot reproduce special intraday gap-entry mechanics.
-9. Keep the 5% buy zone as execution/extension state, not breakout identity.
-10. Do not tune these rules from CAGR/PF before #32 is frozen.
+### Frozen #29 principles for #32
+1. Preserve **RS Rating** and **RS line** as separate concepts.
+2. `RS >=80` is a faithful general leadership screen, not sufficient proof of complete `L` fidelity.
+3. Do not claim the v1 40/20/20/20 formula exactly reproduces IBD; current IBD changed its RS calculations in 2026.
+4. Add RS-line state relative to the S&P 500 using PIT daily prices available at T0.
+5. Prefer RS-line strength at/near the base-period high; preserve "new high before price" as especially bullish evidence.
+6. Preserve falling RS line near a price high as bearish-divergence evidence.
+7. Keep industry-group leadership conceptually separate from individual RS Rating.
+8. Do not fabricate a proprietary IBD industry ranking from incompatible sector classifications; require a defensible PIT classification/ranking contract or preserve `NOT_EVALUABLE/NOT_IMPLEMENTED`.
+9. Do not tune RS thresholds or industry cutoffs from CAGR/PF before #32 is frozen.
 
 ## #33 — O'Neil Pattern Recognition Engine
 After #32 is frozen, #33 will translate the theory specification into reproducible pattern/landmark recognition using existing daily OHLCV R2. Scope includes base segmentation, swing/landmark extraction, named-pattern detectors, base relationships, quality/fault flags, ambiguity handling and morphology validation. It must not optimize definitions against trading performance.
@@ -124,10 +181,10 @@ After #32 is frozen, #33 will translate the theory specification into reproducib
 - Do not retrofit theory-fidelity changes into FWD1.
 - Do not mix EXH2 with this audit.
 - Do not optimize X3 or other entry rules now.
-- Do not tune pattern/breakout thresholds from historical returns.
+- Do not tune pattern/breakout/RS thresholds from historical returns.
 - Do not treat v1 candidates as O'Neil ground truth.
 - Do not start #33 before #32 is frozen.
 - Preserve explicit uncertainty/evidence states rather than forcing full confirmation.
 
 ## Next action
-Proceed with **#29 — RS / Leadership Fidelity**. After #29–31, freeze #32 before any #33 implementation.
+Proceed with **#30 — C/A/S/I/M Role Fidelity**. Audit whether each CAN SLIM letter functions in O'Neil methodology as a hard Boolean filter, screening criterion, confirmation, descriptor, context, or disqualifier. Then complete #31 before freezing #32.

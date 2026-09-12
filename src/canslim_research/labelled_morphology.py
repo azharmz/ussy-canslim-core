@@ -8,7 +8,7 @@ from .pattern_engine import PatternCandidate
 from .pattern_identity import BaseIdentity, structural_signature
 from .pattern_lineage import BaseLineage
 
-LABELLED_EVAL_VERSION = "p8-labelled-eval-v0.4"
+LABELLED_EVAL_VERSION = "p8-labelled-eval-v0.5"
 
 
 @dataclass(frozen=True)
@@ -41,6 +41,8 @@ class LabelAgreement:
     end_error_days: int | None
     pivot_date_error_days: int | None
     pivot_price_error_pct: float | None
+    pivot_validation_state: str
+    matched_raw_candidate: dict | None
     rationale: list[str]
     evaluator_version: str = LABELLED_EVAL_VERSION
 
@@ -75,6 +77,14 @@ def _map_candidate(candidate: PatternCandidate, identities: list[BaseIdentity], 
     return (lineage.lineage_id if lineage else None, identity.base_id)
 
 
+def _no_match(label: MorphologyLabel, state: str, rationale: list[str]) -> LabelAgreement:
+    return LabelAgreement(
+        label.example_id, label.pattern, label.split, state,
+        None, None, None, None, None, None,
+        "NOT_EVALUABLE", None, rationale,
+    )
+
+
 def evaluate_positive_label(
     label: MorphologyLabel,
     lineages: Iterable[BaseLineage],
@@ -91,17 +101,23 @@ def evaluate_positive_label(
     discard their individual start/end boundaries. P8 therefore scores the raw
     emitted windows, then maps the selected window back to its stable base_id and
     lineage for audit. No synthetic window is created and no outcome data is used.
+
+    A source may not publish enough information to validate every dimension. In
+    that case the available dimensions can still agree, but the report explicitly
+    marks the missing pivot dimension as SOURCE_NOT_PROVIDED and persists the
+    selected raw candidate so that a boundary-only match cannot masquerade as a
+    source-validated structural pivot.
     """
     if label.split != "DEVELOPMENT":
         raise ValueError("labelled evaluator is locked to DEVELOPMENT examples")
     if label.label != "POSITIVE":
-        raise ValueError("v0.4 evaluates positive authoritative labels only")
+        raise ValueError("v0.5 evaluates positive authoritative labels only")
 
     identities_list = list(identities)
     lineages_list = list(lineages)
     same_pattern = [item for item in candidates if item.pattern_type == label.pattern]
     if not same_pattern:
-        return LabelAgreement(label.example_id, label.pattern, label.split, "MISS_PATTERN", None, None, None, None, None, None, ["frozen detector emitted no raw window with the authoritative pattern label"])
+        return _no_match(label, "MISS_PATTERN", ["frozen detector emitted no raw window with the authoritative pattern label"])
 
     pivot_required = bool(label.expected_pivot_source_date and label.expected_pivot_level is not None)
     ranked = []
@@ -137,6 +153,7 @@ def evaluate_positive_label(
     pivot_evaluable = pivot_date_error is not None and pivot_price_error is not None
     pivot_ok = not pivot_required or (pivot_evaluable and pivot_date_error <= pivot_date_tolerance_days and pivot_price_error <= pivot_price_tolerance_pct)
     lineage_id, base_id = _map_candidate(candidate, identities_list, lineages_list)
+    pivot_validation_state = "VALIDATED" if pivot_required and pivot_evaluable else ("SOURCE_NOT_PROVIDED" if not pivot_required else "NOT_EVALUABLE")
 
     if not boundary_ok:
         state = "BOUNDARY_DISAGREEMENT"
@@ -157,6 +174,8 @@ def evaluate_positive_label(
         ]
         if pivot_required:
             rationale += [f"pivot date is within {pivot_date_tolerance_days} calendar days of source anchor", f"pivot price is within {pivot_price_tolerance_pct:.2%} of source anchor"]
+        else:
+            rationale += ["source does not provide a detector-comparable structural pivot; MATCH is boundary/pattern agreement only"]
 
     return LabelAgreement(
         label.example_id,
@@ -169,5 +188,7 @@ def evaluate_positive_label(
         end_error,
         pivot_date_error,
         round(pivot_price_error, 8) if pivot_price_error is not None else None,
+        pivot_validation_state,
+        candidate.to_dict(),
         rationale,
     )

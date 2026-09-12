@@ -42,7 +42,13 @@ def _eval(candidate, label=None):
 
 
 def test_authoritative_label_matches_emitted_window_boundaries_and_pivot():
-    r=_eval(_candidate()); assert r.agreement_state=="MATCH"; assert (r.start_error_days,r.end_error_days,r.pivot_date_error_days,r.pivot_price_error_pct)==(0,1,0,0.0); assert r.matched_base_id=="base"
+    r=_eval(_candidate())
+    assert r.agreement_state=="MATCH"
+    assert (r.start_error_days,r.end_error_days,r.pivot_date_error_days,r.pivot_price_error_pct)==(0,1,0,0.0)
+    assert r.matched_base_id=="base"
+    assert r.pivot_validation_state=="VALIDATED"
+    assert r.matched_raw_candidate["base_start_date"]=="2023-04-04"
+    assert r.matched_raw_candidate["pivot_source_date"]=="2023-04-04"
 
 
 def test_bad_boundary_is_not_called_match():
@@ -59,10 +65,10 @@ def test_exact_raw_window_beats_identity_representative_loss_of_boundaries():
     exact=_candidate()
     wrong=_candidate(start="2023-03-17",end="2023-04-24",confidence=.99)
     base=_base(wrong)
-    # Force identity to represent the same structural signature as exact/wrong.
     lineage=_lineage(base.base_id)
     r=evaluate_positive_label(_label(), [lineage], [base], [wrong,exact])
     assert r.agreement_state=="MATCH"; assert r.start_error_days==0; assert r.end_error_days==1
+    assert r.matched_raw_candidate["base_start_date"]=="2023-04-04"
 
 
 def test_boundary_fidelity_beats_perfect_pivot_on_wrong_window():
@@ -73,13 +79,21 @@ def test_boundary_fidelity_beats_perfect_pivot_on_wrong_window():
     r=evaluate_positive_label(_label(),lineages,bases,[wrong,right]); assert r.agreement_state=="MATCH"; assert r.start_error_days==1; assert r.end_error_days==1
 
 
-def test_pivot_is_optional_when_source_does_not_supply_it():
-    r=_eval(_candidate(pivot_date="2023-05-17",pivot_level=410.91), _label(with_pivot=False)); assert r.agreement_state=="MATCH"; assert r.pivot_date_error_days is None
+def test_pivot_is_optional_but_match_is_explicitly_boundary_only_when_source_does_not_supply_it():
+    r=_eval(_candidate(pivot_date="2023-05-17",pivot_level=410.91), _label(with_pivot=False))
+    assert r.agreement_state=="MATCH"
+    assert r.pivot_date_error_days is None
+    assert r.pivot_validation_state=="SOURCE_NOT_PROVIDED"
+    assert r.matched_raw_candidate["pivot_source_date"]=="2023-05-17"
+    assert any("boundary/pattern agreement only" in item for item in r.rationale)
 
 
 def test_missing_pattern_is_explicit_miss():
     other=_candidate(); other.pattern_type="DOUBLE_BOTTOM"
-    assert evaluate_positive_label(_label(),[],[],[other]).agreement_state=="MISS_PATTERN"
+    r=evaluate_positive_label(_label(),[],[],[other])
+    assert r.agreement_state=="MISS_PATTERN"
+    assert r.matched_raw_candidate is None
+    assert r.pivot_validation_state=="NOT_EVALUABLE"
 
 
 def test_validation_split_is_not_allowed_into_development_evaluator():

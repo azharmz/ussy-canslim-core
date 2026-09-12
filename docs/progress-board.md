@@ -101,7 +101,8 @@ Implemented:
 - structural lineage clustering with PIT/prefix-stable lineage IDs;
 - explicit cross-pattern conflict records and cup-family hierarchy;
 - authoritative `LabelEvidence` DEVELOPMENT/VALIDATION split;
-- authoritative evaluator v0.5 that scores raw windows emitted by the frozen detector, persists the selected raw candidate, maps it back to stable `base_id`/lineage, and explicitly distinguishes source-provided vs missing pivot validation.
+- authoritative evaluator v0.5 that scores raw windows emitted by the frozen detector, persists the selected raw candidate, maps it back to stable `base_id`/lineage, and explicitly distinguishes source-provided vs missing pivot validation;
+- reproducible v0.3 structural-identity audit against the same raw candidate population.
 
 ### Authoritative validation status
 
@@ -117,16 +118,28 @@ The evaluator correction from identity-representative scoring to raw-emitted-win
 
 The v0.3 flat-pivot correction is also semantic rather than outcome-driven: v0.1/v0.2 already used a left-side high for flat-base containment but could persist the full-window maximum high as the pivot. v0.3 makes the stored pivot consistent with the established high that the breakout must clear. Decision record: `docs/decisions/2026-09-13-p8-flat-pivot-and-tw-label-audit.md`.
 
-The correction changes some structural signatures/base IDs/lineages because flat-base landmark dates are inputs to structural identity. Raw emitted candidate-window counts are unchanged; this identity effect must be audited before detector freeze rather than hidden.
+### v0.3 structural-identity audit
+
+The v0.3 correction was audited against the **same 1,387 raw SNPS 2023 candidate windows**, so candidate membership was unchanged by construction. Of 975 flat-base windows, 615 receive a corrected persisted pivot under v0.3.
+
+Structural clustering changes as follows:
+
+- identities: **104 -> 111** overall, entirely from flat-base **60 -> 67**;
+- lineages: **39 -> 38** overall, entirely from flat-base **26 -> 25**;
+- 23 legacy flat identities split across multiple v0.3 identities, while 18 v0.3 identities combine windows from multiple legacy identities;
+- 8 legacy flat lineages split across multiple v0.3 lineages, while 10 v0.3 lineages combine windows from multiple legacy lineages;
+- maximum identity split fan-out is 7 and merge fan-in is 5; maximum lineage split fan-out is 5 and merge fan-in is 4.
+
+The aggregate lineage count staying near-flat is reassuring, but the assignment churn is material. Therefore v0.3 is **not reverted**, while the BaseIdentity/Lineage layer is **not yet frozen**. `base_id` stability is conditional on the detector's landmark semantics/version and is not promised across a semantic detector revision. No identity/lineage algorithm is changed from this single-symbol audit. Decision record: `docs/decisions/2026-09-13-p8-v03-structural-identity-audit.md`.
 
 This remains morphology evidence, not trading-performance evidence.
 
 ### Current #33 next slice
 
-1. audit the v0.3 structural-identity/lineage changes caused by corrected flat-base pivot landmarks;
-2. promote the next source-first P0 authoritative example into DEVELOPMENT only after exact source anchors/window are independently supported and frozen;
-3. repeat multi-example DEVELOPMENT agreement/disagreement analysis across more than one pattern family;
-4. version any morphology-rule correction only when independently justified by source/theory and cross-example evidence;
+1. promote the next source-first P0 authoritative example into DEVELOPMENT only after exact source anchors/window are independently supported and frozen;
+2. prioritize a non-FLAT core pattern family so DEVELOPMENT tests more than the SNPS flat-base path without touching NFLX VALIDATION;
+3. repeat raw-window plus identity/lineage audits across multiple symbols and pattern families;
+4. version any morphology/lineage correction only when independently justified by source/theory and cross-example evidence, never by candidate counts or returns;
 5. expand the DEVELOPMENT corpus before detector freeze;
 6. keep NFLX VALIDATION locked until DEVELOPMENT semantics are frozen;
 7. after freeze, open untouched VALIDATION once and issue the final P8 verdict;
@@ -155,7 +168,7 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. **Continue #33 P8 authoritative DEVELOPMENT validation** with source-first examples and v0.3 identity audit.
+1. **Continue #33 P8 authoritative DEVELOPMENT validation** with additional source-first examples and cross-symbol/pattern-family identity-lineage audits.
 2. Freeze detector semantics only after a broader DEVELOPMENT corpus and explicit disagreement analysis.
 3. Open untouched VALIDATION once after freeze and issue final P8 verdict.
 4. Then implement #34 theory-faithful candidate generator.

@@ -27,7 +27,10 @@ from canslim_research.ohlcv_providers import (  # noqa: E402
     yahoo_provider,
 )
 from canslim_research.ohlcv_router import route_ohlcv  # noqa: E402
-from canslim_research.pattern_engine import PATTERN_ENGINE_VERSION, detect_patterns  # noqa: E402
+from canslim_research.pattern_engine_v02 import (  # noqa: E402
+    PATTERN_ENGINE_VERSION,
+    detect_patterns_v02,
+)
 from canslim_research.pattern_identity import BASE_IDENTITY_VERSION, cluster_base_identities  # noqa: E402
 from canslim_research.pattern_lineage import BASE_LINEAGE_VERSION, cluster_base_lineages  # noqa: E402
 
@@ -36,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate P8 authoritative DEVELOPMENT labels")
     parser.add_argument("--labels", default="data/p8/labels_v0.csv")
     parser.add_argument("--example-id")
-    parser.add_argument("--context-calendar-days", type=int, default=120)
+    parser.add_argument("--context-calendar-days", type=int, default=240)
     parser.add_argument("--boundary-tolerance-days", type=int, default=10)
     parser.add_argument("--output", default="results/p8-labelled-development.json")
     return parser.parse_args()
@@ -77,7 +80,7 @@ def _run_label(label: MorphologyLabel, *, context_days: int, boundary_tolerance:
             "tiingo": lambda: tiingo_provider(ticker=label.symbol, start=context_start, end=label.asof_date),
         }
     )
-    candidates = detect_patterns(routed.rows)
+    candidates = detect_patterns_v02(routed.rows)
     identities = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(identities)
     agreement = evaluate_positive_label(
@@ -103,8 +106,8 @@ def _run_label(label: MorphologyLabel, *, context_days: int, boundary_tolerance:
 
 def main() -> int:
     args = parse_args()
-    if args.context_calendar_days < 60:
-        raise ValueError("context-calendar-days must be >=60 so prior-uptrend state is evaluable")
+    if args.context_calendar_days < 180:
+        raise ValueError("context-calendar-days must be >=180 for the v0.2 120-session prior-uptrend window")
     labels = _load_labels(ROOT / args.labels)
     if args.example_id:
         labels = [label for label in labels if label.example_id == args.example_id]
@@ -138,6 +141,7 @@ def main() -> int:
             "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
             "reference-first authoritative labels are frozen before detector comparison",
             "OHLCV is truncated at each label asof_date; no future bars are supplied",
+            "v0.2 prior-uptrend correction is morphology/source-driven and versioned before rerun",
             "agreement is morphology/boundary fidelity only; no return/CAGR/PF outcome is inspected",
         ],
     }

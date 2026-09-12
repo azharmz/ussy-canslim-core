@@ -24,8 +24,10 @@ on:
       - 'src/canslim_research/pattern_lineage.py'
       - 'src/canslim_research/pattern_conflict.py'
       - 'src/canslim_research/labelled_morphology.py'
+      - 'src/canslim_research/pattern_diagnostics.py'
       - 'scripts/run_p8_pattern_engine.py'
       - 'scripts/run_p8_labelled_development.py'
+      - 'scripts/diagnose_p8_flat_label.py'
       - 'data/p8/labels_v0.csv'
       - 'tests/test_pattern_engine.py'
       - 'tests/test_pattern_identity.py'
@@ -80,6 +82,12 @@ jobs:
           python scripts/run_p8_labelled_development.py \
             --output results/p8-labelled-development.json
 
+      - name: Diagnose authoritative SNPS Flat Base gates
+        run: |
+          python scripts/diagnose_p8_flat_label.py \
+            --example-id p8-label-0001 \
+            --output results/p8-flat-label-diagnostic.json
+
       - name: Upload morphology reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -88,4 +96,5 @@ jobs:
           path: |
             results/p8-pattern-engine.json
             results/p8-labelled-development.json
+            results/p8-flat-label-diagnostic.json
           if-no-files-found: warn

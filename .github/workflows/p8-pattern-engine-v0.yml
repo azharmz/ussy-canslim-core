@@ -30,6 +30,7 @@ on:
       - 'scripts/run_p8_pattern_engine.py'
       - 'scripts/run_p8_labelled_development.py'
       - 'scripts/diagnose_p8_flat_label.py'
+      - 'scripts/audit_p8_v03_identity.py'
       - 'data/p8/labels_v0.csv'
       - 'tests/test_pattern_engine.py'
       - 'tests/test_pattern_engine_v02.py'
@@ -40,6 +41,7 @@ on:
       - 'tests/test_ohlcv_providers.py'
       - 'docs/methodology/p8-pattern-engine-design-v0.md'
       - 'docs/decisions/2026-09-12-p8-prior-uptrend-correction-v0.2.md'
+      - 'docs/decisions/2026-09-13-p8-flat-pivot-and-tw-label-audit.md'
 
 permissions:
   contents: read
@@ -93,6 +95,14 @@ jobs:
             --example-id p8-label-0001 \
             --output results/p8-flat-label-diagnostic.json
 
+      - name: Audit v0.3 structural identity effects
+        run: |
+          python scripts/audit_p8_v03_identity.py \
+            --ticker "${TICKER}" \
+            --start "${START_DATE}" \
+            --end "${END_DATE}" \
+            --output results/p8-v03-identity-audit.json
+
       - name: Upload morphology reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,4 +112,5 @@ jobs:
             results/p8-pattern-engine.json
             results/p8-labelled-development.json
             results/p8-flat-label-diagnostic.json
+            results/p8-v03-identity-audit.json
           if-no-files-found: warn

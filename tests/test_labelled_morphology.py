@@ -9,8 +9,8 @@ from canslim_research.pattern_identity import BaseIdentity, structural_signature
 from canslim_research.pattern_lineage import BaseLineage
 
 
-def _label(split="DEVELOPMENT", *, with_pivot=True):
-    return MorphologyLabel("example", "SNPS", "FLAT_BASE", "POSITIVE", "2023-04-04", "2023-05-18", "2023-05-18", "2023-04-04" if with_pivot else None, 392.79 if with_pivot else None, "AUTHORITATIVE_SOURCE", "IBD", "https://example.test", "source anchored", split)
+def _label(split="DEVELOPMENT", *, with_pivot=True, with_end=True):
+    return MorphologyLabel("example", "SNPS", "FLAT_BASE", "POSITIVE", "2023-04-04", "2023-05-18" if with_end else None, "2023-05-18", "2023-04-04" if with_pivot else None, 392.79 if with_pivot else None, "AUTHORITATIVE_SOURCE", "IBD", "https://example.test", "source anchored", split)
 
 
 def _candidate(start="2023-04-04", end="2023-05-17", *, pivot_date="2023-04-04", pivot_level=392.79, confidence=.9):
@@ -46,6 +46,7 @@ def test_authoritative_label_matches_emitted_window_boundaries_and_pivot():
     assert r.agreement_state=="MATCH"
     assert (r.start_error_days,r.end_error_days,r.pivot_date_error_days,r.pivot_price_error_pct)==(0,1,0,0.0)
     assert r.matched_base_id=="base"
+    assert r.boundary_validation_state=="FULL_SOURCE_ANCHORS"
     assert r.pivot_validation_state=="VALIDATED"
     assert r.matched_raw_candidate["base_start_date"]=="2023-04-04"
     assert r.matched_raw_candidate["pivot_source_date"]=="2023-04-04"
@@ -60,8 +61,6 @@ def test_good_boundaries_with_wrong_pivot_is_landmark_disagreement():
 
 
 def test_exact_raw_window_beats_identity_representative_loss_of_boundaries():
-    # Multiple raw windows can collapse to one BaseIdentity. P8 must score the
-    # actual emitted windows, not only the identity representative.
     exact=_candidate()
     wrong=_candidate(start="2023-03-17",end="2023-04-24",confidence=.99)
     base=_base(wrong)
@@ -79,13 +78,25 @@ def test_boundary_fidelity_beats_perfect_pivot_on_wrong_window():
     r=evaluate_positive_label(_label(),lineages,bases,[wrong,right]); assert r.agreement_state=="MATCH"; assert r.start_error_days==1; assert r.end_error_days==1
 
 
-def test_pivot_is_optional_but_match_is_explicitly_boundary_only_when_source_does_not_supply_it():
+def test_pivot_is_optional_but_match_is_explicitly_unscored_for_pivot():
     r=_eval(_candidate(pivot_date="2023-05-17",pivot_level=410.91), _label(with_pivot=False))
     assert r.agreement_state=="MATCH"
     assert r.pivot_date_error_days is None
     assert r.pivot_validation_state=="SOURCE_NOT_PROVIDED"
     assert r.matched_raw_candidate["pivot_source_date"]=="2023-05-17"
-    assert any("boundary/pattern agreement only" in item for item in r.rationale)
+    assert any("pivot fidelity is not scored" in item for item in r.rationale)
+
+
+def test_missing_end_anchor_can_validate_start_and_pivot_without_inventing_end():
+    label=_label(with_end=False)
+    late_end=_candidate(end="2023-06-30")
+    r=_eval(late_end,label)
+    assert r.agreement_state=="MATCH"
+    assert r.start_error_days==0
+    assert r.end_error_days is None
+    assert r.boundary_validation_state=="START_ONLY_SOURCE_ANCHOR"
+    assert r.pivot_validation_state=="VALIDATED"
+    assert any("end fidelity is not scored" in item for item in r.rationale)
 
 
 def test_missing_pattern_is_explicit_miss():
@@ -93,6 +104,7 @@ def test_missing_pattern_is_explicit_miss():
     r=evaluate_positive_label(_label(),[],[],[other])
     assert r.agreement_state=="MISS_PATTERN"
     assert r.matched_raw_candidate is None
+    assert r.boundary_validation_state=="FULL_SOURCE_ANCHORS"
     assert r.pivot_validation_state=="NOT_EVALUABLE"
 
 

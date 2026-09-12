@@ -1,0 +1,74 @@
+name: P8 Pattern Engine v0
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: DEVELOPMENT ticker
+        required: true
+        default: SNPS
+      start:
+        description: Inclusive start date
+        required: true
+        default: "2023-01-01"
+      end:
+        description: Inclusive end date
+        required: true
+        default: "2023-12-31"
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p8-pattern-engine-v0.yml'
+      - 'src/canslim_research/pattern_engine.py'
+      - 'scripts/run_p8_pattern_engine.py'
+      - 'tests/test_pattern_engine.py'
+      - 'docs/methodology/p8-pattern-engine-design-v0.md'
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      TIINGO_API_KEY: ${{ secrets.TIINGO_API_KEY }}
+      TICKER: ${{ inputs.ticker || 'SNPS' }}
+      START_DATE: ${{ inputs.start || '2023-01-01' }}
+      END_DATE: ${{ inputs.end || '2023-12-31' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 yfinance
+
+      - name: Run morphology regression tests
+        run: python -m pytest -q tests/test_pattern_engine.py
+
+      - name: Run SNPS DEVELOPMENT morphology engine
+        run: |
+          python scripts/run_p8_pattern_engine.py \
+            --ticker "${TICKER}" \
+            --start "${START_DATE}" \
+            --end "${END_DATE}" \
+            --split DEVELOPMENT \
+            --output results/p8-pattern-engine.json
+
+      - name: Upload morphology report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p8-pattern-engine-${{ env.TICKER }}
+          path: results/p8-pattern-engine.json
+          if-no-files-found: warn

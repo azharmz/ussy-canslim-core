@@ -2,7 +2,15 @@
 
 Independent CAN SLIM research program for USSY.
 
-This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a production trading application. It owns CAN SLIM methodology, experiment specifications, evidence, progress, and research decisions.
+This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a production trading application. It owns CAN SLIM methodology, experiment specifications, evidence, roadmap/progress, and research decisions.
+
+> ## START HERE — continuation / context recovery
+>
+> For overall CAN SLIM state, read `docs/progress-board.md` on the active branch.
+>
+> For workstream **#33 — O'Neil Pattern Recognition Engine / P8 morphology validation**, do **not** continue from local pattern-engine code in this repository. The canonical implementation/source of truth is `azharmz/ussy-oneil-patterns`. Start from that repository's `README.md`, then `docs/progress-board.md` and latest #33/P8 decision records.
+>
+> Local #33/P8 implementation history in this repository is retained as research/migration evidence until a separate cleanup is completed; it is superseded as the implementation source of truth. #34 remains blocked until canonical #33/P8 is defensible.
 
 ## Project boundaries
 
@@ -10,10 +18,24 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 |---|---|
 | `ussy-data` | Canonical universe and OHLCV data contracts |
 | `ussy-fundamentals` | SEC facts, PIT normalization, readiness, immutable R2 production snapshots |
+| `ussy-oneil-patterns` | **Canonical #33 O'Neil pattern engine**, morphology/fault/ambiguity implementation, P8 labelled morphology validation, versioned #33 output |
 | `ussy-trendfoll` | Independent legacy TrendFoll strategy and paper-trading implementation |
-| `ussy-canslim-research` | Independent CAN SLIM methodology, labels, experiments, evidence, decisions |
+| `ussy-canslim-research` | CAN SLIM parent/HQ: theory/specification, roadmap, integration evidence, #32 contract, later #34+ research |
 
 TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or reject any TrendFoll rule without changing TrendFoll production.
+
+## Current theory-fidelity boundary — 13 Sep 2026
+
+- #25–#31 Theory Fidelity Audit: **COMPLETE**
+- #32 Theory-Faithful Candidate Specification v1: **COMPLETE / FROZEN**
+- #33 O'Neil Pattern Recognition Engine: **IN PROGRESS in `ussy-oneil-patterns`**
+- #33/P8 current phase: canonical DEVELOPMENT reconciliation / morphology validation
+- canonical P8 corpus: five DEVELOPMENT examples spanning all four core pattern families plus locked NFLX VALIDATION
+- parent-side `5 MATCH / 5 AMBIGUOUS` result is preserved as migration evidence only until canonical oneil re-execution
+- #34 Theory-Faithful Candidate Generator: **NOT STARTED / BLOCKED on #33**
+- FWD1 and EXH2 remain separate frozen/prospective tracks and must not influence #33 tuning
+
+Canonical #33 reconciliation landed in `ussy-oneil-patterns` at merge `261d667eecf8525b27e8a15b6980ba698e609848`.
 
 ## Research-universe definition
 
@@ -27,77 +49,21 @@ Point-in-time discipline remains mandatory for information actually used to make
 - SEC fundamental evidence only after `accepted_at`;
 - no future filings, future prices, or later amendments before their acceptance time.
 
-## Current state — 10 Sep 2026
-
-- Canonical Musaffa universe: **1,327 securities**
-- Fundamental production-ready: **901** (`857 PASS_FULL` + `44 PASS_3Y_FALLBACK`)
-- Domestic SEC-supported readiness: **87.05%**
-- `ussy-fundamentals`: **PRODUCTION-OPERATIONAL / FREEZE**
-- R2 consumer entry point: `fundamentals/current.json`
-- C-v1 methodology: **FROZEN**
-- A-v1 methodology: **FROZEN**
-- C/A label implementation: **COMPLETE**
-- C/A distribution study: **COMPLETE / VALIDATED**
-- Independent technical baseline: **FROZEN / IMPLEMENTED**
-- Entry-timing basis test X1-X4: **IN PROGRESS**
-
-## Frozen C-v1
-
-Latest usable quarterly observation known at decision time:
-
-```text
-EPS YoY >= +25%
-AND
-Revenue YoY >= +25%
-```
-
-Undefined/missing growth is not coerced to zero.
-
-## Frozen A-v1
-
-```text
-Latest 3 consecutive annual EPS YoY observations
-all evaluable
-AND each >= +25%
-```
-
-`PASS_3Y_FALLBACK` remains a separate provenance tier.
-
-## First C/A distribution result
-
-Pinned fundamentals snapshot:
-
-```text
-fundamentals/snapshots/2026-09-09/run-34417104650/manifest.json
-```
-
-Among **901 production-ready securities**:
-
-| Label | PASS | FAIL | NOT_EVALUABLE |
-|---|---:|---:|---:|
-| C-v1 | 69 | 520 | 312 |
-| A-v1 | 11 | 483 | 407 |
-| C+A | 3 | 437 | 461 |
-
-C+A PASS symbols in this snapshot: **FIX, NBIX, NVDA**.
-
-These results are a methodology/distribution sanity check, **not a trading verdict** and not a reason to change thresholds.
-
 ## Research principles
 
 - Preserve facts; version interpretations.
 - Freeze methodology before performance testing.
-- Never optimize the SEC extraction layer for CAN SLIM pass-rate or CAGR/PF.
+- Never optimize extraction or pattern-recognition semantics for pass-rate, CAGR, PF, win rate, FWD1, or later returns.
 - `accepted_at` is the fundamental information-availability boundary.
 - Define the research universe explicitly and do not confuse current-universe historical research with historical-eligibility reconstruction.
 - Completed experiments must pin immutable universe/fundamental inputs and checksums.
 - Missing is not zero. Unsupported is not failed. Insufficient history is not a bad-company verdict.
+- Source precision is not invented; absent authoritative morphology dimensions remain unscored.
 - Daily-EOD signals may only use completed daily information; close-based conditions are filled no earlier than the next session Open.
 
-## Next research blocks
+## Active path
 
-1. Complete the X1-X4 entry-timing basis test.
-2. Freeze the preferred executable entry model only after comparative evidence review.
-3. Integrate frozen PIT C/A labels into historical candidate states.
-4. Run C and C+A ablations after entry timing is frozen.
-5. Freeze portfolio construction before portfolio return/max-drawdown claims.
+1. Finish canonical #33/P8 DEVELOPMENT morphology validation in `ussy-oneil-patterns`.
+2. Freeze #33 only after morphology disagreements/ambiguities have defensible `KEEP` / `REVISE` / `UNRESOLVED` treatment and untouched validation is evaluated.
+3. Only then begin #34 in this parent program using frozen/versioned #33 output.
+4. Keep FWD1/EXH2 accumulating unchanged and keep execution/entry research parked during #33 validation.

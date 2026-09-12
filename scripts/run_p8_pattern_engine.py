@@ -21,6 +21,10 @@ from canslim_research.ohlcv_providers import (  # noqa: E402
     yahoo_provider,
 )
 from canslim_research.ohlcv_router import route_ohlcv  # noqa: E402
+from canslim_research.pattern_conflict import (  # noqa: E402
+    CONFLICT_LAYER_VERSION,
+    detect_pattern_conflicts,
+)
 from canslim_research.pattern_engine import (  # noqa: E402
     DEFAULT_POLICY,
     PATTERN_ENGINE_VERSION,
@@ -68,10 +72,12 @@ def run(args: argparse.Namespace) -> dict:
     candidates = detect_patterns(rows, min_confidence=args.min_confidence)
     bases = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(bases)
+    conflicts = detect_pattern_conflicts(lineages, bases)
 
     counts = Counter(candidate.pattern_type for candidate in candidates)
     base_counts = Counter(base.pattern_type for base in bases)
     lineage_counts = Counter(lineage.pattern_type for lineage in lineages)
+    conflict_counts = Counter(conflict.relationship for conflict in conflicts)
     ambiguous = sum(candidate.pattern_evidence_state == "AMBIGUOUS" for candidate in candidates)
     ambiguous_bases = sum(base.pattern_evidence_state == "AMBIGUOUS" for base in bases)
     ambiguous_lineages = sum(lineage.pattern_evidence_state == "AMBIGUOUS" for lineage in lineages)
@@ -105,6 +111,7 @@ def run(args: argparse.Namespace) -> dict:
         "pattern_engine_version": PATTERN_ENGINE_VERSION,
         "base_identity_version": BASE_IDENTITY_VERSION,
         "base_lineage_version": BASE_LINEAGE_VERSION,
+        "conflict_layer_version": CONFLICT_LAYER_VERSION,
         "policy": DEFAULT_POLICY.__dict__,
         "min_confidence": args.min_confidence,
         "raw_candidate_window_count": len(candidates),
@@ -116,6 +123,9 @@ def run(args: argparse.Namespace) -> dict:
         "base_lineage_count": len(lineages),
         "ambiguous_lineage_count": ambiguous_lineages,
         "lineage_pattern_counts": dict(sorted(lineage_counts.items())),
+        "pattern_conflict_count": len(conflicts),
+        "conflict_relationship_counts": dict(sorted(conflict_counts.items())),
+        "pattern_conflicts": [conflict.to_dict() for conflict in conflicts],
         "latest_base_lineages": [lineage.to_dict() for lineage in latest_lineages],
         "latest_base_identities": [base.to_dict() for base in latest_bases],
         "latest_raw_candidates": [candidate.to_dict() for candidate in latest],
@@ -128,8 +138,9 @@ def run(args: argparse.Namespace) -> dict:
             "named pattern is not forced when rules are unmet",
             "pattern-specific pivot is persisted with landmarks",
             "rolling windows sharing the same pattern-specific structural landmarks collapse to one stable base_id",
-            "nearby same-pattern base identities may collapse into one lineage only under conservative pattern-specific root anchors",
-            "cross-pattern types remain separate at lineage stage; hierarchy/conflict resolution is a later explicit layer",
+            "nearby same-pattern base identities may collapse into one prefix-stable lineage only under conservative pattern-specific root anchors",
+            "cross-pattern overlap is persisted as an explicit conflict record; no silent winner is selected",
+            "cup handle/no-handle hierarchy is explicit and unresolved until morphology adjudication",
             "first_recognized_date is the earliest as-of date the frozen detector could recognize that structural identity",
         ],
     }

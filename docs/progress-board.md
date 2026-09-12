@@ -38,7 +38,7 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 30 | C/A/S/I/M role fidelity | **COMPLETE** |
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
-| 33 | **O'Neil Pattern Recognition Engine** | **NEXT** |
+| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — P8 v0.1 merged** |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
@@ -83,22 +83,37 @@ Missing/stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to
 
 ## #33 — O'Neil Pattern Recognition Engine
 
-#33 is now authorized to begin against frozen #32. Its responsibility is limited to translating daily R2 OHLCV into reproducible proper-base morphology, landmarks and pattern-specific pivots.
+#33 is active against frozen #32. The first DEVELOPMENT implementation slice is merged as P8 pattern engine v0.1.
 
-Expected initial scope:
+Implemented in v0.1:
 
-- candidate-base segmentation;
-- swing / landmark extraction;
-- CWH detector;
-- cup-without-handle detector;
-- double-bottom detector;
-- flat-base detector;
-- later/secondary ascending-base and base-on-base state;
-- fault/quality flags;
-- ambiguity handling;
-- pattern/pivot validation fixtures.
+- strict R2 -> Yahoo -> Tiingo OHLCV routing, with fallback only on explicit `UNAVAILABLE`;
+- DEVELOPMENT-only execution guardrail;
+- preregistered geometry policy before broader validation;
+- `CUP_WITH_HANDLE` detector;
+- `CUP_WITHOUT_HANDLE` detector;
+- `DOUBLE_BOTTOM` detector;
+- `FLAT_BASE` detector;
+- prior-uptrend state;
+- pattern-specific landmark persistence and pivot derivation;
+- fault flags and ambiguity state;
+- synthetic morphology regression fixtures;
+- live SNPS 2023 workflow from R2.
 
-#33 must not optimize detector definitions against CAGR/PF. The first acceptance target is morphology/landmark fidelity and reproducibility, not trading performance.
+First live DEVELOPMENT result for SNPS 2023: 250 R2 sessions consumed successfully. v0.1 emitted 47 raw morphology windows: 38 flat-base windows and 9 double-bottom windows, with 5 ambiguity states. This result is **not** a candidate count and is **not** performance evidence; overlapping windows still require stable base-identity clustering/deduplication.
+
+Current #33 next slice:
+
+1. consolidate overlapping raw windows into stable `base_id` identities;
+2. define recognition chronology / earliest valid recognition date explicitly;
+3. add candidate-base segmentation around stable landmark sets rather than window multiplicity;
+4. expand labelled DEVELOPMENT fixtures and inspect false positives/false negatives;
+5. then implement secondary `ASCENDING_BASE` and `BASE_ON_BASE` relationships;
+6. only after morphology validation may #34 consume #33 output.
+
+Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
+
+#33 must not optimize detector definitions against CAGR/PF. The acceptance target remains morphology/landmark fidelity and reproducibility, not trading performance.
 
 ## Frozen theory summary (#26-#31)
 
@@ -117,7 +132,7 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. **Execute #33 O'Neil Pattern Recognition Engine** from R2 daily OHLCV against frozen #32.
+1. **Continue #33** with stable base identity / `base_id` clustering and recognition chronology.
 2. Validate morphology and landmarks before using returns as evidence.
 3. Then implement #34 theory-faithful candidate generator.
 4. Run #35 semantic/morphology/candidate validation before performance research.

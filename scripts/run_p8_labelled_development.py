@@ -41,8 +41,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--example-id")
     parser.add_argument("--context-calendar-days", type=int, default=240)
     parser.add_argument("--boundary-tolerance-days", type=int, default=10)
+    parser.add_argument("--pivot-date-tolerance-days", type=int, default=3)
+    parser.add_argument("--pivot-price-tolerance-pct", type=float, default=0.01)
     parser.add_argument("--output", default="results/p8-labelled-development.json")
     return parser.parse_args()
+
+
+def _optional_float(value: str | None) -> float | None:
+    if value is None or not value.strip():
+        return None
+    return float(value)
+
+
+def _optional_text(value: str | None) -> str | None:
+    if value is None or not value.strip():
+        return None
+    return value.strip()
 
 
 def _load_labels(path: Path) -> list[MorphologyLabel]:
@@ -60,6 +74,8 @@ def _load_labels(path: Path) -> list[MorphologyLabel]:
                     window_start=row["window_start"],
                     window_end=row["window_end"],
                     asof_date=row["asof_date"],
+                    expected_pivot_source_date=_optional_text(row.get("expected_pivot_source_date")),
+                    expected_pivot_level=_optional_float(row.get("expected_pivot_level")),
                     provenance=row["provenance"],
                     source_name=row["source_name"],
                     source_reference=row["source_reference"],
@@ -70,7 +86,14 @@ def _load_labels(path: Path) -> list[MorphologyLabel]:
     return labels
 
 
-def _run_label(label: MorphologyLabel, *, context_days: int, boundary_tolerance: int) -> dict:
+def _run_label(
+    label: MorphologyLabel,
+    *,
+    context_days: int,
+    boundary_tolerance: int,
+    pivot_date_tolerance: int,
+    pivot_price_tolerance: float,
+) -> dict:
     context_start = (date.fromisoformat(label.window_start) - timedelta(days=context_days)).isoformat()
     security_id = resolve_security_id_from_r2(label.symbol, "current")
     routed = route_ohlcv(
@@ -88,6 +111,8 @@ def _run_label(label: MorphologyLabel, *, context_days: int, boundary_tolerance:
         lineages,
         identities,
         boundary_tolerance_days=boundary_tolerance,
+        pivot_date_tolerance_days=pivot_date_tolerance,
+        pivot_price_tolerance_pct=pivot_price_tolerance,
     )
     return {
         "label": label.__dict__,
@@ -108,6 +133,8 @@ def main() -> int:
     args = parse_args()
     if args.context_calendar_days < 180:
         raise ValueError("context-calendar-days must be >=180 for the v0.2 120-session prior-uptrend window")
+    if args.pivot_price_tolerance_pct < 0:
+        raise ValueError("pivot-price-tolerance-pct must be nonnegative")
     labels = _load_labels(ROOT / args.labels)
     if args.example_id:
         labels = [label for label in labels if label.example_id == args.example_id]
@@ -119,6 +146,8 @@ def main() -> int:
             label,
             context_days=args.context_calendar_days,
             boundary_tolerance=args.boundary_tolerance_days,
+            pivot_date_tolerance=args.pivot_date_tolerance_days,
+            pivot_price_tolerance=args.pivot_price_tolerance_pct,
         )
         for label in labels
     ]
@@ -131,6 +160,8 @@ def main() -> int:
         "labelled_eval_version": LABELLED_EVAL_VERSION,
         "context_calendar_days": args.context_calendar_days,
         "boundary_tolerance_days": args.boundary_tolerance_days,
+        "pivot_date_tolerance_days": args.pivot_date_tolerance_days,
+        "pivot_price_tolerance_pct": args.pivot_price_tolerance_pct,
         "result_count": len(results),
         "agreement_counts": {
             state: sum(item["agreement"]["agreement_state"] == state for item in results)
@@ -139,10 +170,11 @@ def main() -> int:
         "results": results,
         "guardrails": [
             "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
-            "reference-first authoritative labels are frozen before detector comparison",
+            "reference-first authoritative labels and pivot anchors are frozen before detector comparison",
             "OHLCV is truncated at each label asof_date; no future bars are supplied",
             "v0.2 prior-uptrend correction is morphology/source-driven and versioned before rerun",
-            "agreement is morphology/boundary fidelity only; no return/CAGR/PF outcome is inspected",
+            "agreement requires pattern/boundary fidelity and source pivot fidelity when that evidence is available",
+            "no return/CAGR/PF outcome is inspected",
         ],
     }
     output = ROOT / args.output

@@ -1,0 +1,51 @@
+name: I-v1 historical ablation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/i1-ablation-v1.yml'
+      - 'scripts/run_i1_ablation_v1.py'
+      - 'docs/methodology/institutional-sponsorship-growth-v1.md'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ablate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+      - name: Download canonical I-v1 attachment evidence
+        run: |
+          mkdir -p inputs/i1
+          gh run download 34663929577 --repo azharmz/ussy-canslim-research --name historical-i1-attachment-v1-34663929577 --dir inputs/i1
+          cat inputs/i1/summary.json
+      - name: Run frozen I-v1 ablation
+        run: |
+          python scripts/run_i1_ablation_v1.py \
+            --labels inputs/i1/candidate_i1_labels.csv \
+            --attachment-summary inputs/i1/summary.json
+      - name: Show summary
+        run: cat results/i1-ablation-v1/summary.json
+      - name: Upload evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: i1-ablation-v1-${{ github.run_id }}
+          path: results/i1-ablation-v1/
+          retention-days: 30

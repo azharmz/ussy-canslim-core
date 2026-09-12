@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diagnose frozen Flat Base gates for one authoritative DEVELOPMENT label."""
+"""Diagnose active v0.3 Flat Base semantics for one authoritative DEVELOPMENT label."""
 
 from __future__ import annotations
 
@@ -16,14 +16,19 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from canslim_research.ohlcv_providers import (  # noqa: E402
-    r2_provider,
-    resolve_security_id_from_r2,
+    r2_ticker_provider,
     tiingo_provider,
     yahoo_provider,
 )
 from canslim_research.ohlcv_router import route_ohlcv  # noqa: E402
 from canslim_research.pattern_diagnostics import diagnose_flat_base_window  # noqa: E402
 from canslim_research.pattern_engine import DEFAULT_POLICY, normalize_rows  # noqa: E402
+from canslim_research.pattern_engine_v02 import (  # noqa: E402
+    PATTERN_ENGINE_VERSION,
+    PRIOR_UPTREND_LOOKBACK,
+    PRIOR_UPTREND_MIN_GAIN,
+    prior_uptrend_state_v02,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,14 +75,37 @@ def _prior_advance_stats(rows, start: int) -> dict[str, dict]:
     return result
 
 
+def _active_flat_diagnostic(rows, start: int, end: int) -> dict:
+    """Reuse geometry diagnostics but replace legacy prior-uptrend semantics."""
+    result = diagnose_flat_base_window(rows, start, end, DEFAULT_POLICY).to_dict()
+    active_prior_state = prior_uptrend_state_v02(rows, start)
+    active_prior_gain = None
+    if start >= PRIOR_UPTREND_LOOKBACK:
+        segment = rows[start - PRIOR_UPTREND_LOOKBACK : start]
+        origin_low = min(float(row["low"]) for row in segment)
+        active_prior_gain = float(rows[start]["high"]) / origin_low - 1.0
+
+    result["prior_uptrend_state"] = active_prior_state
+    result["prior_uptrend_gain"] = round(active_prior_gain, 6) if active_prior_gain is not None else None
+    result["gate_prior_uptrend"] = "PASS" if active_prior_state == "PASS" else active_prior_state
+
+    failed = [gate for gate in result["failed_gates"] if gate != "PRIOR_UPTREND"]
+    if active_prior_state != "PASS":
+        failed.append("PRIOR_UPTREND")
+    result["failed_gates"] = failed
+    result["final_state"] = "PASS" if not failed else "FAIL"
+    result["active_pivot_source_date"] = result["first_third_left_high_date"]
+    result["active_pivot_level"] = result["first_third_left_high_price"]
+    return result
+
+
 def main() -> int:
     args = parse_args()
     label = _load(ROOT / args.labels, args.example_id)
     context_start = (date.fromisoformat(label["window_start"]) - timedelta(days=args.context_calendar_days)).isoformat()
-    security_id = resolve_security_id_from_r2(label["symbol"], "current")
     routed = route_ohlcv(
         {
-            "r2": lambda: r2_provider(security_id=security_id, start=context_start, end=label["asof_date"]),
+            "r2": lambda: r2_ticker_provider(ticker=label["symbol"], start=context_start, end=label["asof_date"]),
             "yahoo": lambda: yahoo_provider(ticker=label["symbol"], start=context_start, end=label["asof_date"]),
             "tiingo": lambda: tiingo_provider(ticker=label["symbol"], start=context_start, end=label["asof_date"]),
         }
@@ -90,12 +118,21 @@ def main() -> int:
     except KeyError as exc:
         raise ValueError(f"authoritative boundary not present in OHLCV: {exc}") from exc
 
-    diagnostic = diagnose_flat_base_window(rows, start, end, DEFAULT_POLICY)
+    diagnostic = _active_flat_diagnostic(rows, start, end)
     body_end = end - 1
-    pre_breakout_diagnostic = diagnose_flat_base_window(rows, start, body_end, DEFAULT_POLICY)
+    pre_breakout_diagnostic = _active_flat_diagnostic(rows, start, body_end)
+    legacy_prior_fields = {
+        "prior_uptrend_lookback": DEFAULT_POLICY.prior_uptrend_lookback,
+        "prior_uptrend_min_gain": DEFAULT_POLICY.prior_uptrend_min_gain,
+    }
+    active_geometry_policy = dict(DEFAULT_POLICY.__dict__)
+    active_geometry_policy.pop("prior_uptrend_lookback")
+    active_geometry_policy.pop("prior_uptrend_min_gain")
+
     report = {
         "stage": "P8",
         "scope": "AUTHORITATIVE_FLAT_BASE_GATE_DIAGNOSTIC",
+        "pattern_engine_version": PATTERN_ENGINE_VERSION,
         "example_id": label["example_id"],
         "symbol": label["symbol"],
         "source_pattern": label["pattern"],
@@ -103,17 +140,25 @@ def main() -> int:
         "source_window_end": label["window_end"],
         "source_asof_date": label["asof_date"],
         "selected_source": routed.source,
-        "security_id": security_id,
+        "security_id": routed.metadata.get("security_id"),
         "input_row_count": len(rows),
-        "policy": DEFAULT_POLICY.__dict__,
-        "source_window_including_breakout_day": diagnostic.to_dict(),
-        "base_body_through_prior_session": pre_breakout_diagnostic.to_dict(),
+        "active_policy": {
+            **active_geometry_policy,
+            "prior_uptrend_lookback": PRIOR_UPTREND_LOOKBACK,
+            "prior_uptrend_min_gain": PRIOR_UPTREND_MIN_GAIN,
+            "prior_uptrend_semantics": "lowest low in prior 120 completed sessions to base-start high >=30%",
+            "flat_pivot_semantics": "highest high in the first-third left-side zone; breakout-day new high cannot redefine pivot",
+        },
+        "legacy_v01_prior_uptrend_fields_not_active": legacy_prior_fields,
+        "source_window_including_breakout_day": diagnostic,
+        "base_body_through_prior_session": pre_breakout_diagnostic,
         "alternative_prior_advance_diagnostics": _prior_advance_stats(rows, start),
         "guardrails": [
-            "diagnostic only; detector semantics are unchanged",
+            "diagnostic mirrors active v0.3 prior-uptrend and flat-pivot semantics",
             "DEVELOPMENT authoritative label only",
             "OHLCV ends at source asof_date",
-            "alternative prior-advance calculations are diagnostics, not promoted thresholds",
+            "source-window breakout-day containment failure is diagnostic and does not redefine the earlier structural pivot",
+            "alternative prior-advance horizons are diagnostics only; active detector remains 120 completed sessions / >=30%",
             "no post-breakout return/CAGR/PF data is inspected",
         ],
     }

@@ -8,7 +8,7 @@ from .pattern_engine import PatternCandidate
 from .pattern_identity import BaseIdentity, structural_signature
 from .pattern_lineage import BaseLineage
 
-LABELLED_EVAL_VERSION = "p8-labelled-eval-v0.7"
+LABELLED_EVAL_VERSION = "p8-labelled-eval-v0.8"
 
 
 @dataclass(frozen=True)
@@ -28,6 +28,7 @@ class MorphologyLabel:
     rationale: str
     split: str
     window_start_precision: str = "DAY"
+    pivot_price_adjustment_factor: float = 1.0
 
 
 @dataclass
@@ -65,18 +66,26 @@ def _start_error(candidate_date: str, label: MorphologyLabel) -> tuple[bool, int
         anchor = date.fromisoformat(label.window_start[:10])
         actual = date.fromisoformat(candidate_date[:10])
         same_month = actual.year == anchor.year and actual.month == anchor.month
-        # Distance remains diagnostic only; MONTH acceptance is membership in the published month.
         return same_month, _date_distance(candidate_date, label.window_start)
     raise ValueError(f"unsupported window_start_precision: {label.window_start_precision}")
+
+
+def _comparison_pivot_level(label: MorphologyLabel) -> float | None:
+    if label.expected_pivot_level is None:
+        return None
+    if label.expected_pivot_level <= 0:
+        raise ValueError("expected pivot level must be positive")
+    if label.pivot_price_adjustment_factor <= 0:
+        raise ValueError("pivot price adjustment factor must be positive")
+    return label.expected_pivot_level / label.pivot_price_adjustment_factor
 
 
 def _pivot_errors(label: MorphologyLabel, candidate: PatternCandidate) -> tuple[int | None, float | None]:
     date_error = _date_distance(candidate.pivot_source_date, label.expected_pivot_source_date) if label.expected_pivot_source_date else None
     price_error = None
-    if label.expected_pivot_level is not None:
-        if label.expected_pivot_level <= 0:
-            raise ValueError("expected pivot level must be positive")
-        price_error = abs(float(candidate.pivot_level) / label.expected_pivot_level - 1.0)
+    comparison_level = _comparison_pivot_level(label)
+    if comparison_level is not None:
+        price_error = abs(float(candidate.pivot_level) / comparison_level - 1.0)
     return date_error, price_error
 
 
@@ -122,19 +131,20 @@ def evaluate_positive_label(
 ) -> LabelAgreement:
     """Validate source-published morphology dimensions against raw detector windows.
 
-    Source dimensions are scored only at the precision actually published. DAY starts
-    use the preregistered day tolerance; MONTH starts require the emitted start to fall
-    inside that calendar month. Pivot date and pivot price are independent dimensions:
-    a source may publish one without the other. Missing dimensions remain unscored.
+    Source dimensions are scored only at the precision actually published. Source pivot
+    prices remain immutable; when the OHLCV provider expresses history on a later split-
+    adjusted basis, pivot_price_adjustment_factor maps the source price onto that same
+    comparison basis before error is calculated.
     """
     if label.split != "DEVELOPMENT":
         raise ValueError("labelled evaluator is locked to DEVELOPMENT examples")
     if label.label != "POSITIVE":
-        raise ValueError("v0.7 evaluates positive authoritative labels only")
+        raise ValueError("v0.8 evaluates positive authoritative labels only")
     if not label.window_start:
-        raise ValueError("v0.7 requires at least a source-anchored window_start")
+        raise ValueError("v0.8 requires at least a source-anchored window_start")
     if label.window_start_precision.upper() not in {"DAY", "MONTH"}:
         raise ValueError("window_start_precision must be DAY or MONTH")
+    _comparison_pivot_level(label)
 
     identities_list, lineages_list = list(identities), list(lineages)
     same_pattern = [item for item in candidates if item.pattern_type == label.pattern]
@@ -192,7 +202,11 @@ def evaluate_positive_label(
         rationale.append(f"base end/recognition is within {boundary_tolerance_days} calendar days of source anchor" if end_required else "source does not publish an exact base-end boundary; end fidelity is not scored")
         if pivot_date_required: rationale.append(f"pivot date is within {pivot_date_tolerance_days} calendar days of source anchor")
         else: rationale.append("source does not publish a detector-comparable pivot date; pivot-date fidelity is not scored")
-        if pivot_price_required: rationale.append(f"pivot price is within {pivot_price_tolerance_pct:.2%} of source anchor")
+        if pivot_price_required:
+            comparison_level = _comparison_pivot_level(label)
+            if label.pivot_price_adjustment_factor != 1.0:
+                rationale.append(f"source pivot {label.expected_pivot_level:g} is normalized by documented factor {label.pivot_price_adjustment_factor:g} to comparison level {comparison_level:g}")
+            rationale.append(f"pivot price is within {pivot_price_tolerance_pct:.2%} of the comparison-basis source anchor")
         else: rationale.append("source does not publish a detector-comparable pivot price; pivot-price fidelity is not scored")
 
     return LabelAgreement(label.example_id, label.pattern, label.split, state, lineage_id, base_id, start_error, end_error, pivot_date_error, round(pivot_price_error, 8) if pivot_price_error is not None else None, _boundary_state(label), pivot_validation_state, candidate.to_dict(), rationale)

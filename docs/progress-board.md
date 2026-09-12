@@ -34,8 +34,8 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 26 | Proper-base definitions | **COMPLETE** |
 | 27 | Pivot / buy-point definition | **COMPLETE** |
 | 28 | Breakout + volume confirmation | **COMPLETE** |
-| 29 | RS / leadership fidelity | **NEXT** |
-| 30 | C/A/S/I/M role fidelity | NOT STARTED |
+| 29 | RS / leadership fidelity | **COMPLETE** |
+| 30 | C/A/S/I/M role fidelity | **NEXT** |
 | 31 | Sell / risk-management fidelity | NOT STARTED |
 | 32 | Theory-faithful candidate specification | NOT STARTED |
 | 33 | **O'Neil Pattern Recognition Engine** | NOT STARTED |
@@ -50,27 +50,35 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 **WEAK-to-REASONABLE_PROXY** for v1. Pivot is pattern-specific structural resistance, not an arbitrary rolling high. CWH uses handle high; cup without handle prior/left high; double bottom middle W peak; flat base base/left high; ascending base final/pattern resistance; base-on-base derives pivot from the second base. The 5% buy zone is execution/anti-chasing, not pivot identity.
 
 ### #28 Breakout + Volume Confirmation
-**COMPLETE. Overall v1 fidelity: REASONABLE_PROXY.**
+**REASONABLE_PROXY** overall for v1. `Volume >=1.40x prior-50d avg` is high fidelity; `Close > pivot` is an over-strict hold proxy; the 5% cap is an execution/extension concept rather than breakout identity. Preserve pivot-cross event, close/hold quality, initial vs later volume confirmation, and gap state separately.
+
+### #29 RS / Leadership Fidelity
+**COMPLETE. Overall v1 fidelity: REASONABLE_PROXY, INCOMPLETE.**
 
 Frozen conclusions:
 
-- breakout event = price passes/clears the proper pattern-specific pivot;
-- daily close above pivot is desirable breakout-quality/hold evidence, not the universal definition of whether the pivot was crossed;
-- strong price action includes a close above resistance and preferably high in the day's range;
-- canonical strong-volume confirmation = daily volume >=1.40x the **prior 50 completed sessions'** average daily volume;
-- initial-breakout-day volume confirmation is preferred; an initially light pivot cross may receive later confirmation, but that later date must be preserved and never backdated;
-- a low-volume cross is not a fully confirmed textbook breakout;
-- gap-through-pivot can be a legitimate breakout; daily R2 can identify the gap event, but special 5/15-minute breakaway-gap entry protocols cannot be reconstructed from daily bars;
-- the 5% buy zone is execution/extension state, not breakout identity.
+- RS Rating and RS line are distinct concepts and must remain separate;
+- v1's recency-weighted ~12-month cross-sectional score is a reasonable proxy for the historical RS Rating concept, but not an exact IBD formula;
+- `RS_proxy_percentile >=80` is highly aligned with IBD's general leader-screen guidance, but is not a standalone complete definition of `L`;
+- IBD revised its RS Rating methodology in 2026 to use more data points/multiple comparison periods/adjusted weights, so the v1 40/20/20/20 score is explicitly a legacy-aligned transparent proxy;
+- RS line compares stock performance with a benchmark (conventionally S&P 500); strong breakouts preferably show the RS line at/near a base-period high, and an RS-line high before the stock's own breakout is especially bullish;
+- a falling RS line while price approaches highs is bearish-divergence evidence and is missing from v1;
+- O'Neil/IBD also prefers leaders in strong industry groups rather than sympathy laggards;
+- current IBD industry methodology changed in April 2026 from the historic 197 groups to 145 groups (142 ranked), using market-cap weighting and a responsive six-month ranking framework;
+- the project must not fabricate a proprietary IBD industry ranking from incompatible PIT classifications; group leadership remains explicit evidence/NOT_IMPLEMENTED until a defensible PIT contract exists.
 
-Audit of v1 technical conditions:
+Audit of frozen v1 L:
 
-| v1 rule | Fidelity |
+| v1 element | Fidelity |
 |---|---|
-| `T0 Close > pivot` | **OVER-STRICT PROXY** — end-of-day hold imposed as trigger |
-| `T0 Close <= pivot*1.05` | **SEMANTIC MISMATCH / REASONABLE EXECUTION PROXY** |
-| `T0 Volume >=1.40x prior-50d avg` | **HIGH FIDELITY** |
-| T0-only volume confirmation | **TOO STRICT FOR FULL THEORY** |
+| recency-weighted ~12m price-strength score | **REASONABLE_PROXY** |
+| cross-sectional percentile rank | **HIGH CONCEPTUAL FIDELITY** |
+| threshold `>=80` | **HIGH FIDELITY AS GENERAL LEADER SCREEN** |
+| RS line vs S&P 500 | **NOT_IMPLEMENTED** |
+| RS-line base-period/new-high state | **NOT_IMPLEMENTED** |
+| RS-line bearish divergence | **NOT_IMPLEMENTED** |
+| industry-group strength | **NOT_IMPLEMENTED as strategy input** |
+| stock leadership within group | **NOT_IMPLEMENTED** |
 
 Canonical detail: `docs/methodology/oneil-theory-fidelity-audit-v1.md`.
 
@@ -81,8 +89,8 @@ Pattern recognition remains a dedicated workstream after #32. It will use existi
 FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into either track.
 
 ## Active work from here
-1. **Execute #29 RS / Leadership Fidelity.**
-2. Continue #30–31, then freeze #32 Theory-Faithful Candidate Specification.
+1. **Execute #30 C/A/S/I/M Role Fidelity.**
+2. Complete #31, then freeze #32 Theory-Faithful Candidate Specification.
 3. Only after #32, begin #33 Pattern Recognition Engine using R2 OHLCV.
 4. Keep FWD1 and EXH2 accumulating unchanged.
-5. Do not tune theory/pattern/breakout rules from historical or interim forward performance.
+5. Do not tune theory/pattern/breakout/RS rules from historical or interim forward performance.

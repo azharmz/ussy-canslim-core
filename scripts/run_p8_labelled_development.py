@@ -51,7 +51,7 @@ def _load_labels(path: Path) -> list[MorphologyLabel]:
                 continue
             labels.append(MorphologyLabel(
                 example_id=row["example_id"], symbol=row["symbol"], pattern=row["pattern"], label=row["label"],
-                window_start=row["window_start"], window_end=row["window_end"], asof_date=row["asof_date"],
+                window_start=row["window_start"], window_end=_optional_text(row.get("window_end")), asof_date=row["asof_date"],
                 expected_pivot_source_date=_optional_text(row.get("expected_pivot_source_date")),
                 expected_pivot_level=_optional_float(row.get("expected_pivot_level")), provenance=row["provenance"],
                 source_name=row["source_name"], source_reference=row["source_reference"], rationale=row["rationale"], split=row["split"],
@@ -102,7 +102,7 @@ def _run_label(label, *, context_days, boundary_tolerance, pivot_date_tolerance,
 def main() -> int:
     args = parse_args()
     if args.context_calendar_days < 180:
-        raise ValueError("context-calendar-days must be >=180 for the v0.2 120-session prior-uptrend window")
+        raise ValueError("context-calendar-days must be >=180 for the active 120-session prior-uptrend window")
     if args.pivot_price_tolerance_pct < 0:
         raise ValueError("pivot-price-tolerance-pct must be nonnegative")
     labels = _load_labels(ROOT / args.labels)
@@ -122,10 +122,11 @@ def main() -> int:
             "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
             "reference-first authoritative labels and pivot anchors are frozen before detector comparison",
             "OHLCV is truncated at each label asof_date; no future bars are supplied",
+            "source dimensions that are not published remain explicitly unscored rather than inferred",
             "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal",
             "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe",
             "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage",
-            "agreement requires pattern/boundary fidelity and source pivot fidelity when that evidence is available",
+            "agreement requires fidelity on every source-provided pattern/boundary/pivot dimension; partial-source MATCH is explicitly tagged",
             "no return/CAGR/PF outcome is inspected",
         ],
     }

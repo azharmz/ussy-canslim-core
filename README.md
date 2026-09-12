@@ -2,6 +2,33 @@
 
 Independent CAN SLIM research program for USSY.
 
+> ## START HERE — continuation / context recovery
+>
+> If a previous ChatGPT/research session is unavailable, **do not reconstruct project state from memory or from `main` alone**.
+>
+> Before making any change:
+>
+> 1. confirm the **active working branch**;
+> 2. read `docs/progress-board.md` **on that branch**;
+> 3. inspect the latest commits on that branch;
+> 4. read the latest relevant record under `docs/decisions/`;
+> 5. only then continue the `Current #33 next slice` / active-work section in the progress board.
+>
+> Current branch checkpoint: **#33 O'Neil Pattern Recognition Engine → P8 independent morphology validation** on `feat/p8-labelled-development-v0`.
+>
+> Critical recovery guardrails for the current P8 work:
+>
+> - DEVELOPMENT may be used to revise detector/evaluator semantics; VALIDATION may not.
+> - `NFLX` is the untouched VALIDATION case and remains **LOCKED** until DEVELOPMENT semantics are frozen.
+> - Do not tune against breakout performance, returns, CAGR, PF, FWD1, entry optimization, or other outcome evidence.
+> - Preserve source precision; do not invent missing boundaries, landmarks, or daily dates.
+> - Corporate-action normalization must be explicit and versioned; authoritative source prices remain preserved verbatim.
+> - Ambiguity and cross-pattern conflicts must remain explicit; do not silently pick a winning pattern.
+> - BaseIdentity / Lineage are not frozen while structural churn remains material.
+> - Do not start #34 until P8/#33 has a defensible final morphology verdict.
+>
+> The progress board is the canonical live status document. This README is only the recovery entry point and should stay concise.
+
 This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a production trading application. It owns CAN SLIM methodology, experiment specifications, evidence, progress, and research decisions.
 
 ## Project boundaries

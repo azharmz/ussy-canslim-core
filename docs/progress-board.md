@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-12
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is now frozen and must not alter frozen v1/FWD1 semantics.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen and must not alter frozen v1/FWD1 semantics.
 
 ## Canonical v1 state
 
@@ -38,7 +38,7 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 30 | C/A/S/I/M role fidelity | **COMPLETE** |
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
-| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — P8 v0.2 base identity merged** |
+| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — P8 authoritative DEVELOPMENT validation** |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
@@ -83,40 +83,52 @@ Missing/stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to
 
 ## #33 — O'Neil Pattern Recognition Engine
 
-#33 is active against frozen #32. The core DEVELOPMENT morphology slice and stable base-identity layer are now merged.
+#33 is active against frozen #32. Core morphology infrastructure is implemented; the current gate is independent authoritative DEVELOPMENT validation before detector freeze and untouched VALIDATION.
 
 Implemented:
 
 - strict R2 -> Yahoo -> Tiingo OHLCV routing, with fallback only on explicit `UNAVAILABLE`;
-- DEVELOPMENT-only execution guardrail;
-- preregistered geometry policy before broader validation;
-- `CUP_WITH_HANDLE` detector;
-- `CUP_WITHOUT_HANDLE` detector;
-- `DOUBLE_BOTTOM` detector;
-- `FLAT_BASE` detector;
-- prior-uptrend state;
+- DEVELOPMENT-only tuning/validation guardrail;
+- preregistered geometry policy;
+- `CUP_WITH_HANDLE`, `CUP_WITHOUT_HANDLE`, `DOUBLE_BOTTOM`, and `FLAT_BASE` detectors;
+- versioned prior-uptrend semantics with warm-up context;
 - pattern-specific landmark persistence and pivot derivation;
-- fault flags and ambiguity state;
+- fault flags and explicit ambiguity state;
 - synthetic morphology regression fixtures;
-- live SNPS 2023 workflow from R2;
-- deterministic structural `base_id` clustering keyed by `security_id + pattern_type + pattern-specific landmark dates`;
-- explicit recognition chronology with `first_recognized_date`, `last_supported_date`, member-window count and recognition dates.
+- deterministic structural `base_id` clustering;
+- structural lineage clustering with PIT/prefix-stable lineage IDs;
+- explicit cross-pattern conflict records and cup-family hierarchy;
+- authoritative `LabelEvidence` DEVELOPMENT/VALIDATION split;
+- authoritative evaluator v0.4 that scores raw windows emitted by the frozen detector and maps the selected window back to stable `base_id`/lineage.
 
-Live DEVELOPMENT result for SNPS 2023: 250 R2 sessions consumed successfully. The raw detector emitted 47 rolling morphology windows (38 flat-base, 9 double-bottom). Stable structural clustering reduces these to 13 base identities (10 flat-base identities, 3 double-bottom identities), with 4 identities retaining ambiguity. The main repeated double-bottom structure collapses 7 rolling windows into one stable identity, first recognized 2023-08-28 and supported through 2023-10-10.
+### Authoritative validation status
 
-This is still morphology evidence, not a trading candidate count and not performance evidence.
+| Example | Split | Pattern | Status | Evidence |
+|---|---|---|---|---|
+| SNPS (`p8-label-0001`) | DEVELOPMENT | FLAT_BASE | **MATCH / FROZEN** | start error 0d; end error 1d; pivot date error 0d; pivot price error ~0 |
+| NFLX (`p8-label-0002`) | VALIDATION | CUP_WITH_HANDLE | **LOCKED / UNTOUCHED** | do not inspect for tuning |
 
-Current #33 next slice:
+SNPS final emitted detector window is `2023-04-04 -> 2023-05-17` with pivot `2023-04-04 @ ~392.79000854`, matching the authoritative IBD anchor `2023-04-04 -> 2023-05-18` and pivot `392.79`. The selected emitted window maps to `base_f4e321a93cf8dce2` / `lineage_dead150a96867922`. Validation record: `docs/p8-snps-development-validation-v0.md`.
 
-1. define candidate-base segmentation/lineage so nearby evolving landmark identities are not overcounted as separate economic bases;
-2. formalize cross-pattern conflict lineage (`FLAT_BASE` vs `DOUBLE_BOTTOM`, cup-family hierarchy) without silently choosing a winner;
-3. expand labelled DEVELOPMENT examples and inspect false positives/false negatives against independent morphology labels;
-4. implement secondary `ASCENDING_BASE` and `BASE_ON_BASE` relationships after core lineage semantics are stable;
-5. only after morphology validation may #34 consume #33 output.
+The evaluator correction from identity-representative scoring to raw-emitted-window scoring is a data-model correction, not detector tuning: `BaseIdentity`/lineage intentionally summarize multiple rolling windows and can lose an individual member's exact boundaries. No synthetic window is created and no tolerance is relaxed.
+
+This remains morphology evidence, not trading-performance evidence.
+
+### Current #33 next slice
+
+1. promote the next source-first P0 authoritative example into DEVELOPMENT only after its source anchors/window are adjudicated and frozen;
+2. repeat multi-example DEVELOPMENT agreement/disagreement analysis across more than one pattern family;
+3. version any morphology-rule correction only when independently justified by source/theory and cross-example evidence;
+4. expand the DEVELOPMENT corpus before detector freeze;
+5. keep NFLX VALIDATION locked until DEVELOPMENT semantics are frozen;
+6. after freeze, open untouched VALIDATION once and issue the final P8 verdict;
+7. only after defensible P8 validation may #34 consume #33 output.
+
+Secondary `ASCENDING_BASE`, `BASE_ON_BASE`, and `IPO_BASE` remain deferred until the current core-pattern validation gate is sufficiently mature.
 
 Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
 
-#33 must not optimize detector definitions against CAGR/PF. The acceptance target remains morphology/landmark fidelity and reproducibility, not trading performance.
+#33 must not optimize detector definitions against CAGR/PF. Acceptance remains morphology/landmark fidelity and reproducibility, not trading performance.
 
 ## Frozen theory summary (#26-#31)
 
@@ -135,9 +147,10 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. **Continue #33** with candidate-base segmentation / lineage and cross-pattern conflict semantics.
-2. Expand labelled DEVELOPMENT morphology validation before using returns as evidence.
-3. Then implement #34 theory-faithful candidate generator.
-4. Run #35 semantic/morphology/candidate validation before performance research.
-5. Keep #36 execution/entry research parked and keep FWD1/EXH2 accumulating unchanged.
-6. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.
+1. **Continue #33 P8 authoritative DEVELOPMENT validation** with source-first examples.
+2. Freeze detector semantics only after a broader DEVELOPMENT corpus and explicit disagreement analysis.
+3. Open untouched VALIDATION once after freeze and issue final P8 verdict.
+4. Then implement #34 theory-faithful candidate generator.
+5. Run #35 semantic/morphology/candidate validation before performance research.
+6. Keep #36 execution/entry research parked and keep FWD1/EXH2 accumulating unchanged.
+7. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.

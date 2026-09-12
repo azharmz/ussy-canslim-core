@@ -2,7 +2,21 @@
 
 Last updated: 2026-09-13
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen and must not alter frozen v1/FWD1 semantics.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen.
+
+## Repository boundary for #33
+
+**Canonical #33 implementation and P8 morphology validation now live in `azharmz/ussy-oneil-patterns`.**
+
+This repository is the CAN SLIM parent/HQ. Local #33/P8 detector, lineage, evaluator, workflow, and labelled-development history is retained temporarily as research/migration evidence, but is **superseded as implementation source of truth**. No new #33 detector/evaluator development should be added here.
+
+Canonical reconciliation landed in `ussy-oneil-patterns` at merge:
+
+`261d667eecf8525b27e8a15b6980ba698e609848`
+
+Parent boundary decision: `docs/decisions/2026-09-13-33-canonical-repo-boundary.md`.
+
+For continuation/recovery of #33, open `ussy-oneil-patterns/README.md` first, then its `docs/progress-board.md`.
 
 ## Canonical v1 state
 
@@ -10,7 +24,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 |---|---|---|
 | Independent CAN SLIM project | COMPLETE | separate from TrendFoll |
 | Frozen Musaffa universe | COMPLETE / FROZEN | 1,327 current-compliant securities |
-| Production OHLCV / data infrastructure | COMPLETE | existing R2 daily OHLCV is the technical-data basis |
+| Production OHLCV / data infrastructure | COMPLETE | R2 daily OHLCV technical-data basis |
 | SEC/PIT fundamentals | COMPLETE / FROZEN | upstream `ussy-fundamentals` |
 | C / A | COMPLETE | PIT-safe historical attachment validated |
 | N / S / L proxies | COMPLETE | v1 proxy semantics frozen |
@@ -24,7 +38,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | EXH2 | LIVE / PROSPECTIVE | separate exhaustion sidecar |
 | Production integration | BLOCKED | FWD1 review gate not met |
 
-Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PORT1 gross CAGR 3.02–3.04%, gross max DD -43.36%, and SPY price-only CAGR context ~8.80%. These figures must not be used to tune the theory-faithful path.
+Historical v1 results remain frozen evidence and must not be used to tune the theory-faithful #33 path.
 
 ## Theory Fidelity / v2 path — #25 onward
 
@@ -38,8 +52,8 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 30 | C/A/S/I/M role fidelity | **COMPLETE** |
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
-| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — lineage/conflict merged; labelled DEVELOPMENT validation active** |
-| 34 | Theory-faithful candidate generator | NOT STARTED |
+| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — canonical repo `ussy-oneil-patterns`; P8 DEVELOPMENT validation** |
+| 34 | Theory-faithful candidate generator | **NOT STARTED / BLOCKED ON #33** |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
 
@@ -49,7 +63,7 @@ Canonical specification: `docs/methodology/theory-faithful-candidate-spec-v1.md`
 
 Decision record: `docs/decisions/2026-09-12-theory-faithful-candidate-spec-v1.md`.
 
-The spec deliberately avoids a single universal Boolean candidate flag. It preserves staged semantics:
+The staged contract remains:
 
 ```text
 BASE_RECOGNIZED
@@ -59,89 +73,95 @@ BREAKOUT_CONFIRMED
 CANSLIM_ELIGIBLE
 ```
 
-The initial `CANSLIM_ELIGIBLE` contract requires:
-
-```text
-valid named proper base
-+ pattern-specific pivot
-+ pivot crossing
-+ breakout-day volume >=1.40x prior-50-session average
-+ C primary screen PASS
-+ A primary screen PASS
-+ individual L screen PASS (transparent RS proxy >=80)
-+ M permits new buys
-```
-
-Attached evidence that is intentionally not promoted to a universal additional hard gate in this first theory-faithful candidate contract includes broader S supply descriptors, I sponsorship state, RS-line confirmation/divergence, industry-group leadership, non-price N catalyst state, close-above-pivot quality and 5% extension/buy-zone state.
-
-Important fundamental distinction:
-
-- C freezes recent quarterly EPS growth around >=25% as the core screen; revenue growth/acceleration remains required quality evidence, not a universal mandatory `revenue>=25%` conjunction.
-- A freezes sustained multi-year annual EPS growth around >=25% as the theory requirement; the exact reproducible aggregation/consistency adapter must be versioned before #35 and cannot be chosen from return optimization. The old v1 rule requiring each of three annual YoY observations individually >=25% is not treated as canonical O'Neil identity.
-
-Missing/stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
+The first theory-faithful candidate contract requires valid named morphology and a pattern-specific pivot before breakout/C/A/L/M integration. Missing or stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
 
 ## #33 — O'Neil Pattern Recognition Engine
 
-#33 is active against frozen #32. The core DEVELOPMENT morphology, stable identity, lineage, cross-pattern conflict, and validation protocol slices are merged.
+### Ownership
 
-Implemented:
+`azharmz/ussy-oneil-patterns` owns:
 
-- strict R2 -> Yahoo -> Tiingo OHLCV routing, with fallback only on explicit `UNAVAILABLE`;
-- DEVELOPMENT-only execution guardrail;
-- preregistered geometry policy before broader validation;
-- `CUP_WITH_HANDLE`, `CUP_WITHOUT_HANDLE`, `DOUBLE_BOTTOM`, and `FLAT_BASE` detectors;
-- prior-uptrend state;
-- pattern-specific landmark persistence and pivot derivation;
-- fault flags and ambiguity state;
-- synthetic morphology regression fixtures;
-- live SNPS 2023 workflow from R2;
-- deterministic structural `base_id` clustering keyed by `security_id + pattern_type + pattern-specific landmark dates`;
-- explicit recognition chronology with `first_recognized_date`, `last_supported_date`, member-window count and recognition dates;
-- conservative candidate-base lineage clustering for evolving same-pattern identities;
-- prefix/PIT-stable lineage IDs anchored to the earliest knowable identity;
-- explicit `OVERLAPPING_MORPHOLOGY` conflict records instead of silently choosing a winner;
-- explicit `CUP_FAMILY_HIERARCHY` for handle/no-handle variants sharing one cup root;
-- independent morphology-label schema and lineage-level TP/FN/FP/TN matcher;
-- `UNADJUDICATED` handling so incomplete labels are never silently counted as false positives;
-- preregistered broader label-pack readiness contract: at least two securities, positive and negative coverage for every implemented core pattern, and unique label IDs.
+- PIT-safe landmarks and base segmentation;
+- named O'Neil morphology implementation;
+- fault/ambiguity evidence;
+- pattern-specific structural pivots;
+- P8 labelled morphology validation;
+- versioned canonical #33 output.
 
-Live DEVELOPMENT lineage result for SNPS 2023: 250 R2 sessions consumed successfully. The raw detector emitted 47 rolling morphology windows. These collapse to 13 structural base identities and then to 4 conservative base lineages (3 Flat Base, 1 Double Bottom). One explicit unresolved Flat Base vs Double Bottom conflict is retained. These are morphology observations, not trading candidate counts and not performance evidence.
+This parent repo owns only the upstream #32 contract, roadmap/status, historical migration evidence, and later #34 consumption of a frozen #33 contract.
 
-Current #33 next slice:
+### Canonical P8 status
 
-1. build the actual independently adjudicated multi-security morphology label pack satisfying the frozen readiness contract;
-2. run labelled DEVELOPMENT error analysis across all four implemented core pattern types, including explicit negative windows;
-3. classify false positives / false negatives by morphology or landmark failure mode before changing any detector definition;
-4. implement secondary `ASCENDING_BASE` and `BASE_ON_BASE` relationships only after the core labelled validation is understood;
-5. only after morphology validation may #34 consume #33 output.
+The canonical oneil corpus currently contains five DEVELOPMENT examples spanning all four implemented core pattern families plus one locked VALIDATION example:
 
-Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
+| Example | Split | Pattern | Status |
+|---|---|---|---|
+| SNPS | DEVELOPMENT | FLAT_BASE | migrated; pending canonical oneil re-execution |
+| CTSH | DEVELOPMENT | CUP_WITH_HANDLE | migrated; explicit factor-4 pivot comparison normalization |
+| FOUR | DEVELOPMENT | CUP_WITH_HANDLE | migrated; pending canonical oneil re-execution |
+| SEI | DEVELOPMENT | DOUBLE_BOTTOM | migrated; pending canonical oneil re-execution |
+| AMZN | DEVELOPMENT | CUP_WITHOUT_HANDLE | migrated; pending canonical oneil re-execution |
+| NFLX | VALIDATION | CUP_WITH_HANDLE | **LOCKED / UNTOUCHED** |
 
-Validation contract: `docs/methodology/p8-morphology-validation-v0.md`.
+The former parallel parent implementation reported:
 
-#33 must not optimize detector definitions against CAGR/PF. The acceptance target remains morphology/landmark fidelity and reproducibility, not trading performance.
+```text
+source-dimension agreement: MATCH = 5
+matched detector evidence state: AMBIGUOUS = 5
+```
+
+That result is preserved only as **migration evidence**. It is not the canonical P8 verdict and must be reproduced or contradicted through the landmark-first oneil engine.
+
+Current unresolved morphology bands carried to the canonical repo include:
+
+- Double Bottom second-trough undercut semantics (SEI);
+- Cup-with-Handle handle-fault semantics (FOUR);
+- Cup-family CWH vs Cup-without-Handle hierarchy (AMZN);
+- general ambiguity/conflict behavior;
+- structural identity stability after any justified detector revision.
+
+### Local #33 code status
+
+Earlier #33/P8 work in this parent repo implemented routing, detectors, base identity/lineage, conflict handling, evaluator semantics, and CI. Those commits remain available for provenance and reconciliation. They are **not** to be extended as a second engine.
+
+Do not delete/rewrite that history during validation. Any later cleanup should be a separate non-destructive housekeeping task after unique evidence is verified preserved in the canonical repo.
+
+### #33 next slice
+
+Work continues in `ussy-oneil-patterns`, not here:
+
+1. run the migrated schema/corpus through canonical oneil CI;
+2. implement/finish canonical source-dimension evaluator adaptation to oneil outputs;
+3. execute only the five DEVELOPMENT labels;
+4. classify disagreement as source precision, corporate-action normalization, morphology, ambiguity/conflict, or evaluator semantics;
+5. issue `KEEP` / `REVISE` / `UNRESOLVED` morphology-only decisions;
+6. add targeted DEVELOPMENT evidence where required;
+7. freeze canonical detector semantics;
+8. open untouched NFLX VALIDATION exactly once;
+9. issue final P8/#33 verdict;
+10. only then allow #34 to begin.
+
+#33 must never optimize morphology against CAGR, PF, win rate, FWD1, post-breakout returns, or entry performance.
 
 ## Frozen theory summary (#26-#31)
 
-- Proper base: v1 generic 35-session/depth<=40% is a weak proxy; named morphology is required.
+- Proper base: generic 35-session/depth<=40% proxy is insufficient; named morphology is required.
 - Pivot: pattern-specific landmark, not arbitrary rolling high.
-- Breakout: pivot crossing event is distinct from close/hold quality; breakout-day volume >=1.40x prior 50 completed sessions is the canonical strong daily confirmation.
-- Leadership: RS>=80 is a useful leader screen but RS line and industry context are separate evidence.
+- Breakout: pivot crossing is distinct from close/hold quality; breakout-day volume confirmation is downstream of #33 morphology.
+- Leadership: RS>=80 is a useful leader screen but RS line and industry context remain separate evidence.
 - Component roles: C/A screens; S/I evidence/confirmation; M timing/context/risk gate.
-- Sell/risk: downstream state machine; v1 does not contain a canonical O'Neil sell engine.
+- Sell/risk: downstream state machine; not owned by #33.
 
 Canonical audit detail: `docs/methodology/oneil-theory-fidelity-audit-v1.md`.
 
 ## Forward tracks remain frozen
 
-FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/specification findings must not be retrofitted into either track.
+FWD1 remains frozen forward validation and EXH2 remains separate/prospective. Neither may be used to tune #33/P8 morphology semantics.
 
 ## Active work from here
 
-1. **Continue #33** by constructing the independently adjudicated multi-security morphology label pack.
-2. Run labelled DEVELOPMENT morphology validation and error taxonomy before detector changes.
-3. Then implement #34 theory-faithful candidate generator.
-4. Run #35 semantic/morphology/candidate validation before performance research.
-5. Keep #36 execution/entry research parked and keep FWD1/EXH2 accumulating unchanged.
-6. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.
+1. **Continue #33/P8 only in `ussy-oneil-patterns`.**
+2. Keep this parent repo synchronized with canonical #33 status/contract, not a duplicate implementation.
+3. Start #34 only after canonical P8/#33 final freeze.
+4. Keep #36 parked and FWD1/EXH2 accumulating unchanged.
+5. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.

@@ -16,19 +16,23 @@ on:
         required: true
         default: "2023-12-31"
   push:
-    branches: [main, feat/p8-conflict-layer-v0]
+    branches: [main, feat/p8-morphology-validation-v0]
     paths:
       - '.github/workflows/p8-pattern-engine-v0.yml'
       - 'src/canslim_research/pattern_engine.py'
       - 'src/canslim_research/pattern_identity.py'
       - 'src/canslim_research/pattern_lineage.py'
       - 'src/canslim_research/pattern_conflict.py'
+      - 'src/canslim_research/pattern_validation.py'
       - 'scripts/run_p8_pattern_engine.py'
+      - 'scripts/validate_p8_morphology.py'
       - 'tests/test_pattern_engine.py'
       - 'tests/test_pattern_identity.py'
       - 'tests/test_pattern_lineage.py'
       - 'tests/test_pattern_conflict.py'
+      - 'tests/test_pattern_validation.py'
       - 'docs/methodology/p8-pattern-engine-design-v0.md'
+      - 'docs/methodology/p8-morphology-validation-v0.md'
 
 permissions:
   contents: read
@@ -59,8 +63,8 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 yfinance
 
-      - name: Run morphology identity lineage and conflict regression tests
-        run: python -m pytest -q tests/test_pattern_engine.py tests/test_pattern_identity.py tests/test_pattern_lineage.py tests/test_pattern_conflict.py
+      - name: Run morphology regression tests
+        run: python -m pytest -q tests/test_pattern_engine.py tests/test_pattern_identity.py tests/test_pattern_lineage.py tests/test_pattern_conflict.py tests/test_pattern_validation.py
 
       - name: Run SNPS DEVELOPMENT morphology engine
         run: |

@@ -50,6 +50,8 @@ def _identity(
         confidence=confidence,
         representative={
             "pattern_type": pattern_type,
+            "pivot_level": pivot_price,
+            "pivot_source_date": pivot_date,
             "landmarks": landmarks,
         },
         recognition_dates=[first_recognized, last_supported],
@@ -77,6 +79,30 @@ def test_flat_base_adjacent_pivot_dates_merge_only_when_price_is_close():
     far_price = _identity(base_id="c", pivot_date="2023-07-18", pivot_price=500.0)
     assert len(cluster_base_lineages(close)) == 1
     assert len(cluster_base_lineages(close + [far_price])) == 2
+
+
+def test_lineage_id_is_prefix_stable_when_higher_confidence_member_arrives_later():
+    early = _identity(
+        base_id="early",
+        pivot_date="2023-07-17",
+        pivot_price=462.85,
+        first_recognized="2023-07-17",
+        last_supported="2023-07-17",
+        confidence=0.80,
+    )
+    later = _identity(
+        base_id="later",
+        pivot_date="2023-07-19",
+        pivot_price=465.67,
+        first_recognized="2023-08-18",
+        last_supported="2023-09-01",
+        confidence=0.90,
+    )
+    prefix = cluster_base_lineages([early])[0]
+    full = cluster_base_lineages([early, later])[0]
+    assert prefix.lineage_id == full.lineage_id
+    assert full.representative_base_id == "later"
+    assert full.anchor_signature == ["flat_left_high:2023-07-17"]
 
 
 def test_double_bottom_second_low_can_evolve_without_creating_new_lineage():

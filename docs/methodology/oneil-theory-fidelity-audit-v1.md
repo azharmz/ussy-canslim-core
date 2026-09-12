@@ -14,8 +14,8 @@ Audit frozen CAN SLIM quantitative v1 against William J. O'Neil / IBD methodolog
 | 27 | Pivot / buy-point definition | COMPLETE — theory audit |
 | 28 | Breakout + volume confirmation | COMPLETE — theory audit |
 | 29 | RS / leadership fidelity | COMPLETE — theory audit |
-| 30 | C/A/S/I/M role fidelity | NEXT |
-| 31 | Sell / risk-management fidelity | NOT STARTED |
+| 30 | C/A/S/I/M role fidelity | COMPLETE — theory audit |
+| 31 | Sell / risk-management fidelity | NEXT |
 | 32 | Theory-faithful candidate specification | NOT STARTED |
 | 33 | O'Neil Pattern Recognition Engine | NOT STARTED |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
@@ -82,43 +82,9 @@ A gap through a proper pivot can be a legitimate breakout. Daily OHLCV R2 can id
 ## #29 RS / Leadership Fidelity — conclusion
 Overall v1 L/leadership fidelity: **REASONABLE_PROXY, INCOMPLETE**.
 
-The frozen v1 correctly captures one important O'Neil/IBD idea: leaders should rank near the top of the market by relative price performance. But **L is not exhausted by a single cross-sectional percentile threshold**. Authoritative IBD material distinguishes at least three related but non-identical objects:
+The frozen v1 correctly captures one important O'Neil/IBD idea: leaders should rank near the top of the market by relative price performance. But `L` is not exhausted by a single cross-sectional percentile threshold. Authoritative IBD material distinguishes RS Rating, RS line, and industry-group leadership.
 
-1. **RS Rating** — cross-sectional price-performance rank versus other stocks;
-2. **RS line** — stock price performance versus a benchmark, conventionally the S&P 500;
-3. **industry-group leadership** — whether the stock is a leader within a strong/leading group rather than a sympathy laggard.
-
-### RS Rating
-IBD's traditional RS Rating is a 1–99 percentile-style rank of price performance over roughly the prior 12 months, with greater emphasis on recent performance. IBD guidance commonly treats **80 or higher** as desirable for emerging leaders; some historical educational material uses 85 or 90 as a stronger screening preference rather than a universal identity rule.
-
-Frozen v1 uses:
-
-```text
-RS_proxy_raw =
-    0.40 * return_63d
-  + 0.20 * return_126d
-  + 0.20 * return_189d
-  + 0.20 * return_252d
-
-RS_proxy_percentile >= 80
-```
-
-This is a transparent approximation and not the proprietary IBD formula. It is conceptually aligned with the historical idea of a recency-weighted 12-month rank and the >=80 leadership threshold.
-
-Important methodology evolution: in 2026 IBD publicly revised the Relative Strength Rating methodology. The 12-month, 6-month and 3-month ratings now use **more data points, multiple comparison periods and adjusted weightings** to respond faster and reduce drop-off effects. Therefore the simple 40/20/20/20 formula must remain labelled a **legacy-aligned proxy**, not an exact current-IBD replication.
-
-### RS line
-The RS line is separate from the RS Rating. Conceptually:
-
-```text
-RS_line_t ∝ StockPrice_t / Benchmark_t
-```
-
-IBD conventionally compares with the S&P 500. A rising line means the stock is outperforming the benchmark; a falling line means underperformance.
-
-For a proper breakout, IBD prefers the RS line to be at or near a new high. A particularly bullish condition is the RS line reaching new high ground **before** the stock's own price breakout. Current IBD guidance also clarifies that the line need not be at an all-time high: being at the highest level of the base-forming period is acceptable, and if short of that level it should at least be trending upward. A falling RS line as price approaches highs is a bearish divergence.
-
-Carry separately into #32 rather than collapsing into `RS_percentile`:
+Frozen principles for #32:
 
 ```text
 rs_rating_proxy_percentile
@@ -128,51 +94,119 @@ rs_line_base_period_high
 rs_line_at_base_period_high
 rs_line_new_high_before_price
 rs_line_bearish_divergence
-```
-
-A stock can have a high trailing RS Rating while its current RS line is deteriorating. Therefore `RS percentile >=80` alone can retain former leaders that are weakening now.
-
-### Industry leadership
-O'Neil/IBD methodology prefers **leading stocks in leading industry groups**, not weaker sympathy plays. This is distinct from individual-stock RS Rating.
-
-IBD's industry taxonomy/ranking is itself an evolving proprietary data product. In April 2026 IBD consolidated its long-standing 197 industry groups to **145 groups**; 142 groups currently participate in performance ranking. The refreshed ranking uses market-cap weighting and a six-month performance horizon with more data points for responsiveness. This means a faithful research specification must distinguish the enduring theory concept (strong group / strong stock within group) from any specific historical IBD taxonomy or proprietary current ranking.
-
-The current project does not have a PIT-compatible replica of IBD's proprietary industry-group history. Therefore #29 does **not** authorize inventing a hard industry-group threshold from incompatible classifications. Industry leadership should remain an explicit evidence state until a defensible PIT group/ranking contract exists.
-
-### Leader vs laggard semantics
-`L` should be interpreted as **leadership evidence**, not merely "RS >= 80 = PASS, otherwise FAIL." A theory-faithful representation should preserve at least:
-
-```text
-individual_RS_rating_strength
-RS_line_confirmation_or_divergence
 industry_group_strength
 stock_rank_within_group
 ```
 
-These may ultimately have different roles (screening criterion, confirmation, descriptor or disqualifier); #30 will audit that role taxonomy across CAN SLIM components before #32 freezes Boolean semantics.
+The v1 `RS_proxy_percentile >= 80` is a faithful general leader screen, but the 40/20/20/20 formula remains a transparent legacy-aligned proxy rather than an exact current-IBD replication. RS-line and industry leadership are not implemented in v1.
 
-### Audit of frozen v1 L
-| v1 component | Verdict | Reason |
-|---|---|---|
-| recency-weighted ~12-month price-strength score | **REASONABLE_PROXY** | captures historical RS Rating concept, but not proprietary/current 2026 formula |
-| cross-sectional percentile rank | **HIGH CONCEPTUAL FIDELITY** | RS Rating is fundamentally a relative rank vs other stocks |
-| threshold `>=80` | **HIGH FIDELITY AS GENERAL LEADER SCREEN** | current/historical IBD commonly uses 80+ as desirable, not a universal standalone buy rule |
-| RS line vs S&P 500 | **NOT_IMPLEMENTED** | distinct leadership evidence missing |
-| RS line new high / base-period high | **NOT_IMPLEMENTED** | important breakout confirmation / early leadership evidence missing |
-| RS line bearish divergence | **NOT_IMPLEMENTED** | weakening leader state not represented |
-| industry-group strength | **NOT_IMPLEMENTED as strategy input** | v1 diagnostic-only; proprietary/PIT taxonomy not replicated |
-| stock leadership within group | **NOT_IMPLEMENTED** | leader-vs-laggard group context missing |
+## #30 C/A/S/I/M Role Fidelity — conclusion
+The central finding is that CAN SLIM letters are **not all the same kind of Boolean gate**. O'Neil/IBD combines screening criteria, confirmation/evidence, market context and timing/disqualification. A theory-faithful engine should preserve those roles instead of forcing every letter into identical `PASS/FAIL` semantics.
 
-### Frozen #29 principles for #32
-1. Preserve **RS Rating** and **RS line** as separate concepts.
-2. `RS >=80` is a faithful general leadership screen, not sufficient proof of complete `L` fidelity.
-3. Do not claim the v1 40/20/20/20 formula exactly reproduces IBD; current IBD changed its RS calculations in 2026.
-4. Add RS-line state relative to the S&P 500 using PIT daily prices available at T0.
-5. Prefer RS-line strength at/near the base-period high; preserve "new high before price" as especially bullish evidence.
-6. Preserve falling RS line near a price high as bearish-divergence evidence.
-7. Keep industry-group leadership conceptually separate from individual RS Rating.
-8. Do not fabricate a proprietary IBD industry ranking from incompatible sector classifications; require a defensible PIT classification/ranking contract or preserve `NOT_EVALUABLE/NOT_IMPLEMENTED`.
-9. Do not tune RS thresholds or industry cutoffs from CAGR/PF before #32 is frozen.
+### C — Current quarterly earnings
+Authoritative IBD guidance treats strong recent quarterly earnings and sales growth as a **primary fundamental screening criterion**. A common rule of thumb is roughly `>=25%` year-over-year EPS growth, preferably accompanied by strong sales growth and acceleration. Current-quarter strength is evidence that the business is already producing the growth institutions seek.
+
+Role classification:
+
+```text
+PRIMARY_SCREENING_CRITERION
++ quality/context evidence (sales growth, acceleration, margins)
+```
+
+The v1 rule `EPS YoY >=25% AND Revenue YoY >=25%` is a deliberately strict quantitative approximation. It is faithful to the broad growth-screen concept but should not be described as the only literal O'Neil definition of C. O'Neil/IBD also looks at acceleration, quality and context; exceptional IPO/recovery situations can be discussed separately rather than silently forced into the normal screen.
+
+### A — Annual earnings
+Strong annual earnings growth over multiple years is likewise a **primary fundamental screening criterion**, intended to distinguish sustained business quality from a one-quarter spike. Historical O'Neil/IBD material commonly emphasizes about `25%+` growth and strong ROE/consistency.
+
+Role classification:
+
+```text
+PRIMARY_SCREENING_CRITERION
++ quality/consistency evidence
+```
+
+The v1 requirement that each of the latest three consecutive annual EPS YoY observations be >=25% is a transparent strict proxy. It captures sustained growth but is stronger/more Boolean than the broader theory, which also considers multi-year growth rate, stability, ROE and business context.
+
+### S — Supply and demand
+S is fundamentally the **market mechanism** behind price movement, not merely one numeric breakout-volume rule. O'Neil emphasizes supply of shares/float, demand from institutions, volume behavior, buybacks and accumulation. Breakout volume is one important observable manifestation of demand.
+
+Role classification:
+
+```text
+CONFIRMATION / DEMAND EVIDENCE
++ structural descriptor (share supply / float / buybacks)
+```
+
+Therefore v1 `Volume >=1.40x prior-50d average` is highly faithful as a **breakout-demand confirmation**, but it is not a complete representation of S. Shares outstanding/float/buybacks and broader accumulation remain separate evidence rather than mandatory invented gates.
+
+### I — Institutional sponsorship
+I asks whether capable institutional investors are sponsoring the stock and whether sponsorship is improving. Authoritative IBD material favors **increasing institutional ownership**, quality of owning funds and price/volume accumulation; institutions are also the dominant source of demand in leading growth stocks.
+
+Role classification:
+
+```text
+CONFIRMATION / QUALITY EVIDENCE
++ trend descriptor
+```
+
+The theory does **not** support treating one arbitrary manager-count-delta threshold as the whole meaning of I. The v1 13F rule `manager_count_latest - manager_count_prior > 0` is a transparent narrow proxy for increasing sponsorship. Its historical non-promotion as a hard filter is therefore not a contradiction of CAN SLIM: I can remain important evidence without functioning as a universal binary gate.
+
+For #32 preserve distinct evidence such as:
+
+```text
+fund_count_trend
+quality_of_sponsors          # if defensibly measurable
+ownership_concentration
+price_volume_accumulation
+institutional_state_evaluable
+```
+
+Do not invent unavailable proprietary Sponsorship/Accumulation ratings.
+
+### M — Market direction
+M has the clearest **timing-gate/context** role. IBD states that most stocks move with the general market; a follow-through day gives a green light to begin buying leading stocks, while a `market in correction` means **new buys are off the table**. Distribution days and exposure guidance modulate risk as an uptrend weakens.
+
+Role classification:
+
+```text
+MARKET_CONTEXT
++ ENTRY_TIMING_GATE
++ RISK_THROTTLE / DISQUALIFIER for new buys in correction
+```
+
+This is categorically different from C/A. M is not a company-quality attribute; it controls whether otherwise attractive setups should be acted upon and at what exposure.
+
+The frozen v1 SPY-only/full-M proxies are acknowledged approximations of proprietary IBD market-state interpretation. The prior full-M SPY+QQQ ablation result must not be used to redefine theory: lower historical CAGR does not negate M's theoretical timing/risk role.
+
+### Role matrix
+| Component | Primary theoretical role | Secondary role | v1 role fidelity |
+|---|---|---|---|
+| C | **Screening criterion** | growth quality/acceleration | **REASONABLE but over-Boolean** |
+| A | **Screening criterion** | consistency/quality | **REASONABLE but over-Boolean** |
+| S | **Demand confirmation/evidence** | supply/float descriptor | **PARTIAL** — breakout volume strong, full S incomplete |
+| I | **Institutional confirmation/evidence** | sponsorship trend/quality descriptor | **PARTIAL** — manager-count delta narrow proxy |
+| M | **Market timing/context gate** | exposure/risk throttle, disqualifier for new buys in correction | **CONCEPTUALLY HIGH, implementation proxy** |
+
+### Implication for prior ablations
+The historical findings that hard C, hard I and stricter full-M did not improve v1 economics must **not** be reinterpreted as evidence that C/I/M are theoretically irrelevant. Those ablations answered whether specific quantitative Boolean proxies added historical performance to v1; #30 answers a different question: what role the original methodology assigns to each component.
+
+This distinction is now frozen:
+
+```text
+THEORY_ROLE != HISTORICAL_ABLATION_RESULT
+```
+
+A component can remain theoretically important while a particular proxy is not promoted as a hard performance filter.
+
+### Frozen #30 principles for #32
+1. Do not force all CAN SLIM letters into identical Boolean semantics.
+2. Treat C and A primarily as **fundamental screening criteria**, while preserving growth quality/acceleration context.
+3. Treat S primarily as **supply/demand evidence and breakout confirmation**; breakout volume is not the entirety of S.
+4. Treat I as **institutional sponsorship confirmation/evidence**, not automatically a single hard manager-count gate.
+5. Treat M as **market context + timing gate + risk throttle**; correction state can disqualify new buys even when company/setup evidence is strong.
+6. Preserve `NOT_EVALUABLE/NOT_IMPLEMENTED` rather than coercing missing evidence to FAIL or PASS.
+7. Keep theory roles separate from v1 performance-ablation outcomes.
+8. No threshold changes may be selected from historical CAGR/PF before #32 is frozen.
 
 ## #33 — O'Neil Pattern Recognition Engine
 After #32 is frozen, #33 will translate the theory specification into reproducible pattern/landmark recognition using existing daily OHLCV R2. Scope includes base segmentation, swing/landmark extraction, named-pattern detectors, base relationships, quality/fault flags, ambiguity handling and morphology validation. It must not optimize definitions against trading performance.
@@ -181,10 +215,10 @@ After #32 is frozen, #33 will translate the theory specification into reproducib
 - Do not retrofit theory-fidelity changes into FWD1.
 - Do not mix EXH2 with this audit.
 - Do not optimize X3 or other entry rules now.
-- Do not tune pattern/breakout/RS thresholds from historical returns.
+- Do not tune pattern/breakout/RS/C/A/S/I/M thresholds from historical returns.
 - Do not treat v1 candidates as O'Neil ground truth.
 - Do not start #33 before #32 is frozen.
 - Preserve explicit uncertainty/evidence states rather than forcing full confirmation.
 
 ## Next action
-Proceed with **#30 — C/A/S/I/M Role Fidelity**. Audit whether each CAN SLIM letter functions in O'Neil methodology as a hard Boolean filter, screening criterion, confirmation, descriptor, context, or disqualifier. Then complete #31 before freezing #32.
+Proceed with **#31 — Sell / Risk-Management Fidelity**. Audit initial loss cutting, failed breakouts, profit-taking, holding exceptional winners, round-trip behavior and major sell signals. After #31, freeze #32 before any #33 implementation.

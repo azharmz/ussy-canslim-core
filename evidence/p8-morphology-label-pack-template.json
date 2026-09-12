@@ -1,0 +1,11 @@
+{
+  "label_pack_version": "p8-morphology-label-pack-v0.1",
+  "status": "TEMPLATE_NOT_ADJUDICATED",
+  "guardrails": [
+    "Labels must be independently adjudicated from morphology evidence.",
+    "Do not use return, CAGR, profit factor, FWD1 outcome, or downstream eligibility to create or alter labels.",
+    "Date envelopes must be fixed before detector comparison.",
+    "A pack is broader-validation-ready only after positive and negative coverage exists for all four implemented core patterns across at least two securities."
+  ],
+  "labels": []
+}

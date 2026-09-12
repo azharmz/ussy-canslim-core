@@ -93,12 +93,36 @@ per-label matched lineage IDs
 
 These are morphology diagnostics only. No minimum precision/recall promotion threshold is frozen yet because the first purpose is to expose the error taxonomy and review detector semantics on a broader labelled DEVELOPMENT set.
 
+## Broader label-pack readiness v0.1
+
+Before a label collection is treated as a **broader DEVELOPMENT validation pack**, it must satisfy a coverage contract that is independent of detector performance:
+
+```text
+>= 2 distinct securities
++ >= 1 POSITIVE label for each implemented core pattern
++ >= 1 NEGATIVE label for each implemented core pattern
++ unique label_id values
+```
+
+This is a dataset-readiness rule, not a detector promotion threshold. It does not say how much precision or recall is acceptable and it must not be relaxed after inspecting detector metrics.
+
+Check a proposed pack with:
+
+```text
+python scripts/check_p8_label_pack.py \
+  --labels evidence/<label-pack>.json \
+  --require-ready
+```
+
+The repository includes `evidence/p8-morphology-label-pack-template.json` only as an empty schema/guardrail template. It is intentionally **not** an adjudicated validation set and must never be counted as evidence.
+
 ## Workflow
 
 1. Run `scripts/run_p8_pattern_engine.py` on a preregistered DEVELOPMENT symbol/window.
-2. Independently adjudicate labels without consulting returns.
+2. Independently adjudicate labels without consulting returns or detector outcomes.
 3. Save labels as JSON under a versioned evidence/fixture path.
-4. Run:
+4. Check broader pack readiness with `scripts/check_p8_label_pack.py`.
+5. Run:
 
 ```text
 python scripts/validate_p8_morphology.py \
@@ -107,9 +131,9 @@ python scripts/validate_p8_morphology.py \
   --output results/<validation-report>.json
 ```
 
-5. Review FN, adjudicated FP, conflicts, and unadjudicated lineages.
-6. Any detector-threshold change requires a versioned methodology decision before rerunning the labelled set.
+6. Review FN, adjudicated FP, conflicts, and unadjudicated lineages.
+7. Any detector-threshold change requires a versioned methodology decision before rerunning the labelled set.
 
 ## Next DEVELOPMENT work
 
-The next data task is to build a labelled set spanning multiple securities and all four implemented core pattern types, including explicit negative windows. The current SNPS 2023 live run remains useful detector evidence but is not by itself sufficient morphology validation.
+Build the actual independently adjudicated multi-security label pack that satisfies the frozen coverage rule above, then inspect false positives/false negatives by morphology error taxonomy. The current SNPS 2023 live run remains useful detector evidence but is not by itself sufficient morphology validation.

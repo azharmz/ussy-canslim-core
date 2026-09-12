@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date, timedelta
 import json
 import sys
 from collections import Counter
@@ -25,10 +26,10 @@ from canslim_research.pattern_conflict import (  # noqa: E402
     CONFLICT_LAYER_VERSION,
     detect_pattern_conflicts,
 )
-from canslim_research.pattern_engine import (  # noqa: E402
-    DEFAULT_POLICY,
+from canslim_research.pattern_engine import DEFAULT_POLICY  # noqa: E402
+from canslim_research.pattern_engine_v02 import (  # noqa: E402
     PATTERN_ENGINE_VERSION,
-    detect_patterns,
+    detect_patterns_v02,
 )
 from canslim_research.pattern_identity import (  # noqa: E402
     BASE_IDENTITY_VERSION,
@@ -39,12 +40,14 @@ from canslim_research.pattern_lineage import (  # noqa: E402
     cluster_base_lineages,
 )
 
+WARMUP_CALENDAR_DAYS = 240
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run P8 DEVELOPMENT pattern engine")
     parser.add_argument("--ticker", required=True)
-    parser.add_argument("--start", required=True, help="inclusive YYYY-MM-DD")
-    parser.add_argument("--end", required=True, help="inclusive YYYY-MM-DD")
+    parser.add_argument("--start", required=True, help="inclusive evaluation start YYYY-MM-DD")
+    parser.add_argument("--end", required=True, help="inclusive evaluation end YYYY-MM-DD")
     parser.add_argument("--security-id")
     parser.add_argument("--snapshot-date", default="current")
     parser.add_argument("--split", default="DEVELOPMENT")
@@ -61,15 +64,21 @@ def run(args: argparse.Namespace) -> dict:
 
     ticker = args.ticker.strip().upper()
     security_id = args.security_id or resolve_security_id_from_r2(ticker, args.snapshot_date)
+    fetch_start = (date.fromisoformat(args.start) - timedelta(days=WARMUP_CALENDAR_DAYS)).isoformat()
     routed = route_ohlcv(
         {
-            "r2": lambda: r2_provider(security_id=security_id, start=args.start, end=args.end),
-            "yahoo": lambda: yahoo_provider(ticker=ticker, start=args.start, end=args.end),
-            "tiingo": lambda: tiingo_provider(ticker=ticker, start=args.start, end=args.end),
+            "r2": lambda: r2_provider(security_id=security_id, start=fetch_start, end=args.end),
+            "yahoo": lambda: yahoo_provider(ticker=ticker, start=fetch_start, end=args.end),
+            "tiingo": lambda: tiingo_provider(ticker=ticker, start=fetch_start, end=args.end),
         }
     )
     rows = list(routed.rows)
-    candidates = detect_patterns(rows, min_confidence=args.min_confidence)
+    all_candidates = detect_patterns_v02(rows, min_confidence=args.min_confidence)
+    candidates = [
+        candidate
+        for candidate in all_candidates
+        if args.start <= candidate.base_end_or_breakout_ready_date <= args.end
+    ]
     bases = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(bases)
     conflicts = detect_pattern_conflicts(lineages, bases)
@@ -97,6 +106,7 @@ def run(args: argparse.Namespace) -> dict:
         reverse=True,
     )[:25]
 
+    requested_row_count = sum(args.start <= str(row["date"])[:10] <= args.end for row in rows)
     return {
         "stage": "P8",
         "workstream": "#33 O'Neil Pattern Recognition Engine",
@@ -105,14 +115,20 @@ def run(args: argparse.Namespace) -> dict:
         "security_id": security_id,
         "requested_start": args.start,
         "requested_end": args.end,
+        "warmup_fetch_start": fetch_start,
+        "warmup_calendar_days": WARMUP_CALENDAR_DAYS,
         "selected_source": routed.source,
         "source_metadata": dict(routed.metadata),
-        "input_row_count": len(rows),
+        "input_row_count_with_warmup": len(rows),
+        "requested_interval_row_count": requested_row_count,
         "pattern_engine_version": PATTERN_ENGINE_VERSION,
         "base_identity_version": BASE_IDENTITY_VERSION,
         "base_lineage_version": BASE_LINEAGE_VERSION,
         "conflict_layer_version": CONFLICT_LAYER_VERSION,
-        "policy": DEFAULT_POLICY.__dict__,
+        "policy": {
+            **DEFAULT_POLICY.__dict__,
+            "prior_uptrend_semantics": "lowest low in prior 120 completed sessions to base-start high >=30%",
+        },
         "min_confidence": args.min_confidence,
         "raw_candidate_window_count": len(candidates),
         "raw_ambiguous_window_count": ambiguous,
@@ -134,6 +150,8 @@ def run(args: argparse.Namespace) -> dict:
         "all_candidates": [candidate.to_dict() for candidate in candidates],
         "guardrails": [
             "DEVELOPMENT only",
+            "240 calendar days of warmup are fetched before the requested evaluation interval",
+            "warmup-only candidates are excluded from reported evaluation output",
             "OHLCV morphology only; no return/CAGR/PF labels",
             "named pattern is not forced when rules are unmet",
             "pattern-specific pivot is persisted with landmarks",

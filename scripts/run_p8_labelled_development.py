@@ -55,18 +55,12 @@ def _load_labels(path: Path) -> list[MorphologyLabel]:
                 expected_pivot_source_date=_optional_text(row.get("expected_pivot_source_date")),
                 expected_pivot_level=_optional_float(row.get("expected_pivot_level")), provenance=row["provenance"],
                 source_name=row["source_name"], source_reference=row["source_reference"], rationale=row["rationale"], split=row["split"],
+                window_start_precision=(row.get("window_start_precision") or "DAY").strip().upper(),
             ))
     return labels
 
 
 def _evaluation_security_id(label: MorphologyLabel, routed) -> tuple[str, str]:
-    """Return a stable clustering key without pretending external data is R2 membership.
-
-    R2-selected examples retain the canonical security_id. When the current R2
-    membership genuinely lacks a source-first historical example, the evaluator
-    uses an explicit ticker-scoped identity. This identity is local to P8
-    morphology validation and does not mutate or broaden the frozen universe.
-    """
     security_id = routed.metadata.get("security_id")
     if security_id:
         return str(security_id), "R2_SECURITY_ID"
@@ -84,19 +78,8 @@ def _run_label(label, *, context_days, boundary_tolerance, pivot_date_tolerance,
     candidates = detect_patterns_v02(routed.rows)
     identities = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(identities)
-    agreement = evaluate_positive_label(
-        label, lineages, identities, candidates,
-        boundary_tolerance_days=boundary_tolerance,
-        pivot_date_tolerance_days=pivot_date_tolerance,
-        pivot_price_tolerance_pct=pivot_price_tolerance,
-    )
-    return {
-        "label": label.__dict__, "security_id": security_id, "security_identity_kind": security_identity_kind,
-        "context_start": context_start, "selected_source": routed.source, "source_metadata": dict(routed.metadata),
-        "input_row_count": len(routed.rows), "candidate_count": len(candidates), "base_identity_count": len(identities),
-        "base_lineage_count": len(lineages), "agreement": agreement.to_dict(),
-        "same_pattern_lineages": [item.to_dict() for item in lineages if item.pattern_type == label.pattern],
-    }
+    agreement = evaluate_positive_label(label, lineages, identities, candidates, boundary_tolerance_days=boundary_tolerance, pivot_date_tolerance_days=pivot_date_tolerance, pivot_price_tolerance_pct=pivot_price_tolerance)
+    return {"label": label.__dict__, "security_id": security_id, "security_identity_kind": security_identity_kind, "context_start": context_start, "selected_source": routed.source, "source_metadata": dict(routed.metadata), "input_row_count": len(routed.rows), "candidate_count": len(candidates), "base_identity_count": len(identities), "base_lineage_count": len(lineages), "agreement": agreement.to_dict(), "same_pattern_lineages": [item.to_dict() for item in lineages if item.pattern_type == label.pattern]}
 
 
 def main() -> int:
@@ -111,25 +94,7 @@ def main() -> int:
     if not labels:
         raise ValueError("no DEVELOPMENT labels selected")
     results = [_run_label(label, context_days=args.context_calendar_days, boundary_tolerance=args.boundary_tolerance_days, pivot_date_tolerance=args.pivot_date_tolerance_days, pivot_price_tolerance=args.pivot_price_tolerance_pct) for label in labels]
-    report = {
-        "stage":"P8", "scope":"AUTHORITATIVE_LABELLED_DEVELOPMENT", "pattern_engine_version":PATTERN_ENGINE_VERSION,
-        "base_identity_version":BASE_IDENTITY_VERSION, "base_lineage_version":BASE_LINEAGE_VERSION, "labelled_eval_version":LABELLED_EVAL_VERSION,
-        "context_calendar_days":args.context_calendar_days, "boundary_tolerance_days":args.boundary_tolerance_days,
-        "pivot_date_tolerance_days":args.pivot_date_tolerance_days, "pivot_price_tolerance_pct":args.pivot_price_tolerance_pct,
-        "result_count":len(results), "agreement_counts":{state:sum(item["agreement"]["agreement_state"]==state for item in results) for state in sorted({item["agreement"]["agreement_state"] for item in results})},
-        "results":results,
-        "guardrails":[
-            "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
-            "reference-first authoritative labels and pivot anchors are frozen before detector comparison",
-            "OHLCV is truncated at each label asof_date; no future bars are supplied",
-            "source dimensions that are not published remain explicitly unscored rather than inferred",
-            "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal",
-            "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe",
-            "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage",
-            "agreement requires fidelity on every source-provided pattern/boundary/pivot dimension; partial-source MATCH is explicitly tagged",
-            "no return/CAGR/PF outcome is inspected",
-        ],
-    }
+    report = {"stage":"P8", "scope":"AUTHORITATIVE_LABELLED_DEVELOPMENT", "pattern_engine_version":PATTERN_ENGINE_VERSION, "base_identity_version":BASE_IDENTITY_VERSION, "base_lineage_version":BASE_LINEAGE_VERSION, "labelled_eval_version":LABELLED_EVAL_VERSION, "context_calendar_days":args.context_calendar_days, "boundary_tolerance_days":args.boundary_tolerance_days, "pivot_date_tolerance_days":args.pivot_date_tolerance_days, "pivot_price_tolerance_pct":args.pivot_price_tolerance_pct, "result_count":len(results), "agreement_counts":{state:sum(item["agreement"]["agreement_state"]==state for item in results) for state in sorted({item["agreement"]["agreement_state"] for item in results})}, "results":results, "guardrails":["DEVELOPMENT split only; VALIDATION labels are not read into detector comparison", "reference-first authoritative labels and anchors are frozen before detector comparison", "OHLCV is truncated at each label asof_date; no future bars are supplied", "source dimensions are scored only at their published precision; absent dimensions remain unscored", "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal", "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe", "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage", "agreement requires fidelity on every source-provided pattern/boundary/pivot dimension", "no return/CAGR/PF outcome is inspected"]}
     output = ROOT / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2)+"\n", encoding="utf-8")

@@ -8,7 +8,7 @@ from typing import Iterable
 from .pattern_identity import BaseIdentity
 
 
-BASE_LINEAGE_VERSION = "p8-base-lineage-v0.1"
+BASE_LINEAGE_VERSION = "p8-base-lineage-v0.2"
 
 
 @dataclass
@@ -92,9 +92,6 @@ def _same_anchor(identity: BaseIdentity, other: BaseIdentity) -> bool:
     if not names:
         return anchor_signature(identity) == anchor_signature(other)
 
-    # Most patterns require exact root landmarks. Flat bases are allowed a tiny
-    # pivot-date drift when the pivot prices are effectively the same; this
-    # captures one evolving base whose rolling left-high advances by 1-2 bars.
     if identity.pattern_type == "FLAT_BASE":
         left_date = _landmark_date(identity, "flat_left_high")
         right_date = _landmark_date(other, "flat_left_high")
@@ -138,6 +135,13 @@ def _representative(members: list[BaseIdentity]) -> BaseIdentity:
     )[0]
 
 
+def _origin_member(members: list[BaseIdentity]) -> BaseIdentity:
+    # The lineage ID is anchored to the earliest identity that was knowable.
+    # Later evolution can change the best representative without changing the
+    # lineage ID, preserving prefix/PIT stability.
+    return sorted(members, key=lambda item: (item.first_recognized_date, item.base_id))[0]
+
+
 def cluster_base_lineages(identities: Iterable[BaseIdentity]) -> list[BaseLineage]:
     items = list(identities)
     if not items:
@@ -146,16 +150,17 @@ def cluster_base_lineages(identities: Iterable[BaseIdentity]) -> list[BaseLineag
     lineages: list[BaseLineage] = []
     for members in _component_groups(items):
         representative = _representative(members)
-        anchor = anchor_signature(representative)
+        origin = _origin_member(members)
+        anchor = anchor_signature(origin)
         states = {member.pattern_evidence_state for member in members}
         lineages.append(
             BaseLineage(
-                lineage_id=_stable_lineage_id(representative.security_id, representative.pattern_type, anchor),
-                security_id=representative.security_id,
-                pattern_type=representative.pattern_type,
+                lineage_id=_stable_lineage_id(origin.security_id, origin.pattern_type, anchor),
+                security_id=origin.security_id,
+                pattern_type=origin.pattern_type,
                 anchor_signature=list(anchor),
                 member_base_ids=sorted(member.base_id for member in members),
-                first_recognized_date=min(member.first_recognized_date for member in members),
+                first_recognized_date=origin.first_recognized_date,
                 last_supported_date=max(member.last_supported_date for member in members),
                 member_identity_count=len(members),
                 pattern_evidence_state="AMBIGUOUS" if "AMBIGUOUS" in states else "PASS",

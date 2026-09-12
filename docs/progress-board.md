@@ -1,8 +1,8 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-12
+Last updated: 2026-09-13
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is now frozen and must not alter frozen v1/FWD1 semantics.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen and must not alter frozen v1/FWD1 semantics.
 
 ## Canonical v1 state
 
@@ -38,7 +38,7 @@ Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PO
 | 30 | C/A/S/I/M role fidelity | **COMPLETE** |
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
-| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — P8 v0.2 base identity merged** |
+| 33 | **O'Neil Pattern Recognition Engine** | **IN PROGRESS — lineage/conflict merged; labelled DEVELOPMENT validation active** |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
@@ -83,38 +83,42 @@ Missing/stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to
 
 ## #33 — O'Neil Pattern Recognition Engine
 
-#33 is active against frozen #32. The core DEVELOPMENT morphology slice and stable base-identity layer are now merged.
+#33 is active against frozen #32. The core DEVELOPMENT morphology, stable identity, lineage, cross-pattern conflict, and validation protocol slices are merged.
 
 Implemented:
 
 - strict R2 -> Yahoo -> Tiingo OHLCV routing, with fallback only on explicit `UNAVAILABLE`;
 - DEVELOPMENT-only execution guardrail;
 - preregistered geometry policy before broader validation;
-- `CUP_WITH_HANDLE` detector;
-- `CUP_WITHOUT_HANDLE` detector;
-- `DOUBLE_BOTTOM` detector;
-- `FLAT_BASE` detector;
+- `CUP_WITH_HANDLE`, `CUP_WITHOUT_HANDLE`, `DOUBLE_BOTTOM`, and `FLAT_BASE` detectors;
 - prior-uptrend state;
 - pattern-specific landmark persistence and pivot derivation;
 - fault flags and ambiguity state;
 - synthetic morphology regression fixtures;
 - live SNPS 2023 workflow from R2;
 - deterministic structural `base_id` clustering keyed by `security_id + pattern_type + pattern-specific landmark dates`;
-- explicit recognition chronology with `first_recognized_date`, `last_supported_date`, member-window count and recognition dates.
+- explicit recognition chronology with `first_recognized_date`, `last_supported_date`, member-window count and recognition dates;
+- conservative candidate-base lineage clustering for evolving same-pattern identities;
+- prefix/PIT-stable lineage IDs anchored to the earliest knowable identity;
+- explicit `OVERLAPPING_MORPHOLOGY` conflict records instead of silently choosing a winner;
+- explicit `CUP_FAMILY_HIERARCHY` for handle/no-handle variants sharing one cup root;
+- independent morphology-label schema and lineage-level TP/FN/FP/TN matcher;
+- `UNADJUDICATED` handling so incomplete labels are never silently counted as false positives;
+- preregistered broader label-pack readiness contract: at least two securities, positive and negative coverage for every implemented core pattern, and unique label IDs.
 
-Live DEVELOPMENT result for SNPS 2023: 250 R2 sessions consumed successfully. The raw detector emitted 47 rolling morphology windows (38 flat-base, 9 double-bottom). Stable structural clustering reduces these to 13 base identities (10 flat-base identities, 3 double-bottom identities), with 4 identities retaining ambiguity. The main repeated double-bottom structure collapses 7 rolling windows into one stable identity, first recognized 2023-08-28 and supported through 2023-10-10.
-
-This is still morphology evidence, not a trading candidate count and not performance evidence.
+Live DEVELOPMENT lineage result for SNPS 2023: 250 R2 sessions consumed successfully. The raw detector emitted 47 rolling morphology windows. These collapse to 13 structural base identities and then to 4 conservative base lineages (3 Flat Base, 1 Double Bottom). One explicit unresolved Flat Base vs Double Bottom conflict is retained. These are morphology observations, not trading candidate counts and not performance evidence.
 
 Current #33 next slice:
 
-1. define candidate-base segmentation/lineage so nearby evolving landmark identities are not overcounted as separate economic bases;
-2. formalize cross-pattern conflict lineage (`FLAT_BASE` vs `DOUBLE_BOTTOM`, cup-family hierarchy) without silently choosing a winner;
-3. expand labelled DEVELOPMENT examples and inspect false positives/false negatives against independent morphology labels;
-4. implement secondary `ASCENDING_BASE` and `BASE_ON_BASE` relationships after core lineage semantics are stable;
+1. build the actual independently adjudicated multi-security morphology label pack satisfying the frozen readiness contract;
+2. run labelled DEVELOPMENT error analysis across all four implemented core pattern types, including explicit negative windows;
+3. classify false positives / false negatives by morphology or landmark failure mode before changing any detector definition;
+4. implement secondary `ASCENDING_BASE` and `BASE_ON_BASE` relationships only after the core labelled validation is understood;
 5. only after morphology validation may #34 consume #33 output.
 
 Design contract: `docs/methodology/p8-pattern-engine-design-v0.md`.
+
+Validation contract: `docs/methodology/p8-morphology-validation-v0.md`.
 
 #33 must not optimize detector definitions against CAGR/PF. The acceptance target remains morphology/landmark fidelity and reproducibility, not trading performance.
 
@@ -135,8 +139,8 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. **Continue #33** with candidate-base segmentation / lineage and cross-pattern conflict semantics.
-2. Expand labelled DEVELOPMENT morphology validation before using returns as evidence.
+1. **Continue #33** by constructing the independently adjudicated multi-security morphology label pack.
+2. Run labelled DEVELOPMENT morphology validation and error taxonomy before detector changes.
 3. Then implement #34 theory-faithful candidate generator.
 4. Run #35 semantic/morphology/candidate validation before performance research.
 5. Keep #36 execution/entry research parked and keep FWD1/EXH2 accumulating unchanged.

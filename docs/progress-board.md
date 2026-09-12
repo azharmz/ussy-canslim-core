@@ -2,135 +2,39 @@
 
 Last updated: 2026-09-12
 
-Estimated infrastructure/methodology progress: **~100% for the frozen v1 research stack**.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. A separate post-v1 Theory Fidelity Audit is active and must not alter frozen v1/FWD1 semantics.
 
-This is **not production readiness**. Genuine forward evidence (FWD1) is still at the beginning of its observation clock. A separate post-v1 **Theory Fidelity Audit** is now active and must not alter frozen v1/FWD1 semantics.
+## Canonical v1 state
 
-| Area | Status | Canonical evidence / note |
+| Area | Status | Note |
 |---|---|---|
-| Independent project boundary | COMPLETE | CAN SLIM independent from TrendFoll |
-| Research universe | COMPLETE / FROZEN | 1,327 current Musaffa-compliant securities |
-| SEC/PIT fundamental engine | COMPLETE / FROZEN | upstream `ussy-fundamentals` |
-| C-v1 / A-v1 | COMPLETE / FROZEN | PIT-safe; historical attachment validated |
-| Technical baseline | COMPLETE / FROZEN | N/S/L/M proxy baseline |
-| Historical candidates | COMPLETE | 10,731 candidates / 860 securities; legacy v1 proxy, not O'Neil ground truth |
-| Entry timing X1-X4 | COMPLETE / PARKED | historical work complete; X3 preferred within v1, but entry research is parked during theory audit |
-| Portfolio construction PORT1 | COMPLETE / VALIDATED | frozen 100k / max 7 / 1/7 sizing / RS+volume priority |
-| Historical robustness ROB1 | COMPLETE | retrospective, not OOS |
-| QQQ/full-M | COMPLETE / NOT PROMOTED | run `34576910915`; risk throttle, lower CAGR |
-| EXH2 | PRE-REGISTERED / LIVE | prospective exhaustion sidecar; cannot alter FWD1 |
-| FWD1 | LIVE / ACCUMULATING | frozen post-2026-09-09 forward validation |
-| I0 identifier feasibility | COMPLETE | 1,010/1,327 deterministic US-ISIN→CUSIP9 |
-| I1 current/live 13F PIT | COMPLETE / DATA GATE PASS | run `34603142916` |
-| I1 historical 13F state | COMPLETE / VALIDATED | run `34654725293`; all 53 official SEC datasets |
-| I1 uncertainty mask | COMPLETE / VALIDATED | run `34656995462` |
-| I1 canonical R2 snapshot | COMPLETE / READY | publish run `34663714292` |
-| Historical I-v1 attachment | COMPLETE / VALIDATED | run `34663929577`; 0 future-availability violations |
-| I-v1 historical ablation | **COMPLETE / NOT PROMOTED** | canonical run `34664388792`; hard I filter not additive for preferred X3 |
-| CAN SLIM quantitative v1 | **RESEARCH COMPLETE** | historical economics remain weak vs passive SPY |
-| Theory Fidelity Audit | **ACTIVE** | #26 and #27 complete; #28 next |
+| Independent CAN SLIM project | COMPLETE | separate from TrendFoll |
+| Frozen Musaffa universe | COMPLETE / FROZEN | 1,327 current-compliant securities |
+| Production OHLCV / data infrastructure | COMPLETE | existing R2 daily OHLCV is the technical-data basis |
+| SEC/PIT fundamentals | COMPLETE / FROZEN | upstream `ussy-fundamentals` |
+| C / A | COMPLETE | PIT-safe historical attachment validated |
+| N / S / L proxies | COMPLETE | v1 proxy semantics frozen |
+| I institutional sponsorship | COMPLETE / NOT PROMOTED as hard filter | descriptor retained |
+| M / SPY+QQQ ablation | COMPLETE / NOT PROMOTED | v1 evidence frozen |
+| Historical candidates v1 | COMPLETE | 10,731 / 860 securities; proxy candidates, not O'Neil ground truth |
+| X1-X4 / X3 | COMPLETE / PARKED | historical v1 work complete; no current entry optimization |
+| PORT1 / costs / robustness | COMPLETE | retrospective evidence frozen |
+| CAN SLIM quantitative v1 | **RESEARCH COMPLETE** | historical economics weak vs passive SPY |
+| FWD1 | LIVE / ACCUMULATING | frozen forward validation |
+| EXH2 | LIVE / PROSPECTIVE | separate exhaustion sidecar |
 | Production integration | BLOCKED | FWD1 review gate not met |
 
-## Frozen historical baseline
+Historical v1 reference remains approximately X3 PF 1.163, PF ex-top10 1.145, PORT1 gross CAGR 3.02–3.04%, gross max DD -43.36%, and SPY price-only CAGR context ~8.80%. These figures must not be used to tune the theory-fidelity track.
 
-Preferred historical v1 execution remains X3; X1 remains mandatory control. Both are parked as active research while theory fidelity is audited.
-
-```text
-X3 trade-level PF            ≈ 1.163
-X3 PF ex-top10               ≈ 1.145
-PORT1 X3 gross CAGR          ≈ 3.02–3.04%
-PORT1 X3 gross max DD        ≈ -43.36%
-PORT1 X3 CAGR @20bp RT       ≈ 2.38–2.40%
-PORT1 X3 max DD @20bp RT     ≈ -50.94%
-SPY price-only CAGR context  ≈ 8.80%
-```
-
-C-v1 and A-v1 remain descriptors rather than hard performance filters. Full-M SPY+QQQ and hard I were also not promoted.
-
-## Institutional Sponsorship — I-v1
-
-Current/live filing-level validation `34603142916` = SUCCESS. Historical state canonical run `34654725293` = SUCCESS with all 53 official SEC datasets and 14,529,166 state-change events. Historical uncertainty run `34656995462` = SUCCESS; ambiguous lineages are quarantined rather than interpreted as zero sponsorship.
-
-Canonical immutable snapshot was published by run `34663714292`:
-
-```text
-pointer = institutional_sponsorship/current.json
-manifest = institutional_sponsorship/snapshots/2026-09-12/run-34663714292/manifest.json
-history source run = 34654725293
-uncertainty source run = 34656995462
-```
-
-Historical availability remains conservatively frozen as `SEC filing_date + 1 calendar day`; live/current uses exact EDGAR `accepted_at`. Quarter-end is never treated as availability.
-
-Frozen I-v1 rule:
-
-```text
-I_delta = manager_count_latest - manager_count_prior
-PASS = I_delta > 0
-FAIL = I_delta <= 0
-NOT_EVALUABLE = missing / non-consecutive / unmapped / uncertain
-```
-
-Historical PIT attachment run `34663929577` = SUCCESS:
-
-```text
-candidates        = 10,731
-PASS              = 1,902
-FAIL              = 2,888
-NOT_EVALUABLE     = 5,941
-I-evaluable       = 4,790
-future violations = 0
-```
-
-Canonical ablation run `34664388792` did not support promotion of I-v1 as a hard filter. Institutional sponsorship remains a descriptor; no post-hoc manager-count/growth/share/value threshold search is opened.
-
-## FWD1
-
-Forward boundary is exclusive `2026-09-09`; first forward session is `2026-09-10`.
-
-```text
-status = ACCUMULATING
-data_gate_pass = true
-forward_candidate_count = 0
-closed_x3_portfolio_trades = 0
-completed_calendar_months = 0
-review_eligible = false
-```
-
-Formal review requires both:
-
-```text
->= 12 completed calendar months
-AND
->= 50 closed X3 portfolio trades
-```
-
-Passing the gate means REVIEW_ELIGIBLE, never automatic production promotion. Theory Fidelity Audit results must not be retrofitted into FWD1.
-
-## EXH2
-
-EXH2 remains prospective and separate from FWD1:
-
-```text
-signal_date > 2026-09-11
-extreme shock >= +5.3333%
-T+1 rejection = Close(T+1) < Open(T+1) AND Close(T+1) < Close(T0)
-primary endpoint = breakdown below pivot by T+3
-```
-
-Review requires >=50 mature rejected extreme-shock observations and >=50 mature non-rejected extreme-shock controls. EXH2 must not shape Theory Fidelity Audit rules.
-
-## Theory Fidelity Audit — post-v1 track
-
-The dividing line is explicit: **#1–24 are the completed/frozen v1 research track; #25 onward is the new theory-fidelity track.** The new track asks whether the v1 candidate generator actually represents O'Neil/CAN SLIM methodology. It does not optimize v1.
+## Theory Fidelity Audit — #25 onward
 
 | # | Workstream | Status |
 |---:|---|---|
 | 25 | Theory Fidelity Audit — O'Neil vs engine v1 | **ACTIVE** |
-| 26 | Proper-base definitions | **COMPLETE — theory audit** |
-| 27 | Pivot / buy-point definition | **COMPLETE — theory audit** |
-| 28 | Breakout + volume confirmation | **NEXT** |
-| 29 | RS / leadership fidelity | NOT STARTED |
+| 26 | Proper-base definitions | **COMPLETE** |
+| 27 | Pivot / buy-point definition | **COMPLETE** |
+| 28 | Breakout + volume confirmation | **COMPLETE** |
+| 29 | RS / leadership fidelity | **NEXT** |
 | 30 | C/A/S/I/M role fidelity | NOT STARTED |
 | 31 | Sell / risk-management fidelity | NOT STARTED |
 | 32 | Theory-faithful candidate specification | NOT STARTED |
@@ -139,58 +43,46 @@ The dividing line is explicit: **#1–24 are the completed/frozen v1 research tr
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
 
-### #26 Proper Base — frozen audit conclusion
+### #26 Proper Base
+**WEAK_PROXY** for v1. Generic prior-35-session/depth<=40% consolidation does not identify O'Neil morphology. Core future structures include CWH, cup without handle, double bottom and flat base, with base-on-base, ascending base and IPO-base special structures preserved. Pattern-detector thresholds are not authorized until #32.
 
-Overall v1 proper-base fidelity: **WEAK_PROXY**. The generic prior-35-session/depth<=40% proxy captures consolidation broadly but does not identify O'Neil-specific morphology. Core future morphology includes cup with handle, cup without handle, double bottom, and flat base; base-on-base, ascending base, and IPO base are preserved as legitimate additional/special structures. No detector thresholds are authorized by this theory conclusion.
+### #27 Pivot / Buy Point
+**WEAK-to-REASONABLE_PROXY** for v1. Pivot is pattern-specific structural resistance, not an arbitrary rolling high. CWH uses handle high; cup without handle prior/left high; double bottom middle W peak; flat base base/left high; ascending base final/pattern resistance; base-on-base derives pivot from the second base. The 5% buy zone is execution/anti-chasing, not pivot identity.
 
-### #27 Pivot / Buy Point — frozen audit conclusion
+### #28 Breakout + Volume Confirmation
+**COMPLETE. Overall v1 fidelity: REASONABLE_PROXY.**
 
-Overall v1 pivot fidelity: **WEAK-to-REASONABLE_PROXY**. Structural pivot is pattern-specific, not an arbitrary rolling high:
+Frozen conclusions:
 
-```text
-CWH                 -> handle high
-Cup without handle  -> prior / left-side high
-Double bottom       -> middle W peak
-Flat base           -> base / left-side high
-Ascending base      -> final / pattern structural resistance
-Base-on-base        -> pivot of second-base morphology
-```
+- breakout event = price passes/clears the proper pattern-specific pivot;
+- daily close above pivot is desirable breakout-quality/hold evidence, not the universal definition of whether the pivot was crossed;
+- strong price action includes a close above resistance and preferably high in the day's range;
+- canonical strong-volume confirmation = daily volume >=1.40x the **prior 50 completed sessions'** average daily volume;
+- initial-breakout-day volume confirmation is preferred; an initially light pivot cross may receive later confirmation, but that later date must be preserved and never backdated;
+- a low-volume cross is not a fully confirmed textbook breakout;
+- gap-through-pivot can be a legitimate breakout; daily R2 can identify the gap event, but special 5/15-minute breakaway-gap entry protocols cannot be reconstructed from daily bars;
+- the 5% buy zone is execution/extension state, not breakout identity.
 
-The historical fixed-price buffer above resistance is legacy methodology. The 5% buy zone is an execution/anti-chasing concept, not the pivot itself. Exact fidelity of `T0 close > pivot` belongs to #28.
+Audit of v1 technical conditions:
+
+| v1 rule | Fidelity |
+|---|---|
+| `T0 Close > pivot` | **OVER-STRICT PROXY** — end-of-day hold imposed as trigger |
+| `T0 Close <= pivot*1.05` | **SEMANTIC MISMATCH / REASONABLE EXECUTION PROXY** |
+| `T0 Volume >=1.40x prior-50d avg` | **HIGH FIDELITY** |
+| T0-only volume confirmation | **TOO STRICT FOR FULL THEORY** |
 
 Canonical detail: `docs/methodology/oneil-theory-fidelity-audit-v1.md`.
 
 ## #33 — O'Neil Pattern Recognition Engine
+Pattern recognition remains a dedicated workstream after #32. It will use existing daily OHLCV in R2 for candidate-base segmentation, swing/landmark extraction, CWH/cup-no-handle/DB/flat/ascending detectors, base-on-base state, faulty-base flags, ambiguity/confidence handling and morphology validation. It must not start before #32 and must not optimize morphology against CAGR/PF.
 
-Pattern recognition is now a dedicated workstream between theory specification and candidate generation. It will translate the frozen #32 specification into reproducible recognition from existing daily OHLCV in R2.
-
-Expected scope:
-
-- candidate-base segmentation;
-- swing / landmark extraction;
-- CWH, cup-without-handle, double-bottom, flat-base and ascending-base detectors;
-- base-on-base relationship/state tracking;
-- faulty-base / quality flags;
-- ambiguity / confidence handling;
-- morphology validation fixtures and labelled validation.
-
-It must not start before #32 is frozen and must not optimize pattern definitions against CAGR/PF. Initial validation is morphology/landmark fidelity, not trading performance.
-
-Decision record: `docs/decisions/2026-09-12-theory-fidelity-pattern-engine.md`.
-
-## Periodic control policy
-
-On each control cycle audit `ussy-data`, `ussy-fundamentals`, and `ussy-canslim-research`. Update source-of-truth only for meaningful state transitions, new canonical evidence, resolved blockers, or infrastructure/data-quality failures.
-
-Never modify frozen X3/PORT1/FWD1 semantics from monitoring or interim forward outcomes. Never reinterpret stale/invalid evidence as a zero signal. Do not reopen historical threshold tuning merely to improve outcomes.
+## Forward tracks remain frozen
+FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into either track.
 
 ## Active work from here
-
-1. **Execute #28 Breakout + Volume Confirmation theory audit.**
-2. Continue #29–31; then freeze #32 Theory-Faithful Candidate Specification.
-3. Only after #32, begin #33 O'Neil Pattern Recognition Engine using existing R2 OHLCV.
-4. Keep FWD1 accumulating unchanged.
-5. Keep EXH2 accumulating prospectively and separately.
-6. Maintain production OHLCV, SPY/QQQ, fundamentals, and 13F infrastructure/QC.
-7. Do not tune C/A, M, I, X3, PORT1, or pattern definitions from retrospective/forward interim outcomes.
-8. Revisit production eligibility only when the frozen FWD1 review gate is met.
+1. **Execute #29 RS / Leadership Fidelity.**
+2. Continue #30–31, then freeze #32 Theory-Faithful Candidate Specification.
+3. Only after #32, begin #33 Pattern Recognition Engine using R2 OHLCV.
+4. Keep FWD1 and EXH2 accumulating unchanged.
+5. Do not tune theory/pattern/breakout rules from historical or interim forward performance.

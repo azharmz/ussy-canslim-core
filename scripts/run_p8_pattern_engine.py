@@ -30,6 +30,10 @@ from canslim_research.pattern_identity import (  # noqa: E402
     BASE_IDENTITY_VERSION,
     cluster_base_identities,
 )
+from canslim_research.pattern_lineage import (  # noqa: E402
+    BASE_LINEAGE_VERSION,
+    cluster_base_lineages,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -63,11 +67,14 @@ def run(args: argparse.Namespace) -> dict:
     rows = list(routed.rows)
     candidates = detect_patterns(rows, min_confidence=args.min_confidence)
     bases = cluster_base_identities(candidates, security_id=security_id)
+    lineages = cluster_base_lineages(bases)
 
     counts = Counter(candidate.pattern_type for candidate in candidates)
     base_counts = Counter(base.pattern_type for base in bases)
+    lineage_counts = Counter(lineage.pattern_type for lineage in lineages)
     ambiguous = sum(candidate.pattern_evidence_state == "AMBIGUOUS" for candidate in candidates)
     ambiguous_bases = sum(base.pattern_evidence_state == "AMBIGUOUS" for base in bases)
+    ambiguous_lineages = sum(lineage.pattern_evidence_state == "AMBIGUOUS" for lineage in lineages)
     latest = sorted(
         candidates,
         key=lambda candidate: (candidate.base_end_or_breakout_ready_date, candidate.confidence),
@@ -76,6 +83,11 @@ def run(args: argparse.Namespace) -> dict:
     latest_bases = sorted(
         bases,
         key=lambda base: (base.last_supported_date, base.confidence),
+        reverse=True,
+    )[:25]
+    latest_lineages = sorted(
+        lineages,
+        key=lambda lineage: (lineage.last_supported_date, lineage.confidence),
         reverse=True,
     )[:25]
 
@@ -92,6 +104,7 @@ def run(args: argparse.Namespace) -> dict:
         "input_row_count": len(rows),
         "pattern_engine_version": PATTERN_ENGINE_VERSION,
         "base_identity_version": BASE_IDENTITY_VERSION,
+        "base_lineage_version": BASE_LINEAGE_VERSION,
         "policy": DEFAULT_POLICY.__dict__,
         "min_confidence": args.min_confidence,
         "raw_candidate_window_count": len(candidates),
@@ -100,8 +113,13 @@ def run(args: argparse.Namespace) -> dict:
         "base_identity_count": len(bases),
         "ambiguous_base_count": ambiguous_bases,
         "base_pattern_counts": dict(sorted(base_counts.items())),
+        "base_lineage_count": len(lineages),
+        "ambiguous_lineage_count": ambiguous_lineages,
+        "lineage_pattern_counts": dict(sorted(lineage_counts.items())),
+        "latest_base_lineages": [lineage.to_dict() for lineage in latest_lineages],
         "latest_base_identities": [base.to_dict() for base in latest_bases],
         "latest_raw_candidates": [candidate.to_dict() for candidate in latest],
+        "all_base_lineages": [lineage.to_dict() for lineage in lineages],
         "all_base_identities": [base.to_dict() for base in bases],
         "all_candidates": [candidate.to_dict() for candidate in candidates],
         "guardrails": [
@@ -110,6 +128,8 @@ def run(args: argparse.Namespace) -> dict:
             "named pattern is not forced when rules are unmet",
             "pattern-specific pivot is persisted with landmarks",
             "rolling windows sharing the same pattern-specific structural landmarks collapse to one stable base_id",
+            "nearby same-pattern base identities may collapse into one lineage only under conservative pattern-specific root anchors",
+            "cross-pattern types remain separate at lineage stage; hierarchy/conflict resolution is a later explicit layer",
             "first_recognized_date is the earliest as-of date the frozen detector could recognize that structural identity",
         ],
     }
@@ -121,7 +141,7 @@ def main() -> int:
     output = ROOT / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    hidden = {"all_candidates", "all_base_identities"}
+    hidden = {"all_candidates", "all_base_identities", "all_base_lineages"}
     print(json.dumps({key: value for key, value in report.items() if key not in hidden}, indent=2))
     return 0
 

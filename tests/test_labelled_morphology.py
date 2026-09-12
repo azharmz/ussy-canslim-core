@@ -9,8 +9,8 @@ from canslim_research.pattern_identity import BaseIdentity, structural_signature
 from canslim_research.pattern_lineage import BaseLineage
 
 
-def _label(split="DEVELOPMENT", *, with_pivot=True, with_end=True, precision="DAY", pivot_date=True, pivot_price=True):
-    return MorphologyLabel("example", "SNPS", "FLAT_BASE", "POSITIVE", "2023-04-04", "2023-05-18" if with_end else None, "2023-05-18", "2023-04-04" if with_pivot and pivot_date else None, 392.79 if with_pivot and pivot_price else None, "AUTHORITATIVE_SOURCE", "IBD", "https://example.test", "source anchored", split, precision)
+def _label(split="DEVELOPMENT", *, with_pivot=True, with_end=True, precision="DAY", pivot_date=True, pivot_price=True, adjustment=1.0):
+    return MorphologyLabel("example", "SNPS", "FLAT_BASE", "POSITIVE", "2023-04-04", "2023-05-18" if with_end else None, "2023-05-18", "2023-04-04" if with_pivot and pivot_date else None, 392.79 if with_pivot and pivot_price else None, "AUTHORITATIVE_SOURCE", "IBD", "https://example.test", "source anchored", split, precision, adjustment)
 
 
 def _candidate(start="2023-04-04", end="2023-05-17", *, pivot_date="2023-04-04", pivot_level=392.79, confidence=.9):
@@ -83,6 +83,21 @@ def test_pivot_price_can_be_validated_without_source_pivot_date():
 def test_wrong_price_fails_even_when_source_does_not_publish_pivot_date():
     label=_label(with_end=False,pivot_date=False,pivot_price=True)
     assert _eval(_candidate(pivot_date="2023-05-17",pivot_level=410.91),label).agreement_state=="LANDMARK_DISAGREEMENT"
+
+
+def test_source_pivot_is_compared_on_documented_split_adjusted_basis():
+    label=_label(with_end=False,pivot_date=False,pivot_price=True,adjustment=4.0)
+    candidate=_candidate(pivot_date="2023-05-17",pivot_level=392.79/4.0)
+    r=_eval(candidate,label)
+    assert r.agreement_state=="MATCH"; assert r.pivot_price_error_pct==0.0
+    assert any("normalized by documented factor 4" in item for item in r.rationale)
+
+
+def test_nonpositive_pivot_adjustment_is_rejected():
+    label=_label(with_end=False,pivot_date=False,pivot_price=True,adjustment=0.0)
+    try: _eval(_candidate(),label)
+    except ValueError as exc: assert "adjustment factor" in str(exc)
+    else: raise AssertionError("nonpositive adjustment must fail")
 
 
 def test_missing_pattern_is_explicit_miss():

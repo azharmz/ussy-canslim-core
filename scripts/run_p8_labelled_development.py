@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from collections import Counter
 from datetime import date, timedelta
 import json
 import sys
@@ -83,6 +84,23 @@ def _run_label(label, *, context_days, boundary_tolerance, pivot_date_tolerance,
     return {"label": label.__dict__, "security_id": security_id, "security_identity_kind": security_identity_kind, "context_start": context_start, "selected_source": routed.source, "source_metadata": dict(routed.metadata), "input_row_count": len(routed.rows), "candidate_count": len(candidates), "base_identity_count": len(identities), "base_lineage_count": len(lineages), "agreement": agreement.to_dict(), "same_pattern_lineages": [item.to_dict() for item in lineages if item.pattern_type == label.pattern]}
 
 
+def _detector_resolution_state(result: dict) -> str:
+    candidate = result["agreement"].get("matched_raw_candidate")
+    if candidate is None:
+        return "NO_MATCHED_CANDIDATE"
+    return str(candidate.get("pattern_evidence_state") or "UNKNOWN")
+
+
+def _summary_counts(results: list[dict]) -> tuple[dict[str, int], dict[str, int], dict[str, int]]:
+    agreement = Counter(item["agreement"]["agreement_state"] for item in results)
+    detector_resolution = Counter(_detector_resolution_state(item) for item in results)
+    joint = Counter(
+        f'{item["agreement"]["agreement_state"]}:{_detector_resolution_state(item)}'
+        for item in results
+    )
+    return dict(sorted(agreement.items())), dict(sorted(detector_resolution.items())), dict(sorted(joint.items()))
+
+
 def main() -> int:
     args = parse_args()
     if args.context_calendar_days < 180:
@@ -95,7 +113,37 @@ def main() -> int:
     if not labels:
         raise ValueError("no DEVELOPMENT labels selected")
     results = [_run_label(label, context_days=args.context_calendar_days, boundary_tolerance=args.boundary_tolerance_days, pivot_date_tolerance=args.pivot_date_tolerance_days, pivot_price_tolerance=args.pivot_price_tolerance_pct) for label in labels]
-    report = {"stage":"P8", "scope":"AUTHORITATIVE_LABELLED_DEVELOPMENT", "pattern_engine_version":PATTERN_ENGINE_VERSION, "base_identity_version":BASE_IDENTITY_VERSION, "base_lineage_version":BASE_LINEAGE_VERSION, "labelled_eval_version":LABELLED_EVAL_VERSION, "context_calendar_days":args.context_calendar_days, "boundary_tolerance_days":args.boundary_tolerance_days, "pivot_date_tolerance_days":args.pivot_date_tolerance_days, "pivot_price_tolerance_pct":args.pivot_price_tolerance_pct, "result_count":len(results), "agreement_counts":{state:sum(item["agreement"]["agreement_state"]==state for item in results) for state in sorted({item["agreement"]["agreement_state"] for item in results})}, "results":results, "guardrails":["DEVELOPMENT split only; VALIDATION labels are not read into detector comparison", "reference-first authoritative labels and anchors are frozen before detector comparison", "OHLCV is truncated at each label asof_date; no future bars are supplied", "source dimensions are scored only at their published precision; absent dimensions remain unscored", "source pivot prices remain immutable; documented split-adjustment factors normalize only the comparison basis", "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal", "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe", "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage", "agreement requires fidelity on every source-provided pattern/boundary/pivot dimension", "no return/CAGR/PF outcome is inspected"]}
+    agreement_counts, detector_resolution_counts, joint_counts = _summary_counts(results)
+    report = {
+        "stage":"P8",
+        "scope":"AUTHORITATIVE_LABELLED_DEVELOPMENT",
+        "pattern_engine_version":PATTERN_ENGINE_VERSION,
+        "base_identity_version":BASE_IDENTITY_VERSION,
+        "base_lineage_version":BASE_LINEAGE_VERSION,
+        "labelled_eval_version":LABELLED_EVAL_VERSION,
+        "context_calendar_days":args.context_calendar_days,
+        "boundary_tolerance_days":args.boundary_tolerance_days,
+        "pivot_date_tolerance_days":args.pivot_date_tolerance_days,
+        "pivot_price_tolerance_pct":args.pivot_price_tolerance_pct,
+        "result_count":len(results),
+        "agreement_counts":agreement_counts,
+        "matched_detector_evidence_state_counts":detector_resolution_counts,
+        "agreement_by_detector_evidence_state":joint_counts,
+        "results":results,
+        "guardrails":[
+            "DEVELOPMENT split only; VALIDATION labels are not read into detector comparison",
+            "reference-first authoritative labels and anchors are frozen before detector comparison",
+            "OHLCV is truncated at each label asof_date; no future bars are supplied",
+            "source dimensions are scored only at their published precision; absent dimensions remain unscored",
+            "source pivot prices remain immutable; documented split-adjustment factors normalize only the comparison basis",
+            "R2 membership absence is explicit UNAVAILABLE and may fall through to Yahoo/Tiingo; ambiguous or broken R2 resolution remains terminal",
+            "external-source evaluation identities are P8-local ticker keys and do not alter the frozen Musaffa universe",
+            "authoritative scoring uses only raw windows actually emitted by the frozen detector; selected windows are mapped back to stable base_id/lineage",
+            "agreement requires fidelity on every source-provided pattern/boundary/pivot dimension",
+            "MATCH describes source-dimension agreement only; matched detector PASS/AMBIGUOUS state is reported separately and ambiguity is never promoted to clean confirmation",
+            "no return/CAGR/PF outcome is inspected"
+        ]
+    }
     output = ROOT / args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2)+"\n", encoding="utf-8")

@@ -14,10 +14,17 @@ import os
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, timedelta
 from typing import Any
 
 from .ohlcv_router import ProviderResult, SourceStatus, validate_ohlcv_rows
+
+
+class R2TickerNotInSnapshot(LookupError):
+    """Ticker is genuinely absent from the requested R2 membership snapshot."""
+
+
+class R2TickerAmbiguous(LookupError):
+    """Ticker maps to more than one security_id and must not silently fall back."""
 
 
 def _records_from_frame(frame) -> tuple[dict[str, Any], ...]:
@@ -84,9 +91,9 @@ def resolve_security_id_from_r2(ticker: str, snapshot_date: str = "current") -> 
         if str(row.get("ticker", "")).upper() == ticker.upper()
     ]
     if not matches:
-        raise LookupError(f"ticker {ticker} not present in R2 membership snapshot {snapshot_date}")
+        raise R2TickerNotInSnapshot(f"ticker {ticker} not present in R2 membership snapshot {snapshot_date}")
     if len(set(matches)) != 1:
-        raise LookupError(f"ticker {ticker} maps to multiple security_ids in snapshot {snapshot_date}: {sorted(set(matches))}")
+        raise R2TickerAmbiguous(f"ticker {ticker} maps to multiple security_ids in snapshot {snapshot_date}: {sorted(set(matches))}")
     return matches[0]
 
 
@@ -122,6 +129,34 @@ def r2_provider(*, security_id: str, start: str, end: str) -> ProviderResult:
         return _validate_result(source, rows, object_key=key, security_id=security_id)
     except Exception as exc:
         return ProviderResult(source, SourceStatus.FAILED, reason=f"{type(exc).__name__}: {exc}")
+
+
+def r2_ticker_provider(*, ticker: str, start: str, end: str, snapshot_date: str = "current") -> ProviderResult:
+    """Resolve an R2 security_id and fetch OHLCV, preserving strict fallback semantics.
+
+    A ticker genuinely absent from the membership snapshot is explicit UNAVAILABLE,
+    so source-first morphology validation may continue to Yahoo/Tiingo. Ambiguous
+    mappings and operational resolver failures remain terminal FAILED states.
+    This does not change the frozen universe; it only classifies R2 availability.
+    """
+    source = "r2"
+    try:
+        security_id = resolve_security_id_from_r2(ticker, snapshot_date)
+    except R2TickerNotInSnapshot as exc:
+        return ProviderResult(
+            source,
+            SourceStatus.UNAVAILABLE,
+            reason=str(exc),
+            metadata={"ticker": ticker, "membership_resolution": "ABSENT"},
+        )
+    except Exception as exc:
+        return ProviderResult(
+            source,
+            SourceStatus.FAILED,
+            reason=f"ticker resolution failed: {type(exc).__name__}: {exc}",
+            metadata={"ticker": ticker, "membership_resolution": "FAILED"},
+        )
+    return r2_provider(security_id=security_id, start=start, end=end)
 
 
 def yahoo_provider(*, ticker: str, start: str, end: str) -> ProviderResult:

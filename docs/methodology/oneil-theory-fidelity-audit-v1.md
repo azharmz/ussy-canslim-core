@@ -1,7 +1,7 @@
 # O'Neil Theory Fidelity Audit v1
 
 Date: 2026-09-12
-Status: ACTIVE
+Status: COMPLETE — #25 theory audit closed; #32 specification is next
 
 ## Purpose
 Audit frozen CAN SLIM quantitative v1 against William J. O'Neil / IBD methodology. Theory first: `Theory -> specification -> implementation -> validation -> performance`. The 10,731 v1 candidates remain evidence for the old proxy, not CAN SLIM ground truth.
@@ -9,14 +9,14 @@ Audit frozen CAN SLIM quantitative v1 against William J. O'Neil / IBD methodolog
 ## Workstream status
 | # | Workstream | Status |
 |---|---|---|
-| 25 | Theory Fidelity Audit | ACTIVE |
+| 25 | Theory Fidelity Audit | COMPLETE |
 | 26 | Proper-base definitions | COMPLETE — theory audit |
 | 27 | Pivot / buy-point definition | COMPLETE — theory audit |
 | 28 | Breakout + volume confirmation | COMPLETE — theory audit |
 | 29 | RS / leadership fidelity | COMPLETE — theory audit |
 | 30 | C/A/S/I/M role fidelity | COMPLETE — theory audit |
-| 31 | Sell / risk-management fidelity | NEXT |
-| 32 | Theory-faithful candidate specification | NOT STARTED |
+| 31 | Sell / risk-management fidelity | COMPLETE — theory audit |
+| 32 | Theory-faithful candidate specification | NEXT |
 | 33 | O'Neil Pattern Recognition Engine | NOT STARTED |
 | 34 | Theory-faithful candidate generator | NOT STARTED |
 | 35 | New-candidate validation | NOT STARTED |
@@ -41,13 +41,10 @@ pivot_level = pattern-specific structural resistance
 | Ascending base | final / pattern structural resistance |
 | Base-on-base | pivot from second-base morphology |
 
-Legacy fixed-price buffers above resistance must remain documented as legacy. The 5% buy zone is execution/anti-chasing, not pivot definition. Early/aggressive entries remain separate and X1-X4 remain parked.
+Legacy fixed-price buffers above resistance remain documented as legacy. The 5% buy zone is execution/anti-chasing, not pivot definition. Early/aggressive entries remain separate and X1-X4 remain parked.
 
 ## #28 Breakout + Volume Confirmation — conclusion
 Overall v1 breakout/volume fidelity: **REASONABLE_PROXY**. Its volume rule is highly faithful; its daily-close condition is stricter than the theory trigger and it conflates the 5% execution zone with candidate-day screening.
-
-### Breakout event vs breakout quality
-A conventional breakout begins when price **passes/clears the proper pattern-specific buy point**. A close above resistance and a close high in the day's range are desirable strength evidence, but daily close above pivot is not the universal definition of whether a pivot crossing occurred.
 
 Carry separately into #32:
 
@@ -55,9 +52,13 @@ Carry separately into #32:
 pivot_crossed_intraday
 close_above_pivot
 close_position_quality
+volume_ratio
+strong_volume_confirmed
+later_volume_confirmation_date
+gap_through_pivot
+extension_from_pivot
 ```
 
-### Volume confirmation
 Canonical daily-EOD strong-volume confirmation:
 
 ```text
@@ -65,19 +66,7 @@ volume_ratio = Volume(T0) / mean(Volume of prior 50 completed sessions)
 strong_volume_confirmed = volume_ratio >= 1.40
 ```
 
-Initial-breakout-day volume confirmation is preferred. If later volume confirms an initially light pivot cross, chronology must be preserved rather than backdating confirmation.
-
-### Gap breakouts and extension
-A gap through a proper pivot can be a legitimate breakout. Daily OHLCV R2 can identify `Open > pivot`, gap magnitude, daily price action and daily volume. Intraday breakaway-gap protocols using 5/15-minute bars belong to #36. The normal 5% buy zone is execution/extension state, not breakout identity.
-
-### Audit of frozen v1
-| v1 component | Verdict |
-|---|---|
-| `Close > pivot` | **OVER-STRICT PROXY** |
-| `Close <= pivot*1.05` | **SEMANTIC MISMATCH / REASONABLE EXECUTION PROXY** |
-| `Volume >=1.40x prior 50d avg` | **HIGH FIDELITY** |
-| confirmation only on T0 | **TOO STRICT FOR FULL THEORY** |
-| gap handling | **PARTIAL** |
+Initial-breakout-day volume confirmation is preferred. A later confirmation must preserve chronology rather than backdate T0. Gap-through-pivot can be valid; special intraday breakaway-gap protocols belong to #36. The 5% buy zone is execution/extension state, not breakout identity.
 
 ## #29 RS / Leadership Fidelity — conclusion
 Overall v1 L/leadership fidelity: **REASONABLE_PROXY, INCOMPLETE**.
@@ -103,122 +92,163 @@ The v1 `RS_proxy_percentile >= 80` is a faithful general leader screen, but the 
 ## #30 C/A/S/I/M Role Fidelity — conclusion
 The central finding is that CAN SLIM letters are **not all the same kind of Boolean gate**. O'Neil/IBD combines screening criteria, confirmation/evidence, market context and timing/disqualification. A theory-faithful engine should preserve those roles instead of forcing every letter into identical `PASS/FAIL` semantics.
 
-### C — Current quarterly earnings
-Authoritative IBD guidance treats strong recent quarterly earnings and sales growth as a **primary fundamental screening criterion**. A common rule of thumb is roughly `>=25%` year-over-year EPS growth, preferably accompanied by strong sales growth and acceleration. Current-quarter strength is evidence that the business is already producing the growth institutions seek.
-
-Role classification:
-
-```text
-PRIMARY_SCREENING_CRITERION
-+ quality/context evidence (sales growth, acceleration, margins)
-```
-
-The v1 rule `EPS YoY >=25% AND Revenue YoY >=25%` is a deliberately strict quantitative approximation. It is faithful to the broad growth-screen concept but should not be described as the only literal O'Neil definition of C. O'Neil/IBD also looks at acceleration, quality and context; exceptional IPO/recovery situations can be discussed separately rather than silently forced into the normal screen.
-
-### A — Annual earnings
-Strong annual earnings growth over multiple years is likewise a **primary fundamental screening criterion**, intended to distinguish sustained business quality from a one-quarter spike. Historical O'Neil/IBD material commonly emphasizes about `25%+` growth and strong ROE/consistency.
-
-Role classification:
-
-```text
-PRIMARY_SCREENING_CRITERION
-+ quality/consistency evidence
-```
-
-The v1 requirement that each of the latest three consecutive annual EPS YoY observations be >=25% is a transparent strict proxy. It captures sustained growth but is stronger/more Boolean than the broader theory, which also considers multi-year growth rate, stability, ROE and business context.
-
-### S — Supply and demand
-S is fundamentally the **market mechanism** behind price movement, not merely one numeric breakout-volume rule. O'Neil emphasizes supply of shares/float, demand from institutions, volume behavior, buybacks and accumulation. Breakout volume is one important observable manifestation of demand.
-
-Role classification:
-
-```text
-CONFIRMATION / DEMAND EVIDENCE
-+ structural descriptor (share supply / float / buybacks)
-```
-
-Therefore v1 `Volume >=1.40x prior-50d average` is highly faithful as a **breakout-demand confirmation**, but it is not a complete representation of S. Shares outstanding/float/buybacks and broader accumulation remain separate evidence rather than mandatory invented gates.
-
-### I — Institutional sponsorship
-I asks whether capable institutional investors are sponsoring the stock and whether sponsorship is improving. Authoritative IBD material favors **increasing institutional ownership**, quality of owning funds and price/volume accumulation; institutions are also the dominant source of demand in leading growth stocks.
-
-Role classification:
-
-```text
-CONFIRMATION / QUALITY EVIDENCE
-+ trend descriptor
-```
-
-The theory does **not** support treating one arbitrary manager-count-delta threshold as the whole meaning of I. The v1 13F rule `manager_count_latest - manager_count_prior > 0` is a transparent narrow proxy for increasing sponsorship. Its historical non-promotion as a hard filter is therefore not a contradiction of CAN SLIM: I can remain important evidence without functioning as a universal binary gate.
-
-For #32 preserve distinct evidence such as:
-
-```text
-fund_count_trend
-quality_of_sponsors          # if defensibly measurable
-ownership_concentration
-price_volume_accumulation
-institutional_state_evaluable
-```
-
-Do not invent unavailable proprietary Sponsorship/Accumulation ratings.
-
-### M — Market direction
-M has the clearest **timing-gate/context** role. IBD states that most stocks move with the general market; a follow-through day gives a green light to begin buying leading stocks, while a `market in correction` means **new buys are off the table**. Distribution days and exposure guidance modulate risk as an uptrend weakens.
-
-Role classification:
-
-```text
-MARKET_CONTEXT
-+ ENTRY_TIMING_GATE
-+ RISK_THROTTLE / DISQUALIFIER for new buys in correction
-```
-
-This is categorically different from C/A. M is not a company-quality attribute; it controls whether otherwise attractive setups should be acted upon and at what exposure.
-
-The frozen v1 SPY-only/full-M proxies are acknowledged approximations of proprietary IBD market-state interpretation. The prior full-M SPY+QQQ ablation result must not be used to redefine theory: lower historical CAGR does not negate M's theoretical timing/risk role.
-
-### Role matrix
 | Component | Primary theoretical role | Secondary role | v1 role fidelity |
 |---|---|---|---|
-| C | **Screening criterion** | growth quality/acceleration | **REASONABLE but over-Boolean** |
-| A | **Screening criterion** | consistency/quality | **REASONABLE but over-Boolean** |
-| S | **Demand confirmation/evidence** | supply/float descriptor | **PARTIAL** — breakout volume strong, full S incomplete |
-| I | **Institutional confirmation/evidence** | sponsorship trend/quality descriptor | **PARTIAL** — manager-count delta narrow proxy |
-| M | **Market timing/context gate** | exposure/risk throttle, disqualifier for new buys in correction | **CONCEPTUALLY HIGH, implementation proxy** |
+| C | **fundamental screening criterion** | growth quality / acceleration | **REASONABLE but over-Boolean** |
+| A | **fundamental screening criterion** | consistency / quality | **REASONABLE but over-Boolean** |
+| S | **supply-demand confirmation/evidence** | float/shares/buyback descriptor | **PARTIAL** |
+| I | **institutional sponsorship confirmation/evidence** | sponsorship trend / sponsor quality | **PARTIAL** |
+| M | **market context + entry timing gate** | exposure/risk throttle; disqualifier for new buys in correction | **CONCEPTUALLY HIGH, implementation proxy** |
 
-### Implication for prior ablations
-The historical findings that hard C, hard I and stricter full-M did not improve v1 economics must **not** be reinterpreted as evidence that C/I/M are theoretically irrelevant. Those ablations answered whether specific quantitative Boolean proxies added historical performance to v1; #30 answers a different question: what role the original methodology assigns to each component.
-
-This distinction is now frozen:
+This distinction is frozen:
 
 ```text
 THEORY_ROLE != HISTORICAL_ABLATION_RESULT
 ```
 
-A component can remain theoretically important while a particular proxy is not promoted as a hard performance filter.
+Hard C/I or stricter M not improving historical v1 CAGR/PF does not redefine the theoretical role of C/I/M.
 
-### Frozen #30 principles for #32
-1. Do not force all CAN SLIM letters into identical Boolean semantics.
-2. Treat C and A primarily as **fundamental screening criteria**, while preserving growth quality/acceleration context.
-3. Treat S primarily as **supply/demand evidence and breakout confirmation**; breakout volume is not the entirety of S.
-4. Treat I as **institutional sponsorship confirmation/evidence**, not automatically a single hard manager-count gate.
-5. Treat M as **market context + timing gate + risk throttle**; correction state can disqualify new buys even when company/setup evidence is strong.
-6. Preserve `NOT_EVALUABLE/NOT_IMPLEMENTED` rather than coercing missing evidence to FAIL or PASS.
-7. Keep theory roles separate from v1 performance-ablation outcomes.
-8. No threshold changes may be selected from historical CAGR/PF before #32 is frozen.
+## #31 Sell / Risk-Management Fidelity — conclusion
+O'Neil/IBD sell discipline is not a single exit rule. It is a layered state machine combining **capital protection, failed-breakout defense, profit-taking, exceptional-winner hold logic, technical deterioration, climax behavior and market-level exposure reduction**. Frozen v1's X1-X4/X3 work was an execution experiment and must not be treated as a faithful implementation of the original sell discipline.
+
+### 1. Initial loss cutting — hard defensive ceiling
+The clearest defensive rule is to cut a losing position at roughly **7%-8% below the actual purchase price**, not 7%-8% below the chart pivot. Current IBD practical guidance increasingly describes 7% as the actionable trigger while historical O'Neil/IBD materials commonly state 7%-8% as the absolute maximum. The average realized loss should ideally be smaller, and weak/bear markets can justify earlier exits around 3%-5%.
+
+Canonical semantics for #32/#36:
+
+```text
+initial_stop_reference = actual_fill_price
+hard_loss_limit_legacy = 7_to_8_percent
+current_practical_trigger ≈ 7_percent
+```
+
+This is a **capital-protection rule**, not a pattern-quality rule. A stock can remain fundamentally attractive after the position is sold; re-entry on a later valid setup is allowed.
+
+### 2. Failed breakout / early deterioration
+A breakout that quickly fails is important evidence. The system should preserve separately:
+
+```text
+fell_back_below_pivot
+loss_from_fill
+break_10d_or_21d
+break_50d_or_10w
+heavy_volume_break
+largest_down_volume_since_breakout
+```
+
+The hard loss ceiling remains independent of these technical warnings. A sharp break of the 50-day/10-week line in heavy volume is a major sell signal because it indicates institutional distribution. A first decisive break of the 10-week line after a sustained advance is especially important. Shorter moving averages such as the 10-day/21-day can provide earlier, more tactical warnings but are not substitutes for the universal maximum-loss discipline.
+
+### 3. Default profit-taking zone
+The standard O'Neil/IBD offensive rule is to take at least some profits after a normal winner rises about **20%-25% from the proper buy point**. The rationale is that many leaders pause or correct after an initial run of that magnitude.
+
+Canonical state:
+
+```text
+profit_from_buy_point
+normal_profit_zone = 20_to_25_percent
+```
+
+This is a default profit-management rule, not a claim that every position must be fully liquidated at +20% or +25%.
+
+### 4. Eight-week hold exception for exceptional strength
+A major exception applies when a stock rises **20% or more within roughly the first 1-3 weeks after breakout**. O'Neil/IBD treats that unusually fast advance as evidence of a potential exceptional leader and recommends trying to hold it for **at least eight weeks from the breakout** before reassessing.
+
+Preserve chronology:
+
+```text
+reached_20pct_within_first_3_weeks
+exceptional_winner_hold_rule_active
+eight_week_assessment_date
+```
+
+This exception must not be confused with blindly ignoring hard loss or severe technical sell signals.
+
+### 5. Round-trip sell behavior
+If a stock earns a meaningful/double-digit gain and then gives back the entire advance to the buy point, O'Neil/IBD treats that round trip as a sell warning/rule. A former winner should not automatically be allowed to turn into a loser merely because it once showed strength.
+
+Preserve:
+
+```text
+max_gain_from_entry
+round_trip_to_buy_point
+```
+
+This is distinct from the initial 7%-8% stop: the position first created a profit cushion and then lost it.
+
+### 6. Climax-top / exhaustion behavior
+For mature winners after a substantial run, O'Neil/IBD recognizes **climax tops**: the advance becomes abnormally fast and extended, often accompanied by exhaustion gaps, unusually large daily point gains, wide price swings, sharp reversals and extreme distance above long moving averages. Historical IBD guidance describes a hallmark as roughly **25%-50% gain in three weeks or less**, often after the stock has already been advancing for many weeks; extreme extension above the 200-day line is additional evidence.
+
+This is not an ordinary fixed take-profit threshold. It is a **late-stage exhaustion state** requiring multiple contextual features. #32 should preserve the concept and evidence fields; exact detector design belongs to later specification/implementation and must not be tuned from returns.
+
+### 7. Market-level defense
+Sell/risk management also interacts with M. O'Neil/IBD explicitly identifies reducing exposure because of market distribution as one of the main reasons to sell. Therefore stock-level exits and portfolio-level exposure are separate layers:
+
+```text
+stock_sell_state
+market_exposure_state
+```
+
+A weakening market can justify raising cash, taking profits, avoiding new buys and tightening risk even before every individual stock hits a hard sell threshold.
+
+### 8. Position sizing is part of risk management, but not the same as the sell signal
+IBD risk-management education commonly illustrates sizing positions so that a predefined stop corresponds to a controlled portfolio loss (for example, a 1% portfolio-risk budget). This is useful portfolio construction, but the exact risk-budget percentage is not frozen here as a universal O'Neil CAN SLIM identity rule.
+
+Carry the separation:
+
+```text
+position_size_policy
+initial_stop_policy
+sell_signal_state
+```
+
+Do not optimize one by silently changing another.
+
+### 9. Earnings/event risk
+Earnings announcements can gap through ordinary stops. IBD discusses managing earnings risk separately, including reducing exposure or using specific options strategies. The daily-OHLCV CAN SLIM candidate specification should record event-risk state where available, but #31 does not authorize fabricating intraday fills or option mechanics. Those belong to execution/risk research (#36) if pursued.
+
+### Audit of frozen v1 execution/sell work
+| Area | v1 state | Fidelity verdict |
+|---|---|---|
+| 7%-8% max loss from actual fill | not the governing canonical X3 rule | **NOT FAITHFULLY IMPLEMENTED as core sell discipline** |
+| early failed-breakout state | partially observable in OHLCV, not canonical exit framework | **PARTIAL** |
+| 50d/10w heavy-volume break | not canonical sell engine | **NOT IMPLEMENTED as theory-faithful rule** |
+| normal +20%-25% profit zone | not canonical sell engine | **NOT IMPLEMENTED** |
+| 8-week hold exception | not canonical sell engine | **NOT IMPLEMENTED** |
+| round-trip rule | not canonical sell engine | **NOT IMPLEMENTED** |
+| climax/exhaustion sell state | EXH2 is separate prospective research and must not be relabeled as canonical O'Neil implementation | **SEPARATE / NOT IMPLEMENTED in CAN SLIM v1** |
+| market-driven exposure reduction | v1 M studied mainly as candidate gate/ablation | **PARTIAL** |
+| position sizing/risk budget | PORT1 exists, but not derived as O'Neil-faithful risk contract | **SEPARATE PROXY** |
+
+### Frozen #31 principles for #32/#36
+1. Treat **capital protection** as first priority; preserve a hard maximum-loss discipline referenced to **actual purchase/fill price**.
+2. Preserve historical 7%-8% language and current practical ~7% trigger without pretending the evolution never occurred.
+3. Failed breakout and technical deterioration are additional sell evidence, not replacements for the maximum-loss rule.
+4. Preserve 50-day/10-week heavy-volume breaks as major institutional-selling evidence.
+5. Preserve the normal **20%-25% profit zone** as default profit-management guidance.
+6. Preserve the **8-week hold exception** when +20% is reached within the first 1-3 weeks after breakout.
+7. Preserve **round-trip** behavior separately from ordinary stop loss.
+8. Treat climax tops as contextual late-stage exhaustion, not a single arbitrary percentage threshold.
+9. Keep stock-level sell signals separate from market-level exposure/risk throttling.
+10. Keep position sizing, stop placement, event risk and execution mechanics as distinct contracts.
+11. Do not retrofit #31 into frozen FWD1/X3 or EXH2.
+12. Do not tune sell thresholds from historical CAGR/PF before the theory-faithful specification is frozen.
+
+## #25 Theory Fidelity Audit — consolidated close
+Workstreams #26-#31 are now complete. The main conclusion is that frozen CAN SLIM quantitative v1 is a **transparent proxy research system**, not a faithful reconstruction of O'Neil/IBD methodology. Its strongest fidelity areas are breakout-volume confirmation and general RS percentile leadership screening; its largest gaps are proper-base morphology, pattern-specific landmarks/pivots, full RS-line/group leadership context, nuanced component roles, and canonical O'Neil sell/risk discipline.
+
+This closes the **theory audit**, not the implementation project. The next required step is #32: translate the frozen theory findings into an explicit, versioned, testable **Theory-Faithful Candidate Specification** without selecting rules based on historical performance.
 
 ## #33 — O'Neil Pattern Recognition Engine
 After #32 is frozen, #33 will translate the theory specification into reproducible pattern/landmark recognition using existing daily OHLCV R2. Scope includes base segmentation, swing/landmark extraction, named-pattern detectors, base relationships, quality/fault flags, ambiguity handling and morphology validation. It must not optimize definitions against trading performance.
 
 ## Guardrails
 - Do not retrofit theory-fidelity changes into FWD1.
-- Do not mix EXH2 with this audit.
+- Do not mix EXH2 with this audit or relabel EXH2 as the O'Neil sell engine.
 - Do not optimize X3 or other entry rules now.
-- Do not tune pattern/breakout/RS/C/A/S/I/M thresholds from historical returns.
+- Do not tune pattern/breakout/RS/C/A/S/I/M/sell thresholds from historical returns.
 - Do not treat v1 candidates as O'Neil ground truth.
 - Do not start #33 before #32 is frozen.
 - Preserve explicit uncertainty/evidence states rather than forcing full confirmation.
 
 ## Next action
-Proceed with **#31 — Sell / Risk-Management Fidelity**. Audit initial loss cutting, failed breakouts, profit-taking, holding exceptional winners, round-trip behavior and major sell signals. After #31, freeze #32 before any #33 implementation.
+Proceed with **#32 — Theory-Faithful Candidate Specification**. Convert #26-#31 into a versioned contract covering required data, evidence states, pattern/base semantics, pivot, breakout/volume, leadership, component-role semantics and candidate eligibility. Keep execution/entry mechanics and the detailed sell engine outside the candidate-generation contract where appropriate; those remain downstream concerns.

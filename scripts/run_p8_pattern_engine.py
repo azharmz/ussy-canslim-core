@@ -29,6 +29,8 @@ from canslim_research.pattern_conflict import (  # noqa: E402
 from canslim_research.pattern_engine import DEFAULT_POLICY  # noqa: E402
 from canslim_research.pattern_engine_v02 import (  # noqa: E402
     PATTERN_ENGINE_VERSION,
+    PRIOR_UPTREND_LOOKBACK,
+    PRIOR_UPTREND_MIN_GAIN,
     detect_patterns_v02,
 )
 from canslim_research.pattern_identity import (  # noqa: E402
@@ -56,6 +58,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _active_policy_report() -> dict:
+    """Expose the actual v0.3 semantics instead of stale v0.1 policy fields."""
+    geometry = dict(DEFAULT_POLICY.__dict__)
+    legacy_prior = {
+        "prior_uptrend_lookback": geometry.pop("prior_uptrend_lookback"),
+        "prior_uptrend_min_gain": geometry.pop("prior_uptrend_min_gain"),
+    }
+    return {
+        **geometry,
+        "prior_uptrend_lookback": PRIOR_UPTREND_LOOKBACK,
+        "prior_uptrend_min_gain": PRIOR_UPTREND_MIN_GAIN,
+        "prior_uptrend_semantics": "lowest low in prior 120 completed sessions to base-start high >=30%",
+        "flat_pivot_semantics": "highest high in the preregistered first-third left-side zone; breakout-day new high cannot redefine the pivot",
+        "legacy_v01_prior_uptrend_fields_not_active": legacy_prior,
+    }
+
+
 def run(args: argparse.Namespace) -> dict:
     if args.split != "DEVELOPMENT":
         raise ValueError("P8 pattern engine is frozen to split=DEVELOPMENT")
@@ -74,11 +93,7 @@ def run(args: argparse.Namespace) -> dict:
     )
     rows = list(routed.rows)
     all_candidates = detect_patterns_v02(rows, min_confidence=args.min_confidence)
-    candidates = [
-        candidate
-        for candidate in all_candidates
-        if args.start <= candidate.base_end_or_breakout_ready_date <= args.end
-    ]
+    candidates = [candidate for candidate in all_candidates if args.start <= candidate.base_end_or_breakout_ready_date <= args.end]
     bases = cluster_base_identities(candidates, security_id=security_id)
     lineages = cluster_base_lineages(bases)
     conflicts = detect_pattern_conflicts(lineages, bases)
@@ -90,21 +105,9 @@ def run(args: argparse.Namespace) -> dict:
     ambiguous = sum(candidate.pattern_evidence_state == "AMBIGUOUS" for candidate in candidates)
     ambiguous_bases = sum(base.pattern_evidence_state == "AMBIGUOUS" for base in bases)
     ambiguous_lineages = sum(lineage.pattern_evidence_state == "AMBIGUOUS" for lineage in lineages)
-    latest = sorted(
-        candidates,
-        key=lambda candidate: (candidate.base_end_or_breakout_ready_date, candidate.confidence),
-        reverse=True,
-    )[:25]
-    latest_bases = sorted(
-        bases,
-        key=lambda base: (base.last_supported_date, base.confidence),
-        reverse=True,
-    )[:25]
-    latest_lineages = sorted(
-        lineages,
-        key=lambda lineage: (lineage.last_supported_date, lineage.confidence),
-        reverse=True,
-    )[:25]
+    latest = sorted(candidates, key=lambda candidate: (candidate.base_end_or_breakout_ready_date, candidate.confidence), reverse=True)[:25]
+    latest_bases = sorted(bases, key=lambda base: (base.last_supported_date, base.confidence), reverse=True)[:25]
+    latest_lineages = sorted(lineages, key=lambda lineage: (lineage.last_supported_date, lineage.confidence), reverse=True)[:25]
 
     requested_row_count = sum(args.start <= str(row["date"])[:10] <= args.end for row in rows)
     return {
@@ -125,10 +128,7 @@ def run(args: argparse.Namespace) -> dict:
         "base_identity_version": BASE_IDENTITY_VERSION,
         "base_lineage_version": BASE_LINEAGE_VERSION,
         "conflict_layer_version": CONFLICT_LAYER_VERSION,
-        "policy": {
-            **DEFAULT_POLICY.__dict__,
-            "prior_uptrend_semantics": "lowest low in prior 120 completed sessions to base-start high >=30%",
-        },
+        "policy": _active_policy_report(),
         "min_confidence": args.min_confidence,
         "raw_candidate_window_count": len(candidates),
         "raw_ambiguous_window_count": ambiguous,
@@ -154,6 +154,8 @@ def run(args: argparse.Namespace) -> dict:
             "warmup-only candidates are excluded from reported evaluation output",
             "OHLCV morphology only; no return/CAGR/PF labels",
             "named pattern is not forced when rules are unmet",
+            "reported policy fields reflect active v0.3 detector semantics; legacy v0.1 prior-uptrend values are retained only as inactive provenance",
+            "flat-base pivot is the established left-side high, not an optional breakout-day new high",
             "pattern-specific pivot is persisted with landmarks",
             "rolling windows sharing the same pattern-specific structural landmarks collapse to one stable base_id",
             "nearby same-pattern base identities may collapse into one prefix-stable lineage only under conservative pattern-specific root anchors",

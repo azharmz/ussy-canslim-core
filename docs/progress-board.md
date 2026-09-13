@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen #32/#33/#34/#35 contracts, a frozen #36 execution baseline, frozen #37 sell/risk semantics, frozen #38 daily deterioration evidence, and frozen #39 weekly/10-week evidence.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen #32/#33/#34/#35 contracts, a frozen #36 execution baseline, frozen #37 sell/risk semantics, frozen #38 daily deterioration evidence, frozen #39 weekly/10-week evidence, and a frozen #40 technical-deterioration action contract.
 
 ## Repository boundary for #33
 
@@ -29,6 +29,7 @@ Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DO
 | 37 | Sell / risk execution semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 38 | Technical deterioration evidence | **EVIDENCE LAYER COMPLETE / FROZEN v1** |
 | 39 | Weekly aggregation / 10-week evidence | **WEEKLY AGGREGATION + 10W EVIDENCE COMPLETE / FROZEN v1** |
+| 40 | Technical deterioration action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 
 ## #34–#35 frozen candidate/validation state
 
@@ -83,45 +84,69 @@ Terminal state: `EVIDENCE LAYER COMPLETE / FROZEN v1`.
 
 ## #39 — Weekly Aggregation / 10-Week Evidence
 
-Specification: `docs/methodology/39-weekly-aggregation-10w-evidence-spec-v1.md`.
-
 Contract: `39-weekly-10w-evidence-v1`.
 
-Frozen semantics:
+Frozen semantics include ISO completed-week aggregation, holiday-shortened weeks, weekly OHLCV aggregation, true 10-completed-week moving average, strict-below-10w break, prior-10 weekly volume ratio, first-break chronology, and post-week causality. MA50 daily is explicitly not treated as identical to the 10-week line.
 
-- ISO year/week partition;
-- current in-progress ISO week excluded;
-- holiday-shortened weeks remain valid completed weeks;
-- weekly OHLC = first open / max high / min low / last close;
-- weekly volume summed only when all component daily volumes exist;
-- `ma10w` = mean of latest 10 **completed weekly closes**;
-- fewer than 10 completed weeks = `NOT_EVALUABLE`;
-- break only when completed weekly close is strictly below `ma10w`;
-- MA50 daily is explicitly **not** treated as identical to the 10-week line;
-- weekly volume ratio excludes latest completed week from prior-10 denominator;
-- `>=1.40x` heavy-volume evidence remains a quantitative proxy, not a universal sell threshold;
-- first-break chronology is preserved only when prior 10-week state is evaluable;
-- weekly evidence becomes known only after the stream advances into a later week;
-- no Friday-close hindsight execution is fabricated;
-- no mandatory sell action is promoted by #39.
-
-Implementation:
-
-- `src/canslim_research/weekly_10w_v1.py`
-- `tests/test_weekly_10w_v1.py`
-- `.github/workflows/39-weekly-10w-v1.yml`
-
-Canonical semantic-validation run:
-
-- run `34788414986`
-- job `103808042129`
-- commit `2fa62e52c022e54bb2a85895cddb859eb0dd9ac6`
-- **SUCCESS**
-- **10 passed in 0.04s**
+Canonical semantic-validation run `34788414986` → **SUCCESS, 10 passed in 0.04s**.
 
 Freeze decision: `docs/decisions/2026-09-14-39-weekly-10w-evidence-freeze.md`.
 
 Terminal state: `WEEKLY AGGREGATION + 10W EVIDENCE COMPLETE / FROZEN v1`.
+
+## #40 — Technical Deterioration Action Semantics
+
+Specification: `docs/methodology/40-technical-deterioration-action-spec-v1.md`.
+
+Contract: `40-technical-deterioration-action-v1`.
+
+Canonical trigger:
+
+```text
+completed weekly close < frozen 10-week moving average
+AND
+weekly volume > mean(volume of prior 10 completed weeks)
+```
+
+Equivalent quantitative condition:
+
+```text
+break_10w_state == TRUE
+AND weekly_volume_ratio_prior10 > 1.00
+```
+
+Important boundaries:
+
+- equality to MA10w is not a break;
+- equality to average weekly volume is not above-average volume;
+- low-volume breaks remain evidence and do not force the canonical action;
+- an earlier low-volume break does not consume a later actionable break;
+- signal exists only after the completed week closes;
+- execution is first observed trading-session open after the signal week;
+- no Friday-close, weekend, MA-level, or synthetic intraday fill is fabricated;
+- `NO_NEXT_SESSION_BAR` remains explicit when needed;
+- #37 practical ~7% capital protection remains independent and may exit earlier;
+- #40 does not change #37 thresholds or prior fill history;
+- #38 daily `>=1.40x` heavy-volume evidence proxy is not substituted for the weekly above-average-volume rule.
+
+Implementation:
+
+- `src/canslim_research/technical_deterioration_action_v1.py`
+- `tests/test_technical_deterioration_action_v1.py`
+- `.github/workflows/40-technical-deterioration-action-v1.yml`
+
+Canonical semantic-validation run:
+
+- run `34789559782`
+- job `103811139345`
+- commit `b5d8dd488ea8eb5df5d00fff039a6ddc146f6c7b`
+- **SUCCESS**
+
+Freeze decision: `docs/decisions/2026-09-14-40-technical-deterioration-action-freeze.md`.
+
+Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
+
+No performance claim is made and no historical-return tuning is authorized.
 
 ## Forward / production boundaries
 
@@ -129,9 +154,9 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33/#34/#35/#36/#37/#38/#39 frozen.
-2. Do not promote R1/R2/R3 or MA/heavy-volume evidence based on historical performance alone.
-3. Wait for a genuine frozen `CANSLIM_ELIGIBLE` source population before primary #36/#37 performance validation.
-4. Any mandatory 50d/10w sell action requires a separate explicit action specification; #38/#39 are evidence-only.
+1. Keep #33/#34/#35/#36/#37/#38/#39/#40 frozen.
+2. Do not promote or retune entry/sell variants from historical performance alone.
+3. Wait for a genuine frozen `CANSLIM_ELIGIBLE` source population before primary #36/#37/#40 performance validation.
+4. A complete position-lifecycle arbiter may be specified separately to choose the earliest causal exit among frozen #37 and #40 actions without rewriting either contract.
 5. Round-trip action semantics, climax/exhaustion, and market-exposure action remain separate future workstreams requiring authoritative specifications.
 6. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

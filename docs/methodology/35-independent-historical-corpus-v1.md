@@ -15,4 +15,6 @@ Core production patterns only:
 
 P6 advanced patterns remain excluded.
 
-Next sections will freeze the as-of calendar, deterministic sampling rules, strata, quotas, manifest, and opening conditions before manual V35-D review.
+## Independence rule
+
+Selection must not use future returns, CAGR, PF, win rate, breakout success/failure, or later winner/loser status. Future-performance fields must not appear in the sampling table.

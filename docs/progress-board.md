@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-13
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen; #33 core pattern engine and #34 theory-faithful candidate generator are now frozen.
 
 ## Repository boundary for #33
 
@@ -17,7 +17,7 @@ The frozen production contract is `oneil-pattern-output-v2` and emits only:
 - `CUP_WITHOUT_HANDLE`
 - `CUP_WITH_HANDLE`
 
-Advanced P6 (`ASCENDING_BASE`, `BASE_ON_BASE`) remains **DEFERRED / NOT PRODUCTION-VALIDATED** and must not enter #34 production consumption.
+Advanced P6 (`ASCENDING_BASE`, `BASE_ON_BASE`) remains **DEFERRED / NOT PRODUCTION-VALIDATED** and must not enter #34/#35 production-contract consumption.
 
 ## Canonical v1 state
 
@@ -54,94 +54,67 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
-| 34 | **Theory-faithful candidate generator** | **IN PROGRESS** |
-| 35 | New-candidate validation | NOT STARTED |
+| 34 | **Theory-faithful candidate generator** | **COMPLETE / FROZEN v1** |
+| 35 | **New-candidate validation** | **NEXT / READY TO START** |
 | 36 | Execution / entry research | **PARKED** |
 
-## #32 staged contract
+## #32/#34 staged contract
 
 ```text
 BASE_RECOGNIZED
-PIVOT_DEFINED
-PIVOT_CROSSED
-BREAKOUT_CONFIRMED
-CANSLIM_ELIGIBLE
+→ PIVOT_DEFINED
+→ PIVOT_CROSSED
+→ BREAKOUT_CONFIRMED
+→ CANSLIM_ELIGIBLE
 ```
 
 Missing or stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
 
-## #34 — Theory-Faithful Candidate Generator
+## #34 — Theory-Faithful Candidate Generator — FROZEN
 
-### Boundary
+#34 is a downstream consumer of frozen #33 production output. It preserves `RECOGNIZED / AMBIGUOUS / REJECTED`, candidate/base/lineage identity, candidate semantics, detector faults, structural provenance, detector versions, and P8 validation status. It does not copy or retune morphology.
 
-#34 is a downstream consumer of frozen #33 production output. It must preserve:
+Frozen behavior includes:
 
-- `RECOGNIZED / AMBIGUOUS / REJECTED`;
-- `candidate_id`, `base_id`, `lineage_id`;
-- candidate semantics and detector faults;
-- pattern engine/schema/version provenance.
-
-It must not copy, extend or retune the morphology engine in this repo.
-
-### Current implementation checkpoint
-
-Implemented:
-
-- strict consumer for `oneil-pattern-output-v2` four-core pattern scope;
-- advanced P6 pattern rejection;
-- preservation of ambiguity/faults/identity/provenance;
-- pivot-cross facts from daily OHLCV (`high > pivot`) without requiring close-above to define the crossing;
+- strict four-core `oneil-pattern-output-v2` consumption;
+- P6 advanced-pattern rejection;
+- first pivot crossing after #33 `structural_end` rather than repeated historical `High > pivot` recounting;
 - gap/open/close/extension and 5% buy-zone evidence;
 - breakout-day volume confirmation using prior 50 completed sessions and `>=1.40x` ratio;
-- staged candidate semantics through `BREAKOUT_CONFIRMED` / `CANSLIM_ELIGIBLE`;
-- PIT C adapter using quarterly EPS YoY `>=25%` core screen;
-- A adapter using sustained multi-year annual EPS growth rather than the legacy every-year Boolean;
+- PIT C adapter using quarterly EPS YoY `>=25%`;
+- PIT A adapter using latest three-year-span annual EPS CAGR `>=25%`;
 - L adapter using transparent RS percentile `>=80`;
-- M state adapter preserving `ALLOW_NEW_BUYS / CAUTION / BLOCK_NEW_BUYS`;
-- I manager-count trend preserved as evidence, not a hard gate;
-- live-R2 smoke runner that invokes canonical #33 `oneil_patterns.production` rather than local duplicate morphology.
+- M state preserving `ALLOW_NEW_BUYS / CAUTION / BLOCK_NEW_BUYS`;
+- I manager-count trend as evidence, not a hard gate;
+- broader S, RS-line, industry leadership, and non-price N catalyst kept as evidence/context where no frozen PIT production contract exists.
 
-Current commits include:
+Final verification: GitHub Actions run `34758050282` → **SUCCESS** on commit `4ad9c303f22b9d05f123f0db1a25f80793b9ea04`.
 
-- `559165c` initial frozen #33 consumer;
-- `29c1cef` theory-faithful evidence adapters;
-- `2136323` end-to-end live-R2 smoke runner;
-- `3d84d12` extended candidate/evidence unit tests.
+- `9 passed` unit contract;
+- canonical `ussy-oneil-patterns` dependency installed and exercised;
+- live R2 bounded smoke succeeded;
+- 4,056 pattern/candidate records;
+- 472 RECOGNIZED / 2,695 AMBIGUOUS / 889 REJECTED;
+- 3,584 NOT_ELIGIBLE / 465 PIVOT_DEFINED / 7 PIVOT_CROSSED / 0 BREAKOUT_CONFIRMED / 0 CANSLIM_ELIGIBLE;
+- advanced patterns disabled;
+- trading-performance metrics not used.
 
-### Current verification boundary / blocker
+The zero confirmed/eligible count is not a strategy verdict; the run is semantic/plumbing verification only. Canonical freeze record: `docs/decisions/2026-09-13-34-theory-faithful-candidate-generator-freeze.md`.
 
-The new code is committed, but a new dedicated GitHub Actions workflow could not be created from the current connector session (tool safety rejection). The local container also has no outbound DNS access to clone GitHub, so independent execution from this chat cannot currently run the repo tests or the R2 smoke.
+## Data boundary for #35
 
-Therefore #34 is **not yet frozen or complete**. Required next verification is an actual CI/R2 execution of:
+Production daily scanning may continue to use the compact R2 ready snapshot (~300 bars/security). #35 historical/new-candidate validation is **not constrained to that production retention**.
 
-```text
-canonical #33 production output
-→ R2 daily OHLCV
-→ pivot/breakout/volume
-→ PIT fundamentals/current.json
-→ C/A
-→ cross-sectional RS/L
-→ versioned M proxy
-→ candidate stages
-```
-
-No trading-performance metrics are authorized for this verification.
-
-### Evidence intentionally not hard-gated
-
-- I remains evidence unless a later frozen spec changes it;
-- broader S supply/float evidence remains separate from breakout volume;
-- RS-line and industry leadership remain evidence/context until a defensible PIT contract exists;
-- N catalyst remains `NOT_IMPLEMENTED` where no PIT catalyst source exists.
+When #35 needs longer historical windows, acquire purpose-built historical OHLCV of sufficient length and run the frozen #33 + #34 chain on it. Do not enlarge or reinterpret the production R2 contract merely to make it serve as a backtest archive.
 
 ## Forward tracks remain frozen
 
-FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity and #34 findings must not be retrofitted into either track.
+FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/#34/#35 findings must not be retrofitted into either track.
 
 ## Active work from here
 
-1. Obtain one successful CI/R2 execution of the #34 live smoke and fix only technical/schema/PIT defects.
-2. Freeze #34 output schema/adapter versions after the smoke is green.
-3. Then begin #35 candidate validation; do not jump to performance research.
-4. Keep P6 advanced patterns out of production and do not reopen #33 from downstream outcomes.
-5. Keep FWD1/EXH2 accumulating unchanged and #36 parked.
+1. Begin #35 New-Candidate Validation against the frozen #33 + #34 chain.
+2. Design the validation dataset/protocol before inspecting trading outcomes.
+3. Use purpose-built historical OHLCV where longer history is required; production R2 300-bar retention is not a backtest constraint.
+4. Do not retune #33 morphology or #34 thresholds from return, CAGR, PF, breakout success, or entry optimization.
+5. Keep P6 advanced patterns out of production, FWD1/EXH2 unchanged, and #36 parked.

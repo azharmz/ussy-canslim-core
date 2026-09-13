@@ -47,5 +47,6 @@ jobs:
             results/v35-historical-pool/summary.json
             results/v35-historical-pool/selected_manifest.json
             results/v35-historical-pool/availability.csv
+            results/v35-historical-pool/validation_findings.csv
             results/v35-historical-pool/observations.jsonl
           retention-days: 30

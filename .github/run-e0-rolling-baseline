@@ -1,2 +1,2 @@
-triggered_at: 2026-09-10T11:10:00+08:00
-reason: initial E0 rolling expanded-universe smoke after technical baseline v1 freeze
+triggered_at: 2026-09-13T19:55:00+08:00
+reason: rerun bounded #34 verification after first-cross chronology and candidate schema fixes

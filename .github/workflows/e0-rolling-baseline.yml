@@ -23,20 +23,37 @@ jobs:
       PYTHONUNBUFFERED: '1'
     steps:
       - uses: actions/checkout@v7
+      - name: Checkout frozen #33 dependency
+        uses: actions/checkout@v7
+        with:
+          repository: azharmz/ussy-oneil-patterns
+          path: _deps/ussy-oneil-patterns
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+        run: |
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy pytest
+          python -m pip install -e ./_deps/ussy-oneil-patterns
+      - name: Run #34 candidate unit tests
+        run: PYTHONPATH=src pytest -q tests/test_candidate_v2.py
+      - name: Run #34 live R2 smoke
+        run: PYTHONPATH=src python scripts/run_candidate_v2_smoke.py
+      - name: Show #34 summary
+        run: cat results/candidate-v2-smoke/summary.json
       - name: Run E0 rolling baseline smoke
         run: python scripts/run_e0_rolling_baseline.py
-      - name: Show summary
+      - name: Show E0 summary
         run: cat results/e0-rolling-baseline-v1/summary.json
-      - name: Upload E0 evidence
+      - name: Upload evidence
         uses: actions/upload-artifact@v7
         with:
-          name: e0-rolling-baseline-v1-${{ github.run_id }}
+          name: e0-and-candidate-v2-${{ github.run_id }}
           path: |
+            results/candidate-v2-smoke/summary.json
+            results/candidate-v2-smoke/pattern_manifest.json
+            results/candidate-v2-smoke/patterns.jsonl
+            results/candidate-v2-smoke/candidates.jsonl
             results/e0-rolling-baseline-v1/summary.json
             results/e0-rolling-baseline-v1/candidates.csv
             results/e0-rolling-baseline-v1/daily_summary.csv

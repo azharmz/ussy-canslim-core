@@ -1,5 +1,6 @@
 name: '#36 Execution / Entry v1 semantic validation'
 
+# Frozen semantic validation for 36-execution-entry-v1; no performance metrics.
 on:
   workflow_dispatch:
   push:

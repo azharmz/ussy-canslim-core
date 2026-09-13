@@ -8,9 +8,9 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 >
 > For overall CAN SLIM state, read `docs/progress-board.md` on the active branch.
 >
-> For workstream **#33 — O'Neil Pattern Recognition Engine / P8 morphology validation**, do **not** continue from local pattern-engine code in this repository. The canonical implementation/source of truth is `azharmz/ussy-oneil-patterns`. Start from that repository's `README.md`, then `docs/progress-board.md` and latest #33/P8 decision records.
+> Workstream **#33 — O'Neil Pattern Recognition Engine** is canonical in `azharmz/ussy-oneil-patterns` and is now closed at the defensible production boundary. The frozen production contract is `oneil-pattern-output-v2` and emits only `FLAT_BASE`, `DOUBLE_BOTTOM`, `CUP_WITHOUT_HANDLE`, and `CUP_WITH_HANDLE` while preserving `RECOGNIZED / AMBIGUOUS / REJECTED`, identities, faults, semantics, and provenance.
 >
-> Local #33/P8 implementation history in this repository is retained as research/migration evidence until a separate cleanup is completed; it is superseded as the implementation source of truth. #34 remains blocked until canonical #33/P8 is defensible.
+> Local #33/P8 implementation history in this repository is retained only as research/migration evidence and is superseded as implementation source of truth. **#34 is active and must consume the frozen #33 contract rather than rebuilding morphology here.**
 
 ## Project boundaries
 
@@ -18,9 +18,9 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 |---|---|
 | `ussy-data` | Canonical universe and OHLCV data contracts |
 | `ussy-fundamentals` | SEC facts, PIT normalization, readiness, immutable R2 production snapshots |
-| `ussy-oneil-patterns` | **Canonical #33 O'Neil pattern engine**, morphology/fault/ambiguity implementation, P8 labelled morphology validation, versioned #33 output |
+| `ussy-oneil-patterns` | **Canonical #33 O'Neil pattern engine**, frozen four-core production contract, morphology/fault/ambiguity implementation and validation evidence |
 | `ussy-trendfoll` | Independent legacy TrendFoll strategy and paper-trading implementation |
-| `ussy-canslim-research` | CAN SLIM parent/HQ: theory/specification, roadmap, integration evidence, #32 contract, later #34+ research |
+| `ussy-canslim-research` | CAN SLIM parent/HQ: theory/specification, roadmap/status, #32 contract and #34+ integration research |
 
 TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or reject any TrendFoll rule without changing TrendFoll production.
 
@@ -28,14 +28,12 @@ TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or 
 
 - #25–#31 Theory Fidelity Audit: **COMPLETE**
 - #32 Theory-Faithful Candidate Specification v1: **COMPLETE / FROZEN**
-- #33 O'Neil Pattern Recognition Engine: **IN PROGRESS in `ussy-oneil-patterns`**
-- #33/P8 current phase: canonical DEVELOPMENT reconciliation / morphology validation
-- canonical P8 corpus: five DEVELOPMENT examples spanning all four core pattern families plus locked NFLX VALIDATION
-- parent-side `5 MATCH / 5 AMBIGUOUS` result is preserved as migration evidence only until canonical oneil re-execution
-- #34 Theory-Faithful Candidate Generator: **NOT STARTED / BLOCKED on #33**
-- FWD1 and EXH2 remain separate frozen/prospective tracks and must not influence #33 tuning
-
-Canonical #33 reconciliation landed in `ussy-oneil-patterns` at merge `261d667eecf8525b27e8a15b6980ba698e609848`.
+- #33 O'Neil Pattern Recognition Engine: **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS**
+- #33 production contract: **`oneil-pattern-output-v2`**, four core families only
+- P6 `ASCENDING_BASE` / `BASE_ON_BASE`: **DEFERRED / NOT PRODUCTION-VALIDATED**, outside production contract
+- #34 Theory-Faithful Candidate Generator: **IN PROGRESS**
+- current #34 implementation consumes frozen #33 output, evaluates pivot crossing and breakout volume from R2, and attaches PIT C/A plus L/M evidence adapters
+- FWD1 and EXH2 remain separate frozen/prospective tracks and must not influence #33 morphology or #34 theory semantics
 
 ## Research-universe definition
 
@@ -63,7 +61,8 @@ Point-in-time discipline remains mandatory for information actually used to make
 
 ## Active path
 
-1. Finish canonical #33/P8 DEVELOPMENT morphology validation in `ussy-oneil-patterns`.
-2. Freeze #33 only after morphology disagreements/ambiguities have defensible `KEEP` / `REVISE` / `UNRESOLVED` treatment and untouched validation is evaluated.
-3. Only then begin #34 in this parent program using frozen/versioned #33 output.
-4. Keep FWD1/EXH2 accumulating unchanged and keep execution/entry research parked during #33 validation.
+1. Complete #34 as a consumer of frozen `oneil-pattern-output-v2` only.
+2. Verify end-to-end R2 smoke: canonical #33 production output -> pivot/breakout/volume -> PIT C/A -> L/M -> candidate stage.
+3. Preserve I, broader S, RS-line and industry context as evidence states until defensible PIT sources/contracts are attached.
+4. Only after #34 is technically frozen, begin #35 candidate validation.
+5. Keep FWD1/EXH2 accumulating unchanged and keep #36 execution/entry research parked.

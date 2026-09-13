@@ -11,6 +11,7 @@ import boto3
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
 from canslim_research.candidate_v2 import DailyBar, PatternAssessment, build_candidate

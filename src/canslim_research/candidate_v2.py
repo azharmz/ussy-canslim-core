@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
 CANDIDATE_SPEC_VERSION = "theory-faithful-candidate-spec-v1"
-CANDIDATE_GENERATOR_VERSION = "34-candidate-generator-v0.1"
+CANDIDATE_GENERATOR_VERSION = "34-candidate-generator-v0.2"
 
 CORE_PATTERNS = frozenset({
     "FLAT_BASE",
@@ -99,6 +99,8 @@ class CandidateEvidence:
     S_evidence_state: str = "NOT_EVALUABLE"
     I_evidence_state: str = "NOT_EVALUABLE"
     industry_evidence_state: str = "NOT_IMPLEMENTED"
+    rs_rating_proxy_percentile: float | None = None
+    M_market_state: str = "UNKNOWN"
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,6 +112,7 @@ class CandidateRecord:
     security_id: str
     ticker: str
     asof_date: str
+    breakout_date: str | None
     pattern: str
     pattern_status: str
     native_detector_state: str
@@ -120,19 +123,26 @@ class CandidateRecord:
     pivot_level: float | None
     pivot_source_date: str | None
     pivot_crossed_intraday: bool
+    first_tradeable_daily_bar_crossed_pivot: bool
+    prior_cross_after_structure: bool
     open_above_pivot: bool
     gap_through_pivot: bool
     close_above_pivot: bool
+    close_position_quality: float | None
     extension_from_pivot_pct: float | None
     within_traditional_buy_zone: bool
+    extended_above_traditional_buy_zone: bool
     volume_avg_50_prior: float | None
     volume_ratio: float | None
     volume_confirmation_state: str
+    volume_confirmation_date: str | None
     candidate_stage: str
     eligibility_reason_codes: tuple[str, ...]
     C_screen_state: str
     A_screen_state: str
     L_individual_leadership_state: str
+    rs_rating_proxy_percentile: float | None
+    M_market_state: str
     M_entry_state: str
     N_price_state: str
     N_catalyst_state: str
@@ -157,6 +167,26 @@ def _bar_on(bars: Sequence[DailyBar], asof_date: str) -> DailyBar | None:
     return matches[0] if matches else None
 
 
+def _prior_cross_after_structure(
+    bars: Sequence[DailyBar], *, pivot: float, structural_end: str | None, asof_date: str
+) -> bool:
+    if structural_end is None:
+        return False
+    return any(
+        bar.session_date >= structural_end
+        and bar.session_date < asof_date
+        and bar.high > pivot
+        for bar in bars
+    )
+
+
+def _close_position_quality(bar: DailyBar) -> float | None:
+    spread = bar.high - bar.low
+    if spread <= 0:
+        return None
+    return max(0.0, min(1.0, (bar.close - bar.low) / spread))
+
+
 def build_candidate(
     pattern: PatternAssessment,
     bars: Sequence[DailyBar],
@@ -170,14 +200,20 @@ def build_candidate(
 
     bar = _bar_on(bars, pattern.asof_date)
     pivot_crossed = False
+    first_cross = False
+    prior_cross = False
     open_above = False
     gap_through = False
     close_above = False
+    close_quality = None
     extension = None
     within_zone = False
+    extended = False
     avg50 = None
     volume_ratio = None
     volume_state = "NOT_EVALUABLE"
+    volume_confirmation_date = None
+    breakout_date = None
 
     if ambiguous:
         reasons.append("PATTERN_AMBIGUOUS")
@@ -189,18 +225,33 @@ def build_candidate(
 
     if pivot_defined and bar is not None:
         pivot = float(pattern.pivot_level)
-        pivot_crossed = bar.high > pivot
-        open_above = bar.open > pivot
-        gap_through = bar.open > pivot and bar.low > pivot
-        close_above = bar.close > pivot
-        extension = ((bar.close / pivot) - 1.0) * 100.0
-        within_zone = 0.0 <= extension <= 5.0
-        avg50 = _prior_50_volume(bars, pattern.asof_date)
-        if pivot_crossed and avg50 is not None and avg50 > 0:
-            volume_ratio = bar.volume / avg50
-            volume_state = "CONFIRMED_ON_BREAKOUT" if volume_ratio >= 1.40 else "PENDING_CONFIRMATION"
-        elif pivot_crossed:
-            volume_state = "NOT_EVALUABLE"
+        raw_cross = bar.high > pivot
+        prior_cross = _prior_cross_after_structure(
+            bars, pivot=pivot, structural_end=pattern.structural_end, asof_date=pattern.asof_date
+        )
+        first_cross = raw_cross and not prior_cross
+        pivot_crossed = first_cross
+        open_above = first_cross and bar.open > pivot
+        gap_through = first_cross and bar.open > pivot and bar.low > pivot
+        close_above = first_cross and bar.close > pivot
+        close_quality = _close_position_quality(bar) if first_cross else None
+        if first_cross:
+            breakout_date = pattern.asof_date
+            extension = ((bar.close / pivot) - 1.0) * 100.0
+            within_zone = 0.0 <= extension <= 5.0
+            extended = extension > 5.0
+            avg50 = _prior_50_volume(bars, pattern.asof_date)
+            if avg50 is not None and avg50 > 0:
+                volume_ratio = bar.volume / avg50
+                if volume_ratio >= 1.40:
+                    volume_state = "CONFIRMED_ON_BREAKOUT"
+                    volume_confirmation_date = pattern.asof_date
+                else:
+                    volume_state = "PENDING_CONFIRMATION"
+            else:
+                volume_state = "NOT_EVALUABLE"
+        elif raw_cross and prior_cross:
+            reasons.append("BREAKOUT_ALREADY_OCCURRED")
     elif pivot_defined:
         reasons.append("BREAKOUT_BAR_NOT_EVALUABLE")
 
@@ -208,7 +259,7 @@ def build_candidate(
         stage = "NOT_ELIGIBLE"
     elif not pivot_defined:
         stage = "BASE_RECOGNIZED"
-    elif not pivot_crossed:
+    elif not first_cross:
         stage = "PIVOT_DEFINED"
     elif volume_state != "CONFIRMED_ON_BREAKOUT":
         stage = "PIVOT_CROSSED"
@@ -224,6 +275,14 @@ def build_candidate(
                 reasons.append(f"{key}_CORE_NOT_PASS")
         stage = "CANSLIM_ELIGIBLE" if all(hard_states.values()) else "BREAKOUT_CONFIRMED"
 
+    n_price_state = "PASS" if first_cross else evidence.N_price_state
+    if volume_state == "CONFIRMED_ON_BREAKOUT":
+        s_evidence_state = "POSITIVE"
+    elif volume_state == "PENDING_CONFIRMATION":
+        s_evidence_state = "NEUTRAL"
+    else:
+        s_evidence_state = evidence.S_evidence_state
+
     return CandidateRecord(
         assessment_id=pattern.assessment_id,
         candidate_id=pattern.candidate_id,
@@ -232,6 +291,7 @@ def build_candidate(
         security_id=pattern.security_id,
         ticker=pattern.ticker,
         asof_date=pattern.asof_date,
+        breakout_date=breakout_date,
         pattern=pattern.pattern,
         pattern_status=pattern.normalized_status,
         native_detector_state=pattern.native_state,
@@ -242,23 +302,30 @@ def build_candidate(
         pivot_level=pattern.pivot_level,
         pivot_source_date=pattern.pivot_source_date,
         pivot_crossed_intraday=pivot_crossed,
+        first_tradeable_daily_bar_crossed_pivot=first_cross,
+        prior_cross_after_structure=prior_cross,
         open_above_pivot=open_above,
         gap_through_pivot=gap_through,
         close_above_pivot=close_above,
+        close_position_quality=close_quality,
         extension_from_pivot_pct=extension,
         within_traditional_buy_zone=within_zone,
+        extended_above_traditional_buy_zone=extended,
         volume_avg_50_prior=avg50,
         volume_ratio=volume_ratio,
         volume_confirmation_state=volume_state,
+        volume_confirmation_date=volume_confirmation_date,
         candidate_stage=stage,
         eligibility_reason_codes=tuple(reasons),
         C_screen_state=evidence.C_screen_state,
         A_screen_state=evidence.A_screen_state,
         L_individual_leadership_state=evidence.L_individual_leadership_state,
+        rs_rating_proxy_percentile=evidence.rs_rating_proxy_percentile,
+        M_market_state=evidence.M_market_state,
         M_entry_state=evidence.M_entry_state,
-        N_price_state=evidence.N_price_state,
+        N_price_state=n_price_state,
         N_catalyst_state=evidence.N_catalyst_state,
-        S_evidence_state=evidence.S_evidence_state,
+        S_evidence_state=s_evidence_state,
         I_evidence_state=evidence.I_evidence_state,
         industry_evidence_state=evidence.industry_evidence_state,
     )

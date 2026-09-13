@@ -1,0 +1,29 @@
+name: '#36 Entry Variants v1 integrity validation'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/36-entry-variants-integrity-v1.yml'
+      - 'src/canslim_research/execution_entry_variants_v1.py'
+      - 'tests/test_execution_entry_variants_v1.py'
+      - 'docs/methodology/36-entry-variants-prereg-v1.md'
+
+permissions:
+  contents: read
+
+jobs:
+  integrity-validation:
+    runs-on: ubuntu-24.04
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run preregistered E36 variant integrity tests
+        run: python -m pytest -q tests/test_execution_entry_variants_v1.py

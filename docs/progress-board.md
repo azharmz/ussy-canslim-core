@@ -1,8 +1,8 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-13
+Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen; #33 core pattern engine and #34 theory-faithful candidate generator are now frozen.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen; #33 core pattern engine, #34 theory-faithful candidate generator, and #35 new-candidate validation are now frozen.
 
 ## Repository boundary for #33
 
@@ -55,8 +55,8 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
 | 34 | **Theory-faithful candidate generator** | **COMPLETE / FROZEN v1** |
-| 35 | **New-candidate validation** | **IN PROGRESS** |
-| 36 | Execution / entry research | **PARKED** |
+| 35 | **New-candidate validation** | **COMPLETE / FROZEN — CONDITIONAL PASS** |
+| 36 | Execution / entry research | **AUTHORIZED TO OPEN** |
 
 ## #32/#34 staged contract
 
@@ -101,28 +101,48 @@ Final verification: GitHub Actions run `34758050282` → **SUCCESS** on commit `
 
 The zero confirmed/eligible count is not a strategy verdict; the run is semantic/plumbing verification only. Canonical freeze record: `docs/decisions/2026-09-13-34-theory-faithful-candidate-generator-freeze.md`.
 
-## #35 — New-Candidate Validation — IN PROGRESS
+## #35 — New-Candidate Validation — COMPLETE / FROZEN
 
-Preregistered assets now include:
+Terminal verdict:
 
-- candidate validation protocol v1;
-- frozen historical source `ussy-data/backtest/ohlcv/{security_id}.parquet`;
-- fixed 2021Q1–2025Q4 as-of calendar;
-- 300-session minimum warm-up;
-- deterministic SHA-256 corpus sampling;
-- target 60-case independent audit corpus (20 RECOGNIZED / 20 AMBIGUOUS / 20 REJECTED, subject to natural availability);
-- automated semantic validator for V35-A/B/C;
-- dedicated historical-pool workflow with pinned #33 dependency.
+`CONDITIONAL PASS / VALIDATION COMPLETE WITH UPSTREAM #33 MORPHOLOGY DEBT PRESERVED`
 
-The historical runner uses the full research archive for cross-sectional RS/provenance but passes only the final 300 bars through each historical as-of date into the frozen #33 morphology engine, matching the production rolling-window contract. No future performance field is used in sampling.
+Canonical historical run `34763920536` completed successfully with 265,642 observations and 0 V35-A/B/C findings. The deterministic frozen corpus contains 60 cases: 20 RECOGNIZED, 20 AMBIGUOUS, and 20 REJECTED.
 
-V35-D manual real-chart audit remains closed until the historical observation pool and deterministic selected-case manifest are generated and V35-A/B/C have no unresolved PIT/chronology defects.
+V35-D review and independent raw-bar re-audit completed with:
+
+- 60/60 candidate IDs reproducible;
+- 0 missing;
+- 0 pattern mismatch;
+- 0 status mismatch;
+- no future bars;
+- first-cross chronology 60/60 MATCH;
+- volume ratio 60/60 MATCH;
+- final candidate stage 60/60 MATCH.
+
+Independent source-evidence audit GitHub Actions run `34765922653` completed **SUCCESS** on commit `c89555efddc4224509f49e68abb0dd56d0ed8cef`.
+
+- C recomputation: 60/60 MATCH;
+- A recomputation: 60/60 MATCH;
+- L recomputation: 60/60 MATCH;
+- M entry-state recomputation: 60/60 MATCH;
+- RS historical cross-section: 1,300 securities;
+- PIT availability violations: 0;
+- future-performance fields used: false;
+- artifact: `v35d-source-evidence-34765922653`;
+- artifact SHA-256: `06a1eabc12a48a6c4585b6fc4a5b4b8a4cc3f00719a194398c687a93661b1074`.
+
+No implementation bug, PIT leakage, data/evidence issue, contract-interpretation issue, or genuine validation failure was identified in V35-D.
+
+Upstream #33 morphology debt remains explicitly preserved for potentially long `CUP_WITH_HANDLE` handles and relatively large `DOUBLE_BOTTOM` second-trough undercuts. No numeric threshold may be derived from the #35 validation corpus without new authoritative morphology evidence.
+
+Canonical terminal decision record: `docs/decisions/2026-09-14-35-terminal-validation-decision.md`.
 
 ## Data boundary for #35
 
-Production daily scanning may continue to use the compact R2 ready snapshot (~300 bars/security). #35 historical/new-candidate validation is **not constrained to that production retention**.
+Production daily scanning may continue to use the compact R2 ready snapshot (~300 bars/security). #35 historical/new-candidate validation was **not constrained to that production retention**.
 
-The purpose-built full-history archive is used to construct historical as-of slices and RS cross-sections. The production 300-bar contract remains unchanged.
+The purpose-built full-history archive was used to construct historical as-of slices and RS cross-sections. The production 300-bar contract remains unchanged.
 
 ## Forward tracks remain frozen
 
@@ -130,9 +150,8 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. Complete deterministic #35 historical observation-pool generation.
-2. Run V35-A/B/C against the generated historical records.
-3. Freeze the selected-case manifest before manual chart review.
-4. Open V35-D only after automated chronology/PIT checks are green.
-5. Do not retune #33 morphology or #34 thresholds from return, CAGR, PF, breakout success, or entry optimization.
-6. Keep P6 advanced patterns out of production, FWD1/EXH2 unchanged, and #36 parked.
+1. #35 is closed and frozen; do not retune #33 or #34 from the validation corpus.
+2. Preserve the frozen 60-case corpus, canonical artifacts/hashes, and upstream #33 morphology evidence debt.
+3. Keep P6 advanced patterns out of production and FWD1/EXH2 unchanged.
+4. Open #36 Execution / Entry as a separate downstream workstream.
+5. #36 must define executable-entry semantics without rewriting the frozen #33/#34/#35 contracts.

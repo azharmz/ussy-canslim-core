@@ -40,6 +40,41 @@ def strata(row: Mapping[str, object]) -> tuple[str, ...]:
     )
 
 
+def _dedupe_lineage_state(rows: Iterable[Mapping[str, object]]) -> list[Mapping[str, object]]:
+    """Keep one deterministic representative per lineage/chronology state."""
+    best: dict[tuple[str, str], Mapping[str, object]] = {}
+    for row in rows:
+        identity = (str(row.get("lineage_id", "")), chronology_state(row))
+        current = best.get(identity)
+        if current is None or selection_key(row) < selection_key(current):
+            best[identity] = row
+    return sorted(best.values(), key=selection_key)
+
+
+def _coverage_greedy(rows: Iterable[Mapping[str, object]], quota: int) -> list[Mapping[str, object]]:
+    """Deterministically maximize preregistered stratum coverage, tie-breaking by hash."""
+    remaining = _dedupe_lineage_state(rows)
+    chosen: list[Mapping[str, object]] = []
+    covered: set[str] = set()
+
+    while remaining and len(chosen) < quota:
+        best_index = 0
+        best_gain = -1
+        best_hash = ""
+        for index, row in enumerate(remaining):
+            gain = len(set(strata(row)) - covered)
+            row_hash = selection_key(row)
+            if gain > best_gain or (gain == best_gain and (not best_hash or row_hash < best_hash)):
+                best_index = index
+                best_gain = gain
+                best_hash = row_hash
+        row = remaining.pop(best_index)
+        chosen.append(row)
+        covered.update(strata(row))
+
+    return chosen
+
+
 def select_corpus(rows: Iterable[Mapping[str, object]]) -> list[dict[str, object]]:
     buckets: dict[str, list[Mapping[str, object]]] = {status: [] for status in STATUS_QUOTA}
     for row in rows:
@@ -49,17 +84,7 @@ def select_corpus(rows: Iterable[Mapping[str, object]]) -> list[dict[str, object
 
     selected: list[dict[str, object]] = []
     for status, quota in STATUS_QUOTA.items():
-        ordered = sorted(buckets[status], key=selection_key)
-        seen_lineage_state: set[tuple[str, str]] = set()
-        chosen: list[Mapping[str, object]] = []
-        for row in ordered:
-            identity = (str(row.get("lineage_id", "")), chronology_state(row))
-            if identity in seen_lineage_state:
-                continue
-            seen_lineage_state.add(identity)
-            chosen.append(row)
-            if len(chosen) >= quota:
-                break
+        chosen = _coverage_greedy(buckets[status], quota)
         for row in chosen:
             selected.append({
                 "validation_case_id": selection_key(row)[:16],

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
-from typing import Iterable, Mapping, Sequence
+from typing import Sequence
 
 from canslim_research.candidate_v2 import CandidateEvidence
 
@@ -37,24 +37,28 @@ def c_screen_state(*, quarterly_eps_yoy: float | None, available_on: str | None,
 
 
 def annual_eps_cagr(observations: Sequence[AnnualEpsObservation], *, asof_date: str) -> float | None:
+    """Latest three-year-span EPS CAGR using four consecutive PIT-available FY values."""
     usable = sorted(
         (x for x in observations if x.available_on <= asof_date and x.eps is not None),
         key=lambda x: x.fiscal_year,
     )
-    if len(usable) < 3:
+    if len(usable) < 4:
         return None
-    first, last = usable[0], usable[-1]
-    years = last.fiscal_year - first.fiscal_year
-    if years < 2 or float(first.eps) <= 0 or float(last.eps) <= 0:
+    window = usable[-4:]
+    years = [x.fiscal_year for x in window]
+    if years != list(range(years[0], years[0] + 4)):
         return None
-    return (float(last.eps) / float(first.eps)) ** (1.0 / years) - 1.0
+    first, last = window[0], window[-1]
+    if float(first.eps) <= 0 or float(last.eps) <= 0:
+        return None
+    return (float(last.eps) / float(first.eps)) ** (1.0 / 3.0) - 1.0
 
 
 def a_screen_state(observations: Sequence[AnnualEpsObservation], *, asof_date: str) -> tuple[str, float | None, str]:
     growth = annual_eps_cagr(observations, asof_date=asof_date)
     if growth is None or not isfinite(growth):
-        return "NOT_EVALUABLE", None, "A_MULTIYEAR_GROWTH_NOT_EVALUABLE"
-    return ("PASS", growth, "A_MULTIYEAR_EPS_CAGR_GE_25") if growth >= 0.25 else ("FAIL", growth, "A_MULTIYEAR_EPS_CAGR_LT_25")
+        return "NOT_EVALUABLE", None, "A_3Y_EPS_CAGR_NOT_EVALUABLE"
+    return ("PASS", growth, "A_3Y_EPS_CAGR_GE_25") if growth >= 0.25 else ("FAIL", growth, "A_3Y_EPS_CAGR_LT_25")
 
 
 def l_screen_state(rs_rating_proxy_percentile: float | None) -> tuple[str, str]:

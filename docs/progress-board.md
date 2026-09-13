@@ -17,7 +17,7 @@ The frozen production contract is `oneil-pattern-output-v2` and emits only:
 - `CUP_WITHOUT_HANDLE`
 - `CUP_WITH_HANDLE`
 
-Advanced P6 (`ASCENDING_BASE`, `BASE_ON_BASE`) remains **DEFERRED / NOT PRODUCTION-VALIDATED** and must not enter #34/#35 production-contract consumption.
+Advanced P6 (`ASCENDING_BASE`, `BASE_ON_BASE`) remains **DEFERRED / NOT PRODUCTION-VALIDATED** and must not enter #34/#35/#36 production-contract consumption.
 
 ## Canonical v1 state
 
@@ -56,7 +56,7 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
 | 34 | **Theory-faithful candidate generator** | **COMPLETE / FROZEN v1** |
 | 35 | **New-candidate validation** | **COMPLETE / FROZEN — CONDITIONAL PASS** |
-| 36 | Execution / entry research | **AUTHORIZED TO OPEN** |
+| 36 | **Execution / entry research** | **IMPLEMENTED v1 / SEMANTIC VALIDATION PENDING** |
 
 ## #32/#34 staged contract
 
@@ -138,20 +138,67 @@ Upstream #33 morphology debt remains explicitly preserved for potentially long `
 
 Canonical terminal decision record: `docs/decisions/2026-09-14-35-terminal-validation-decision.md`.
 
-## Data boundary for #35
+## #36 — Execution / Entry — IMPLEMENTED v1 / VALIDATION PENDING
+
+Frozen specification:
+
+`docs/methodology/36-execution-entry-spec-v1.md`
+
+Contract version:
+
+`36-execution-entry-v1`
+
+Canonical v1 baseline:
+
+```text
+CANSLIM_ELIGIBLE at T
+→ signal information available after T close
+→ earliest causal execution T+1
+→ execute at observed T+1 open iff pivot <= open <= pivot * 1.05
+```
+
+Execution states preserve missed/nonexecuted cases explicitly:
+
+- `NOT_ENTRY_ELIGIBLE`
+- `NO_NEXT_SESSION_BAR`
+- `EXECUTED_T1_OPEN`
+- `MISSED_EXTENDED_AT_OPEN`
+- `BELOW_PIVOT_AT_OPEN`
+- `NOT_EVALUABLE`
+
+Implementation:
+
+- `src/canslim_research/execution_entry_v1.py`
+- `tests/test_execution_entry_v1.py`
+- `.github/workflows/36-execution-entry-v1.yml`
+
+Risk references carried from frozen #31:
+
+- practical ~7% defensive trigger references actual fill;
+- legacy 8% hard-loss ceiling references actual fill;
+- normal +20%-25% profit zone references the proper buy point/pivot.
+
+The first implementation intentionally does **not** include same-day hindsight fills, arbitrary T+2/T+3 waiting, retest bands, inferred limit fills, or performance-selected entry timing. X1-X4/X3 remain historical frozen execution research and are not the #36 theory-faithful contract.
+
+Direct semantic boundary logic check passed. GitHub Actions has not yet produced a terminal run for the newly added workflow, therefore #36 is not yet implementation-frozen and performance research remains closed.
+
+Decision/start record: `docs/decisions/2026-09-14-36-execution-entry-v1-start.md`.
+
+## Data boundary for #35/#36
 
 Production daily scanning may continue to use the compact R2 ready snapshot (~300 bars/security). #35 historical/new-candidate validation was **not constrained to that production retention**.
 
-The purpose-built full-history archive was used to construct historical as-of slices and RS cross-sections. The production 300-bar contract remains unchanged.
+The purpose-built full-history archive was used to construct historical as-of slices and RS cross-sections. The production 300-bar contract remains unchanged. #36 consumes causal next-session OHLCV only after a frozen T signal; it must not use future bars to alter T eligibility.
 
 ## Forward tracks remain frozen
 
-FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/#34/#35 findings must not be retrofitted into either track.
+FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/#34/#35/#36 findings must not be retrofitted into either track.
 
 ## Active work from here
 
-1. #35 is closed and frozen; do not retune #33 or #34 from the validation corpus.
-2. Preserve the frozen 60-case corpus, canonical artifacts/hashes, and upstream #33 morphology evidence debt.
-3. Keep P6 advanced patterns out of production and FWD1/EXH2 unchanged.
-4. Open #36 Execution / Entry as a separate downstream workstream.
-5. #36 must define executable-entry semantics without rewriting the frozen #33/#34/#35 contracts.
+1. Obtain terminal E36 semantic-validation run for `36-execution-entry-v1`.
+2. Require zero E36-A..F semantic findings before implementation freeze.
+3. Do not inspect trading performance as an implementation acceptance criterion.
+4. After semantic freeze, preregister any delayed/retest/pivot-reclaim execution variant before testing it.
+5. Keep #33/#34/#35 and the frozen 60-case corpus untouched; preserve upstream #33 morphology debt.
+6. Keep P6 advanced patterns out of production and FWD1/EXH2 unchanged.

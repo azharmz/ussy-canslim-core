@@ -10,11 +10,14 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 
 This repository is the CAN SLIM parent/HQ. Local #33/P8 detector, lineage, evaluator, workflow, and labelled-development history is retained as research/migration evidence but is **superseded as implementation source of truth**. No new #33 detector/evaluator development should be added here.
 
-Parent boundary decision: `docs/decisions/2026-09-13-33-canonical-repo-boundary.md`.
+The frozen production contract is `oneil-pattern-output-v2` and emits only:
 
-Canonical final P8 decision pointer: `docs/decisions/2026-09-13-33-final-p8-verdict.md`.
+- `FLAT_BASE`
+- `DOUBLE_BOTTOM`
+- `CUP_WITHOUT_HANDLE`
+- `CUP_WITH_HANDLE`
 
-For continuation/recovery of #33, open `ussy-oneil-patterns/README.md` first, then its `docs/progress-board.md`.
+Advanced P6 (`ASCENDING_BASE`, `BASE_ON_BASE`) remains **DEFERRED / NOT PRODUCTION-VALIDATED** and must not enter #34 production consumption.
 
 ## Canonical v1 state
 
@@ -36,7 +39,7 @@ For continuation/recovery of #33, open `ussy-oneil-patterns/README.md` first, th
 | EXH2 | LIVE / PROSPECTIVE | separate exhaustion sidecar |
 | Production integration | BLOCKED | FWD1 review gate not met |
 
-Historical v1 results remain frozen evidence and must not be used to tune the theory-faithful #33 path.
+Historical v1 results remain frozen evidence and must not be used to tune the theory-faithful path.
 
 ## Theory Fidelity / v2 path — #25 onward
 
@@ -51,17 +54,11 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 31 | Sell / risk-management fidelity | **COMPLETE** |
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
-| 34 | Theory-faithful candidate generator | **READY TO START — consume frozen core #33 contract only** |
+| 34 | **Theory-faithful candidate generator** | **IN PROGRESS** |
 | 35 | New-candidate validation | NOT STARTED |
 | 36 | Execution / entry research | **PARKED** |
 
-## #32 Theory-Faithful Candidate Specification v1
-
-Canonical specification: `docs/methodology/theory-faithful-candidate-spec-v1.md`.
-
-Decision record: `docs/decisions/2026-09-12-theory-faithful-candidate-spec-v1.md`.
-
-The staged contract remains:
+## #32 staged contract
 
 ```text
 BASE_RECOGNIZED
@@ -71,116 +68,80 @@ BREAKOUT_CONFIRMED
 CANSLIM_ELIGIBLE
 ```
 
-The first theory-faithful candidate contract requires valid named morphology and a pattern-specific pivot before breakout/C/A/L/M integration. Missing or stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
+Missing or stale evidence remains `NOT_EVALUABLE/NOT_IMPLEMENTED`, never coerced to PASS or FAIL.
 
-## #33 — O'Neil Pattern Recognition Engine
+## #34 — Theory-Faithful Candidate Generator
 
-### Ownership
+### Boundary
 
-`azharmz/ussy-oneil-patterns` owns:
+#34 is a downstream consumer of frozen #33 production output. It must preserve:
 
-- PIT-safe landmarks and base segmentation;
-- named O'Neil morphology implementation;
-- fault/ambiguity evidence;
-- pattern-specific structural pivots;
-- P8 labelled morphology validation;
-- versioned canonical #33 output.
+- `RECOGNIZED / AMBIGUOUS / REJECTED`;
+- `candidate_id`, `base_id`, `lineage_id`;
+- candidate semantics and detector faults;
+- pattern engine/schema/version provenance.
 
-This parent repo owns only the upstream #32 contract, roadmap/status, historical migration evidence, and #34 consumption of the frozen #33 contract.
+It must not copy, extend or retune the morphology engine in this repo.
 
-### Canonical P8 final state
+### Current implementation checkpoint
 
-Canonical DEVELOPMENT corpus:
+Implemented:
 
-- 20 authoritative positive examples;
-- five each for FLAT_BASE, CUP_WITH_HANDLE, DOUBLE_BOTTOM, CUP_WITHOUT_HANDLE;
-- 20/20 source-dimension MATCH;
-- zero boundary disagreement;
-- zero landmark disagreement;
-- zero pattern miss;
-- zero true candidate identity STATUS_CONFLICT.
+- strict consumer for `oneil-pattern-output-v2` four-core pattern scope;
+- advanced P6 pattern rejection;
+- preservation of ambiguity/faults/identity/provenance;
+- pivot-cross facts from daily OHLCV (`high > pivot`) without requiring close-above to define the crossing;
+- gap/open/close/extension and 5% buy-zone evidence;
+- breakout-day volume confirmation using prior 50 completed sessions and `>=1.40x` ratio;
+- staged candidate semantics through `BREAKOUT_CONFIRMED` / `CANSLIM_ELIGIBLE`;
+- PIT C adapter using quarterly EPS YoY `>=25%` core screen;
+- A adapter using sustained multi-year annual EPS growth rather than the legacy every-year Boolean;
+- L adapter using transparent RS percentile `>=80`;
+- M state adapter preserving `ALLOW_NEW_BUYS / CAUTION / BLOCK_NEW_BUYS`;
+- I manager-count trend preserved as evidence, not a hard gate;
+- live-R2 smoke runner that invokes canonical #33 `oneil_patterns.production` rather than local duplicate morphology.
 
-Frozen core versions include:
+Current commits include:
 
-- `flat-base-v2`;
-- `double-bottom-v3`;
-- `cup-family-v2`;
-- `p8-canonical-prediction-adapter-v1.1`;
-- `p8-pivot-adapter-v0.2`;
-- `p8-source-dimension-eval-v0.5`;
-- `p8-candidate-identity-audit-v0.4`.
+- `559165c` initial frozen #33 consumer;
+- `29c1cef` theory-faithful evidence adapters;
+- `2136323` end-to-end live-R2 smoke runner;
+- `3d84d12` extended candidate/evidence unit tests.
 
-Freeze evidence commit in canonical repo:
+### Current verification boundary / blocker
 
-`2ed3dadcc354f56f4cb27401248daef60b1627fa`
+The new code is committed, but a new dedicated GitHub Actions workflow could not be created from the current connector session (tool safety rejection). The local container also has no outbound DNS access to clone GitHub, so independent execution from this chat cannot currently run the repo tests or the R2 smoke.
 
-### Independent VALIDATION
-
-NFLX `CUP_WITH_HANDLE` stayed locked throughout DEVELOPMENT and was opened once after freeze.
-
-Canonical one-shot result:
+Therefore #34 is **not yet frozen or complete**. Required next verification is an actual CI/R2 execution of:
 
 ```text
-agreement_state         = MATCH
-candidate_resolution    = UNIQUE
-source start            = 2023-02-03
-matched start           = 2023-02-03
-start error             = 0 days
-matched detector state  = CUP_WITH_HANDLE_AMBIGUOUS
-candidate semantics     = OPEN_RIGHT_EDGE_HANDLE:p8-open-right-edge-handle-v0.1
-detector fault          = BELOW_CUP_MIDPOINT
+canonical #33 production output
+→ R2 daily OHLCV
+→ pivot/breakout/volume
+→ PIT fundamentals/current.json
+→ C/A
+→ cross-sectional RS/L
+→ versioned M proxy
+→ candidate stages
 ```
 
-The detector was **not** retuned after this result. `BELOW_CUP_MIDPOINT` therefore remains explicit validation debt.
+No trading-performance metrics are authorized for this verification.
 
-The NFLX row intentionally left pivot/depth unscored before VALIDATION was opened, so canonical P8 does not claim that every numeric CWH band has independent validation.
+### Evidence intentionally not hard-gated
 
-### Final #33/P8 verdict
-
-**CONDITIONAL PASS / FROZEN WITH VALIDATION DEBT** for the four core pattern families.
-
-Downstream consumers must preserve:
-
-- `RECOGNIZED` / `AMBIGUOUS` / `REJECTED` state;
-- candidate semantics;
-- detector faults;
-- validation/source provenance where relevant.
-
-`AMBIGUOUS` must not be silently converted into either recognized morphology or no-pattern.
-
-Advanced/deferred pattern families do not automatically inherit the same P8 evidence level.
-
-### Local #33 code status
-
-Earlier #33/P8 work in this parent repo implemented routing, detectors, base identity/lineage, conflict handling, evaluator semantics, and CI. Those commits remain available for provenance and reconciliation. They are **not** to be extended as a second engine.
-
-Do not delete/rewrite that history as part of #34 implementation. Any cleanup remains a separate non-destructive housekeeping task.
-
-## #34 gate
-
-The #33 blocking gate is now cleared **for the frozen four core families only**.
-
-#34 may start by consuming canonical #33 output while preserving explicit pattern state, semantics and faults. #34 must not reopen P8 using CAGR, PF, win rate, FWD1, post-breakout returns, or entry performance.
-
-## Frozen theory summary (#26-#31)
-
-- Proper base: generic 35-session/depth<=40% proxy is insufficient; named morphology is required.
-- Pivot: pattern-specific landmark, not arbitrary rolling high.
-- Breakout: pivot crossing is distinct from close/hold quality; breakout-day volume confirmation is downstream of #33 morphology.
-- Leadership: RS>=80 is a useful leader screen but RS line and industry context remain separate evidence.
-- Component roles: C/A screens; S/I evidence/confirmation; M timing/context/risk gate.
-- Sell/risk: downstream state machine; not owned by #33.
-
-Canonical audit detail: `docs/methodology/oneil-theory-fidelity-audit-v1.md`.
+- I remains evidence unless a later frozen spec changes it;
+- broader S supply/float evidence remains separate from breakout volume;
+- RS-line and industry leadership remain evidence/context until a defensible PIT contract exists;
+- N catalyst remains `NOT_IMPLEMENTED` where no PIT catalyst source exists.
 
 ## Forward tracks remain frozen
 
-FWD1 remains frozen forward validation and EXH2 remains separate/prospective. Neither may be used to tune the frozen #33/P8 morphology semantics.
+FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity and #34 findings must not be retrofitted into either track.
 
 ## Active work from here
 
-1. Treat canonical #33 core morphology as frozen; do not extend the parent duplicate engine.
-2. Begin #34 only against the frozen four-core-family output contract.
-3. Preserve `AMBIGUOUS` and detector-fault evidence through downstream candidate generation.
-4. Keep #36 parked and FWD1/EXH2 accumulating unchanged.
-5. Any material change to #32 hard eligibility or evidence-vs-gate semantics requires a new spec version and decision record.
+1. Obtain one successful CI/R2 execution of the #34 live smoke and fix only technical/schema/PIT defects.
+2. Freeze #34 output schema/adapter versions after the smoke is green.
+3. Then begin #35 candidate validation; do not jump to performance research.
+4. Keep P6 advanced patterns out of production and do not reopen #33 from downstream outcomes.
+5. Keep FWD1/EXH2 accumulating unchanged and #36 parked.

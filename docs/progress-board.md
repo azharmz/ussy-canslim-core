@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path through #36 now has frozen #32/#33/#34/#35 contracts and a frozen #36 execution baseline.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen #32/#33/#34/#35 contracts, a frozen #36 execution baseline, and a frozen #37 sell/risk state-machine baseline.
 
 ## Repository boundary for #33
 
@@ -23,7 +23,7 @@ P6 advanced patterns (`ASCENDING_BASE`, `BASE_ON_BASE`) remain:
 
 `DEFERRED / NOT PRODUCTION-VALIDATED / FROZEN UNTIL NEW AUTHORITATIVE MORPHOLOGY EVIDENCE EXISTS`
 
-They must not enter #34/#35/#36 production-contract consumption.
+They must not enter #34/#35/#36/#37 production-contract consumption.
 
 ## Canonical v1 state
 
@@ -63,6 +63,7 @@ Historical v1 results remain frozen evidence and must not tune the theory-faithf
 | 34 | Theory-faithful candidate generator | **COMPLETE / FROZEN v1** |
 | 35 | New-candidate validation | **COMPLETE / FROZEN — CONDITIONAL PASS** |
 | 36 | Execution / entry research | **BASELINE FROZEN / DIAGNOSTIC COMPLETE / PRIMARY PERFORMANCE VALIDATION BLOCKED_ON_ELIGIBLE_POPULATION** |
+| 37 | Sell / risk execution semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 
 ## Frozen #32/#34 staged contract
 
@@ -92,151 +93,104 @@ Terminal verdict:
 
 `CONDITIONAL PASS / VALIDATION COMPLETE WITH UPSTREAM #33 MORPHOLOGY DEBT PRESERVED`
 
-Canonical historical run `34763920536`:
+Canonical historical run `34763920536`: 265,642 observations, V35-A/B/C findings = 0, frozen 60-case corpus = 20 RECOGNIZED / 20 AMBIGUOUS / 20 REJECTED.
 
-- 265,642 observations;
-- V35-A/B/C findings = 0;
-- frozen 60-case corpus = 20 RECOGNIZED / 20 AMBIGUOUS / 20 REJECTED.
-
-V35-D:
-
-- candidate identity 60/60 reproducible;
-- pattern/status mismatch = 0;
-- no future bars;
-- first-cross chronology 60/60 MATCH;
-- volume ratio 60/60 MATCH;
-- final stage 60/60 MATCH.
-
-Independent source-evidence audit run `34765922653` → **SUCCESS**:
-
-- C 60/60 MATCH;
-- A 60/60 MATCH;
-- L 60/60 MATCH;
-- M 60/60 MATCH;
-- 1,300-security historical RS cross-section;
-- PIT violations = 0;
-- future-performance fields used = false.
+Independent source-evidence audit run `34765922653` → **SUCCESS** with C/A/L/M 60/60 MATCH, 1,300-security historical RS cross-section, PIT violations = 0, and no future-performance fields used.
 
 Canonical decision:
 
 `docs/decisions/2026-09-14-35-terminal-validation-decision.md`
 
-Upstream #33 morphology debt remains preserved for potentially long CWH handles and relatively large DB second-trough undercuts. No threshold may be derived from #35 validation data.
+Upstream #33 morphology debt remains preserved. No threshold may be derived from #35 validation data.
 
 ## #36 — Execution / Entry
 
-### Canonical baseline — FROZEN v1
-
-Specification:
-
-`docs/methodology/36-execution-entry-spec-v1.md`
-
-Contract:
-
-`36-execution-entry-v1`
+Canonical baseline contract: `36-execution-entry-v1`.
 
 ```text
 CANSLIM_ELIGIBLE at T
 → signal known after close T
-→ earliest causal execution T+1
-→ fill at observed T+1 open iff pivot <= open <= pivot * 1.05
+→ earliest causal execution convention T+1 open
+→ fill iff pivot <= open <= pivot * 1.05
 ```
 
-No same-day hindsight fill, synthetic limit fill, arbitrary delayed fill, or performance-selected entry timing is part of the canonical baseline.
+`T`, close T and T+1/T+3 are dataset/backtest chronology labels, **not O'Neil terminology**. Theory semantics, information boundary and execution clock are explicitly separated by:
 
-Semantic validation:
+`docs/decisions/2026-09-14-36-theory-vs-execution-boundary-clarification.md`
 
-- initial run `34784341195` failed only from CI import path before assertions;
-- tooling-only fix: `PYTHONPATH=src`;
-- canonical run `34785545504` → **SUCCESS**, 11 passed;
-- no semantic threshold or upstream contract changed.
+Semantic validation run `34785545504` → **SUCCESS**, 11 passed.
 
 Freeze decision:
 
 `docs/decisions/2026-09-14-36-execution-entry-v1-freeze.md`
 
-### R0/R1/R2/R3 research variants
-
-Preregistration:
-
-`docs/methodology/36-entry-variants-prereg-v1.md`
-
-Variant integrity run `34785658367` → **SUCCESS**.
-
-- R0 = frozen T+1-open baseline;
-- R1 = first valid observed open T+1–T+3;
-- R2 = full daily pivot hold T+1/T+2, then next valid open;
-- R3 = +2% near-pivot retest/reclaim research proxy; explicitly non-authoritative.
-
-### Primary actionable population gate
-
-Source-population audit run `34786499862` → **SUCCESS** against the frozen canonical #35 artifact.
-
-Stage counts across 265,642 observations:
-
-- `NOT_ELIGIBLE`: 241,514
-- `PIVOT_DEFINED`: 23,656
-- `PIVOT_CROSSED`: 334
-- `BREAKOUT_CONFIRMED`: 138
-- `CANSLIM_ELIGIBLE`: **0**
-
-Therefore the preregistered actionable R0/R1/R2/R3 performance comparison is:
-
-`BLOCKED_ON_ELIGIBLE_POPULATION`
-
-No performance metric was inspected before that gate was recorded.
-
-Decision:
-
-`docs/decisions/2026-09-14-36-entry-primary-population-gate.md`
-
-### Separate BREAKOUT_CONFIRMED execution diagnostic
-
-Preregistered separately after the zero-population gate and before outcome inspection:
-
-`docs/methodology/36-breakout-confirmed-execution-diagnostic-v1.md`
-
-Run `34786603831` → **SUCCESS**.
-
-Integrity findings: **0**.
-
-Population:
-
-- 138 frozen `BREAKOUT_CONFIRMED` candidate records;
-- 6 securities;
-- only 12 unique security-date signal events.
-
-Execution coverage:
-
-- R0: 18/138 = 13.0%;
-- R1: 21/138 = 15.2%, +3 incremental candidate fills vs R0;
-- R2: 13/138 = 9.4%, +2 incremental vs R0;
-- R3: 18/138 = 13.0%, +2 incremental vs R0.
-
-Fixed 5/10/20/30-session returns plus 20-session MFE/MAE were computed only after integrity passed. Because the 138 candidate records collapse to only 12 security-date events, candidate-level outcomes are strongly clustered and must not be treated as 138 independent trials.
-
-No R1/R2/R3 promotion is authorized. R3 remains a non-authoritative research proxy. This diagnostic is **not CANSLIM-eligible strategy performance**.
-
-Terminal decision:
-
-`docs/decisions/2026-09-14-36-entry-diagnostic-terminal.md`
+R0/R1/R2/R3 variant integrity run `34785658367` → **SUCCESS**. Primary actionable comparison remains `BLOCKED_ON_ELIGIBLE_POPULATION` because canonical #35 contains 0 `CANSLIM_ELIGIBLE` observations. Separate BREAKOUT_CONFIRMED diagnostic run `34786603831` → **SUCCESS**, integrity findings = 0, but no variant promotion is authorized.
 
 Terminal #36 state:
 
 `BASELINE FROZEN / DIAGNOSTIC COMPLETE / PRIMARY PERFORMANCE VALIDATION BLOCKED_ON_ELIGIBLE_POPULATION`
 
+## #37 — Sell / Risk Execution Semantics — FROZEN v1
+
+Specification:
+
+`docs/methodology/37-theory-faithful-sell-risk-spec-v1.md`
+
+Contract:
+
+`37-sell-risk-v1`
+
+Canonical semantic boundaries:
+
+- practical ~7% capital-protection trigger references **actual fill price**;
+- historical/legacy 8% level is preserved as ceiling/severity evidence, not the planned first trigger;
+- gap-through defensive exit uses the observed open;
+- non-gap daily low crossing the 7% trigger uses an explicit daily-OHLC mechanical stop convention;
+- normal +20%-25% zone references the proper buy point/pivot and is **not an automatic full-exit target**;
+- fast +20% within first three weeks activates exceptional-winner/eight-week context;
+- 15/40 completed-session counts are daily-data calendar conventions, not O'Neil terminology;
+- round-trip remains evidence-only until an authoritative numeric precondition is frozen;
+- climax remains not implemented canonically; EXH2 is not relabelled as #37;
+- market exposure remains separate from stock-level sell action.
+
+Implementation:
+
+- `src/canslim_research/sell_risk_v1.py`
+- `tests/test_sell_risk_v1.py`
+- `.github/workflows/37-sell-risk-v1.yml`
+
+Initial run `34787869372` exposed a floating-point equality bug exactly at the -7% threshold. This was classified as an implementation numeric-boundary bug; the specification and thresholds were unchanged. The classifier was corrected to compare prices directly with 93%/92% thresholds.
+
+Canonical semantic-validation run:
+
+- run `34787905360`
+- commit `ff052942f2ba7bafe6fa616b3883a6ad188ff8c1`
+- **SUCCESS**
+- **10 passed**
+
+Freeze decision:
+
+`docs/decisions/2026-09-14-37-sell-risk-v1-freeze.md`
+
+Terminal #37 state:
+
+`IMPLEMENTATION COMPLETE / FROZEN v1`
+
+No trading-performance claim is made by #37. Performance research remains closed until separately preregistered.
+
 ## Data boundary
 
-Production daily scanning may continue using the compact R2 ready snapshot (~300 bars/security). Historical validation/research may use the purpose-built full-history archive. #36 may consume next-session bars only after a frozen signal T; future bars must never alter signal-T eligibility.
+Production daily scanning may continue using the compact R2 ready snapshot (~300 bars/security). Historical validation/research may use the purpose-built full-history archive. Future bars must never alter frozen signal-T eligibility or historical entry facts.
 
 ## Forward tracks remain frozen
 
-FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity/#34/#35/#36 findings must not be retrofitted into either track.
+FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=12 completed calendar months and >=50 closed X3 portfolio trades. EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into either track.
 
 ## Active work from here
 
-1. Keep #33/#34/#35 and the frozen #36 R0 baseline unchanged.
-2. Do not promote R1/R2/R3 from the clustered breakout-confirmed diagnostic.
-3. Wait for a genuine frozen `CANSLIM_ELIGIBLE` historical/forward source population before primary #36 performance validation.
-4. Preserve #33 morphology debt and keep P6 advanced patterns out of production.
-5. Any new downstream workstream after #36 must receive its own explicit scope/specification rather than modifying the frozen candidate/entry contracts.
+1. Keep #33/#34/#35/#36/#37 frozen contracts unchanged.
+2. Do not promote R1/R2/R3 from the clustered #36 diagnostic.
+3. Wait for a genuine frozen `CANSLIM_ELIGIBLE` source population before primary #36/#37 performance validation.
+4. If additional #37 sell states are pursued, freeze their exact authoritative semantics first: 50d/10w heavy-volume deterioration, round-trip trigger, climax/exhaustion, or market-exposure action.
+5. Preserve #33 morphology debt and keep P6 advanced patterns out of production.
+6. Keep FWD1/EXH2 unchanged and separate.

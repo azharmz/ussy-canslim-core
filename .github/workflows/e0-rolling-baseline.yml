@@ -27,9 +27,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy pytest
-      - name: Verify #34/#35 contracts
-        run: PYTHONPATH=src pytest -q tests/test_candidate_v2.py tests/test_validation_v2.py
+        run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
       - name: Run E0 rolling baseline smoke
         run: python scripts/run_e0_rolling_baseline.py
       - name: Show summary

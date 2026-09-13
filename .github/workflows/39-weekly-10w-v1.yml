@@ -1,0 +1,27 @@
+name: "#39 Weekly / 10W v1 semantic validation"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/canslim_research/weekly_10w_v1.py"
+      - "tests/test_weekly_10w_v1.py"
+      - "docs/methodology/39-weekly-aggregation-10w-evidence-spec-v1.md"
+      - ".github/workflows/39-weekly-10w-v1.yml"
+
+env:
+  PYTHONPATH: src
+
+jobs:
+  semantic-validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run W39 semantic boundary tests
+        run: python -m pytest -q tests/test_weekly_10w_v1.py

@@ -90,10 +90,11 @@ def _profit_zone(pivot: float, price: float) -> ProfitZoneState:
 
 
 def _capital_state(fill: float, mark: float) -> CapitalProtectionState:
-    loss = mark / fill - 1.0
-    if loss <= -LEGACY_HARD_LOSS_CEILING:
+    practical_price = fill * (1.0 - PRACTICAL_LOSS_TRIGGER)
+    legacy_price = fill * (1.0 - LEGACY_HARD_LOSS_CEILING)
+    if mark <= legacy_price:
         return CapitalProtectionState.LEGACY_8PCT_CEILING_BREACHED
-    if loss <= -PRACTICAL_LOSS_TRIGGER:
+    if mark <= practical_price:
         return CapitalProtectionState.PRACTICAL_7PCT_TRIGGER_REACHED
     return CapitalProtectionState.LOSS_OK
 

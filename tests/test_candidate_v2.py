@@ -4,6 +4,14 @@ from canslim_research.candidate_v2 import (
     PatternAssessment,
     build_candidate,
 )
+from canslim_research.candidate_v2_adapters import (
+    AnnualEpsObservation,
+    a_screen_state,
+    c_screen_state,
+    institutional_state,
+    l_screen_state,
+    m_entry_state,
+)
 
 
 def pattern_row(status="RECOGNIZED", pivot=100.0):
@@ -90,3 +98,31 @@ def test_failed_core_evidence_does_not_erase_confirmed_breakout():
     assert result.volume_confirmation_state == "CONFIRMED_ON_BREAKOUT"
     assert result.candidate_stage == "BREAKOUT_CONFIRMED"
     assert "A_CORE_NOT_PASS" in result.eligibility_reason_codes
+
+
+def test_c_adapter_is_pit_safe_and_uses_25pct_eps_core():
+    assert c_screen_state(quarterly_eps_yoy=0.30, available_on="2026-08-01", asof_date="2026-09-11")[0] == "PASS"
+    assert c_screen_state(quarterly_eps_yoy=0.20, available_on="2026-08-01", asof_date="2026-09-11")[0] == "FAIL"
+    assert c_screen_state(quarterly_eps_yoy=0.40, available_on="2026-09-12", asof_date="2026-09-11")[0] == "NOT_EVALUABLE"
+
+
+def test_a_adapter_uses_multiyear_eps_growth():
+    rows = [
+        AnnualEpsObservation(2022, 1.00, "2023-02-15"),
+        AnnualEpsObservation(2023, 1.30, "2024-02-15"),
+        AnnualEpsObservation(2024, 1.70, "2025-02-15"),
+        AnnualEpsObservation(2025, 2.20, "2026-02-15"),
+    ]
+    state, growth, _ = a_screen_state(rows, asof_date="2026-09-11")
+    assert state == "PASS"
+    assert growth is not None and growth >= 0.25
+
+
+def test_l_m_and_i_adapters_preserve_theory_roles():
+    assert l_screen_state(80.0)[0] == "PASS"
+    assert l_screen_state(79.99)[0] == "FAIL"
+    assert m_entry_state("CONFIRMED_UPTREND")[0] == "ALLOW_NEW_BUYS"
+    assert m_entry_state("UPTREND_UNDER_PRESSURE")[0] == "CAUTION"
+    assert m_entry_state("CORRECTION")[0] == "BLOCK_NEW_BUYS"
+    assert institutional_state(fund_count_latest=12, fund_count_prior=10, available_on="2026-08-01", asof_date="2026-09-11")[0] == "POSITIVE"
+    assert institutional_state(fund_count_latest=8, fund_count_prior=10, available_on="2026-08-01", asof_date="2026-09-11")[0] == "NEGATIVE"

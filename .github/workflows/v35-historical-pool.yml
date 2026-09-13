@@ -9,6 +9,10 @@ on:
       - 'scripts/run_v35_historical_pool.py'
       - 'src/canslim_research/validation_corpus_v1.py'
 
+concurrency:
+  group: v35-historical-pool
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

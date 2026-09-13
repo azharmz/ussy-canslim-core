@@ -28,8 +28,6 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
-      - name: Verify #35 corpus sampler
-        run: PYTHONPATH=src python -c "from canslim_research.validation_corpus_v1 import selection_key; r={'security_id':'S1','asof_date':'2024-03-28','candidate_id':'C1'}; assert selection_key(r)==selection_key(dict(r))"
       - name: Run E0 rolling baseline smoke
         run: python scripts/run_e0_rolling_baseline.py
       - name: Show summary

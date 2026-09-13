@@ -120,12 +120,13 @@ def main() -> None:
             if len(pit) < MIN_BARS:
                 availability.append({"security_id": sid, "asof_date": asof.date().isoformat(), "state": "INSUFFICIENT_HISTORY", "bars": len(pit)})
                 continue
+            window = pit.tail(MIN_BARS).copy()
             ticker = tickers[sid]
-            assessments = analyze_security(sid, ticker, pit[["date", "open", "high", "low", "close", "volume"]], asof.date())
-            availability.append({"security_id": sid, "asof_date": asof.date().isoformat(), "state": "EVALUATED", "bars": len(pit), "assessments": len(assessments)})
+            assessments = analyze_security(sid, ticker, window[["date", "open", "high", "low", "close", "volume"]], asof.date())
+            availability.append({"security_id": sid, "asof_date": asof.date().isoformat(), "state": "EVALUATED", "bars": len(window), "assessments": len(assessments)})
             if not assessments:
                 continue
-            bars = [DailyBar(r.date.date().isoformat(), float(r.open), float(r.high), float(r.low), float(r.close), float(r.volume)) for r in pit.itertuples()]
+            bars = [DailyBar(r.date.date().isoformat(), float(r.open), float(r.high), float(r.low), float(r.close), float(r.volume)) for r in window.itertuples()]
             q_eps, q_available, annual = fundamental_evidence(wide, long, ticker, asof.date().isoformat())
             adapted = build_candidate_evidence(asof_date=asof.date().isoformat(), quarterly_eps_yoy=q_eps, quarterly_available_on=q_available, annual_eps=annual, rs_rating_proxy_percentile=rs_map.get(sid), market_state=market_state)
             for item in assessments:
@@ -146,6 +147,7 @@ def main() -> None:
         "resolved_asof_dates": [x.date().isoformat() for x in dates],
         "history_object_count": len(keys),
         "security_sample_size": len(selected_ids),
+        "morphology_window_bars": MIN_BARS,
         "security_sampling": "sha256(v35-security-frame|security_id)",
         "observation_count": len(rows),
         "selected_case_count": len(selected),

@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen #32/#33/#34/#35 contracts, a frozen #36 execution baseline, frozen #37 sell/risk semantics, frozen #38 daily deterioration evidence, frozen #39 weekly/10-week evidence, and a frozen #40 technical-deterioration action contract.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #41, including a deterministic end-to-end position lifecycle for currently canonical entry and exit actions.
 
 ## Repository boundary for #33
 
@@ -30,10 +30,11 @@ Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DO
 | 38 | Technical deterioration evidence | **EVIDENCE LAYER COMPLETE / FROZEN v1** |
 | 39 | Weekly aggregation / 10-week evidence | **WEEKLY AGGREGATION + 10W EVIDENCE COMPLETE / FROZEN v1** |
 | 40 | Technical deterioration action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+| 41 | Position lifecycle / exit arbiter | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 
-## #34–#35 frozen candidate/validation state
+## #34–#35 candidate and validation state
 
-Frozen staged contract:
+Frozen candidate stages remain:
 
 ```text
 BASE_RECOGNIZED
@@ -43,110 +44,102 @@ BASE_RECOGNIZED
 → CANSLIM_ELIGIBLE
 ```
 
-#34 final verification run `34758050282` → **SUCCESS**, 9 tests passed.
+#34 final verification run `34758050282` → **SUCCESS**, 9 tests. #35 canonical historical run `34763920536` produced 265,642 observations with zero V35-A/B/C findings and a frozen 60-case corpus. Independent source-evidence audit `34765922653` → **SUCCESS**, C/A/L/M 60/60 MATCH and PIT violations = 0. #35 remains `CONDITIONAL PASS` solely with upstream #33 morphology debt preserved.
 
-#35 canonical historical run `34763920536`: 265,642 observations, zero V35-A/B/C findings, frozen 60-case corpus. Independent source-evidence audit run `34765922653` → **SUCCESS**, C/A/L/M 60/60 MATCH, PIT violations = 0. Terminal verdict remains `CONDITIONAL PASS / VALIDATION COMPLETE WITH UPSTREAM #33 MORPHOLOGY DEBT PRESERVED`.
+## #36 — Entry
 
-## #36 — Execution / Entry
+Canonical `36-execution-entry-v1` remains frozen: eligible signal known after close T, earliest daily-EOD causal execution convention T+1 open, fill only inside pivot through pivot*1.05. T/T+1/T+3 are dataset/backtest clocks, not O'Neil terminology.
 
-Canonical baseline `36-execution-entry-v1` remains frozen:
+Semantic validation `34785545504` → **SUCCESS, 11 passed**. Variant integrity `34785658367` → **SUCCESS**. Primary performance validation remains `BLOCKED_ON_ELIGIBLE_POPULATION` because canonical #35 has 0 `CANSLIM_ELIGIBLE` observations.
 
-```text
-CANSLIM_ELIGIBLE at T
-→ known after close T
-→ causal execution convention T+1 open
-→ fill iff pivot <= open <= pivot * 1.05
-```
+## #37 — Sell / Risk
 
-`T`, close T, T+1 and T+3 are dataset/backtest chronology labels, not O'Neil terminology.
+`37-sell-risk-v1` remains frozen with practical ~7% capital protection from actual fill, legacy 8% severity evidence, observed-open gap-through handling, +20%-25% profit-management state from pivot without automatic full exit, and exceptional-winner/eight-week context.
 
-Semantic validation run `34785545504` → **SUCCESS**, 11 passed. R0/R1/R2/R3 integrity run `34785658367` → **SUCCESS**. Primary performance validation remains `BLOCKED_ON_ELIGIBLE_POPULATION` because canonical #35 has 0 `CANSLIM_ELIGIBLE` observations. BREAKOUT_CONFIRMED diagnostic remains diagnostic-only and authorizes no variant promotion.
+Semantic validation `34787905360` → **SUCCESS, 10 passed**.
 
-## #37 — Sell / Risk Execution Semantics
+## #38 — Daily Deterioration Evidence
 
-Contract: `37-sell-risk-v1`.
+`38-technical-deterioration-evidence-v1` remains evidence-only: MA10/21/50, strict-below-MA breaks, prior-50 volume ratio, project-consistent >=1.40x heavy-volume proxy, largest down-volume evidence, below-pivot and loss-from-fill evidence.
 
-Frozen semantics include practical ~7% capital protection from actual fill, legacy 8% severity evidence, observed-open gap-through handling, +20%-25% profit-management state from pivot without mandatory full exit, exceptional-winner/eight-week context, and explicit boundaries around round-trip/climax/market exposure.
+Semantic validation `34788119495` → **SUCCESS, 12 passed**.
 
-Canonical semantic-validation run `34787905360` → **SUCCESS, 10 passed**.
+## #39 — Weekly / 10-Week Evidence
 
-Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
+`39-weekly-10w-evidence-v1` remains frozen: completed ISO-week aggregation, holiday-shortened weeks, weekly OHLCV, true 10-completed-week MA, strict-below break, prior-10 weekly volume ratio and post-week causality. MA50 daily is not treated as identical to the 10-week line.
 
-## #38 — Daily Technical Deterioration Evidence
+Semantic validation `34788414986` → **SUCCESS, 10 passed**.
 
-Contract: `38-technical-deterioration-evidence-v1`.
+## #40 — Technical Deterioration Action
 
-Frozen evidence includes completed-session MA10/MA21/MA50, strict-below-MA breaks, prior-50 volume ratio, project-consistent `>=1.40x` heavy-volume evidence proxy, largest down-volume-since-breakout evidence, below-pivot evidence, and loss-from-fill evidence. #38 cannot promote a new mandatory sell action.
-
-Canonical semantic-validation run `34788119495` → **SUCCESS, 12 passed in 0.04s**.
-
-Terminal state: `EVIDENCE LAYER COMPLETE / FROZEN v1`.
-
-## #39 — Weekly Aggregation / 10-Week Evidence
-
-Contract: `39-weekly-10w-evidence-v1`.
-
-Frozen semantics include ISO completed-week aggregation, holiday-shortened weeks, weekly OHLCV aggregation, true 10-completed-week moving average, strict-below-10w break, prior-10 weekly volume ratio, first-break chronology, and post-week causality. MA50 daily is explicitly not treated as identical to the 10-week line.
-
-Canonical semantic-validation run `34788414986` → **SUCCESS, 10 passed in 0.04s**.
-
-Freeze decision: `docs/decisions/2026-09-14-39-weekly-10w-evidence-freeze.md`.
-
-Terminal state: `WEEKLY AGGREGATION + 10W EVIDENCE COMPLETE / FROZEN v1`.
-
-## #40 — Technical Deterioration Action Semantics
-
-Specification: `docs/methodology/40-technical-deterioration-action-spec-v1.md`.
-
-Contract: `40-technical-deterioration-action-v1`.
+`40-technical-deterioration-action-v1` remains frozen.
 
 Canonical trigger:
 
 ```text
-completed weekly close < frozen 10-week moving average
-AND
-weekly volume > mean(volume of prior 10 completed weeks)
+completed weekly close < MA10w
+AND weekly volume > mean(prior 10 completed weekly volumes)
 ```
 
-Equivalent quantitative condition:
+Low-volume breaks remain evidence. Execution is the first observed trading-session open after the completed signal week. #37 capital protection remains independent.
+
+Semantic validation `34789559782` → **SUCCESS**.
+
+## #41 — Position Lifecycle / Exit Arbiter
+
+Specification: `docs/methodology/41-position-lifecycle-exit-arbiter-spec-v1.md`.
+
+Contract: `41-position-lifecycle-exit-arbiter-v1`.
+
+#41 does not create a sell rule. It combines frozen #37 and #40 executable exits into one deterministic position lifecycle.
+
+Frozen arbitration:
 
 ```text
-break_10w_state == TRUE
-AND weekly_volume_ratio_prior10 > 1.00
+#36 executable entry
+→ OPEN
+→ normalize #37 / #40 executable exits
+→ earliest causal executable exit
+→ CLOSED
 ```
 
-Important boundaries:
-
-- equality to MA10w is not a break;
-- equality to average weekly volume is not above-average volume;
-- low-volume breaks remain evidence and do not force the canonical action;
-- an earlier low-volume break does not consume a later actionable break;
-- signal exists only after the completed week closes;
-- execution is first observed trading-session open after the signal week;
-- no Friday-close, weekend, MA-level, or synthetic intraday fill is fabricated;
-- `NO_NEXT_SESSION_BAR` remains explicit when needed;
-- #37 practical ~7% capital protection remains independent and may exit earlier;
-- #40 does not change #37 thresholds or prior fill history;
-- #38 daily `>=1.40x` heavy-volume evidence proxy is not substituted for the weekly above-average-volume rule.
+Same-session rules:
+- same observed-open #37 gap-through + #40 next-session-open => one `SAME_OPEN_CONVERGENCE` close;
+- #40 session-open execution precedes a same-date #37 daily-low stop-convention execution;
+- any other same-date ordering unsupported by frozen semantics remains `AMBIGUOUS_SAME_SESSION`;
+- no intraday OHLC path is invented;
+- no exit before entry and no double exit.
 
 Implementation:
-
-- `src/canslim_research/technical_deterioration_action_v1.py`
-- `tests/test_technical_deterioration_action_v1.py`
-- `.github/workflows/40-technical-deterioration-action-v1.yml`
+- `src/canslim_research/position_lifecycle_v1.py`
+- `tests/test_position_lifecycle_v1.py`
+- `.github/workflows/41-position-lifecycle-v1.yml`
 
 Canonical semantic-validation run:
-
-- run `34789559782`
-- job `103811139345`
-- commit `b5d8dd488ea8eb5df5d00fff039a6ddc146f6c7b`
+- run `34790106465`
+- job `103812624227`
+- commit `44685b62432adf1601ae6759b5ffa00517410ddf`
 - **SUCCESS**
+- **11 passed in 0.03s**
 
-Freeze decision: `docs/decisions/2026-09-14-40-technical-deterioration-action-freeze.md`.
+Freeze decision: `docs/decisions/2026-09-14-41-position-lifecycle-freeze.md`.
 
 Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
 
-No performance claim is made and no historical-return tuning is authorized.
+## End-to-end frozen lifecycle
+
+```text
+#33 pattern
+→ #34 candidate
+→ #35 independent validation
+→ #36 executable entry
+→ OPEN POSITION
+→ #37 capital protection OR #38/#39/#40 deterioration path
+→ #41 earliest causal exit arbitration
+→ CLOSED POSITION
+```
+
+This is semantic completeness for the currently frozen action set, not a performance-validation claim.
 
 ## Forward / production boundaries
 
@@ -154,9 +147,9 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33/#34/#35/#36/#37/#38/#39/#40 frozen.
-2. Do not promote or retune entry/sell variants from historical performance alone.
-3. Wait for a genuine frozen `CANSLIM_ELIGIBLE` source population before primary #36/#37/#40 performance validation.
-4. A complete position-lifecycle arbiter may be specified separately to choose the earliest causal exit among frozen #37 and #40 actions without rewriting either contract.
-5. Round-trip action semantics, climax/exhaustion, and market-exposure action remain separate future workstreams requiring authoritative specifications.
+1. Keep #33-#41 frozen.
+2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
+3. Do not tune #36 entry, #37 stop, #40 deterioration or #41 arbitration from historical returns.
+4. Remaining theory modules are separate additions, not prerequisites for the current lifecycle: round-trip action semantics, climax/exhaustion and market-exposure action.
+5. Any such module must be specified from authoritative theory first, validated independently, then integrated into #41 only through a new version rather than mutating frozen v1.
 6. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

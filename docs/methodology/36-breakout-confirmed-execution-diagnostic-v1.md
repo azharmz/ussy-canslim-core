@@ -68,9 +68,11 @@ Only after integrity passes, report mark-to-market close return from actual fill
 - 20 completed sessions after entry;
 - 30 completed sessions after entry.
 
+Horizon convention is frozen before execution: the entry session itself is completed session 1. Therefore horizon `H` uses the close of the H-th trading session beginning with the entry session.
+
 For each horizon report evaluable count, mean, median, win rate, p25, p75, and censored count.
 
-Also report first-20-session MFE and MAE from actual fill when 20 post-entry sessions exist.
+Also report first-20-session MFE and MAE from actual fill when 20 sessions beginning with the entry session exist. MFE uses the maximum observed high and MAE uses the minimum observed low across those 20 sessions.
 
 No CAGR, portfolio simulation, sizing, stop optimization, exit optimization, or parameter search is authorized.
 

@@ -7,6 +7,7 @@ PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
 EXPECTED_PATTERN_ENGINE_VERSION = "33-core-p8-frozen-v1"
 EXPECTED_LABELLED_VALIDATION_STATUS = "P8_CONDITIONAL_PASS_FROZEN"
 CANDIDATE_SPEC_VERSION = "theory-faithful-candidate-spec-v1"
+CANDIDATE_OUTPUT_SCHEMA_VERSION = "canslim-candidate-output-v2"
 CANDIDATE_GENERATOR_VERSION = "34-candidate-generator-v0.2"
 
 CORE_PATTERNS = frozenset({
@@ -137,9 +138,15 @@ class CandidateRecord:
     pattern_status: str
     native_detector_state: str
     candidate_semantics: str
+    structural_signature: tuple[str, ...]
+    structural_start: str
+    structural_end: str | None
+    depth_pct: float | None
     detector_faults: tuple[str, ...]
     pattern_engine_version: str
+    pattern_validation_status: str
     pattern_contract_version: str
+    detector_contract_version: str
     pivot_level: float | None
     pivot_source_date: str | None
     pivot_crossed_intraday: bool
@@ -169,6 +176,7 @@ class CandidateRecord:
     S_evidence_state: str
     I_evidence_state: str
     industry_evidence_state: str
+    candidate_output_schema_version: str = CANDIDATE_OUTPUT_SCHEMA_VERSION
     spec_version: str = CANDIDATE_SPEC_VERSION
     candidate_generator_version: str = CANDIDATE_GENERATOR_VERSION
 
@@ -316,9 +324,15 @@ def build_candidate(
         pattern_status=pattern.normalized_status,
         native_detector_state=pattern.native_state,
         candidate_semantics=pattern.candidate_semantics,
+        structural_signature=pattern.structural_signature,
+        structural_start=pattern.structural_start,
+        structural_end=pattern.structural_end,
+        depth_pct=pattern.depth_pct,
         detector_faults=pattern.detector_faults,
         pattern_engine_version=pattern.engine_version,
+        pattern_validation_status=pattern.labelled_validation_status,
         pattern_contract_version=pattern.output_schema_version,
+        detector_contract_version=pattern.detector_contract_version,
         pivot_level=pattern.pivot_level,
         pivot_source_date=pattern.pivot_source_date,
         pivot_crossed_intraday=pivot_crossed,

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
+EXPECTED_PATTERN_ENGINE_VERSION = "33-core-p8-frozen-v1"
+EXPECTED_LABELLED_VALIDATION_STATUS = "P8_CONDITIONAL_PASS_FROZEN"
 CANDIDATE_SPEC_VERSION = "theory-faithful-candidate-spec-v1"
 CANDIDATE_GENERATOR_VERSION = "34-candidate-generator-v0.2"
 
@@ -14,6 +16,12 @@ CORE_PATTERNS = frozenset({
     "CUP_WITH_HANDLE",
 })
 PATTERN_STATUSES = frozenset({"RECOGNIZED", "AMBIGUOUS", "REJECTED"})
+EXPECTED_DETECTOR_VERSIONS = {
+    "FLAT_BASE": "flat-base-v2",
+    "DOUBLE_BOTTOM": "double-bottom-v3",
+    "CUP_WITHOUT_HANDLE": "cup-family-v2",
+    "CUP_WITH_HANDLE": "cup-family-v2",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,17 +54,29 @@ class PatternAssessment:
         schema = str(row.get("output_schema_version", ""))
         if schema != PATTERN_SCHEMA_VERSION:
             raise ValueError(f"unsupported pattern schema: {schema!r}")
+        engine = str(row.get("engine_version", ""))
+        if engine != EXPECTED_PATTERN_ENGINE_VERSION:
+            raise ValueError(f"unsupported #33 engine version: {engine!r}")
+        validation_status = str(row.get("labelled_validation_status", ""))
+        if validation_status != EXPECTED_LABELLED_VALIDATION_STATUS:
+            raise ValueError(f"unsupported #33 validation status: {validation_status!r}")
         pattern = str(row.get("pattern", ""))
         if pattern not in CORE_PATTERNS:
             raise ValueError(f"pattern outside frozen #33 core contract: {pattern!r}")
+        detector_version = str(row.get("detector_contract_version", ""))
+        expected_detector = EXPECTED_DETECTOR_VERSIONS[pattern]
+        if detector_version != expected_detector:
+            raise ValueError(
+                f"unsupported detector version for {pattern}: {detector_version!r}; expected {expected_detector!r}"
+            )
         status = str(row.get("normalized_status", ""))
         if status not in PATTERN_STATUSES:
             raise ValueError(f"unsupported normalized_status: {status!r}")
         return cls(
             assessment_id=str(row["assessment_id"]),
             output_schema_version=schema,
-            engine_version=str(row["engine_version"]),
-            labelled_validation_status=str(row["labelled_validation_status"]),
+            engine_version=engine,
+            labelled_validation_status=validation_status,
             security_id=str(row["security_id"]),
             ticker=str(row["ticker"]),
             asof_date=str(row["asof_date"]),
@@ -74,7 +94,7 @@ class PatternAssessment:
             pivot_level=float(row["pivot_level"]) if row.get("pivot_level") is not None else None,
             depth_pct=float(row["depth_pct"]) if row.get("depth_pct") is not None else None,
             detector_faults=tuple(str(x) for x in row.get("detector_faults", ())),
-            detector_contract_version=str(row["detector_contract_version"]),
+            detector_contract_version=detector_version,
         )
 
 

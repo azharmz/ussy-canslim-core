@@ -22,7 +22,7 @@ from scripts.run_candidate_v2_smoke import build_spy_state, fundamental_evidence
 
 OUT = ROOT / "results" / "v35-historical-pool"
 ANCHORS = [f"{year}-{md}" for year in range(2021, 2026) for md in ("03-31", "06-30", "09-30", "12-31")]
-SECURITY_SAMPLE_SIZE = 120
+SECURITY_SAMPLE_SIZE = 60
 MIN_BARS = 300
 
 

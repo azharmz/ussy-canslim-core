@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen; #33 core pattern engine, #34 theory-faithful candidate generator, and #35 new-candidate validation are now frozen.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The post-v1 Theory Fidelity Audit (#25-#31) is complete; #32 Theory-Faithful Candidate Specification v1 is frozen; #33 core pattern engine, #34 theory-faithful candidate generator, #35 new-candidate validation, and #36 execution/entry baseline v1 are now frozen.
 
 ## Repository boundary for #33
 
@@ -56,7 +56,7 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
 | 34 | **Theory-faithful candidate generator** | **COMPLETE / FROZEN v1** |
 | 35 | **New-candidate validation** | **COMPLETE / FROZEN — CONDITIONAL PASS** |
-| 36 | **Execution / entry research** | **IMPLEMENTED v1 / SEMANTIC VALIDATION PENDING** |
+| 36 | **Execution / entry research** | **BASELINE COMPLETE / FROZEN v1 — VARIANT RESEARCH PREREGISTERED** |
 
 ## #32/#34 staged contract
 
@@ -138,7 +138,7 @@ Upstream #33 morphology debt remains explicitly preserved for potentially long `
 
 Canonical terminal decision record: `docs/decisions/2026-09-14-35-terminal-validation-decision.md`.
 
-## #36 — Execution / Entry — IMPLEMENTED v1 / VALIDATION PENDING
+## #36 — Execution / Entry — BASELINE COMPLETE / FROZEN v1
 
 Frozen specification:
 
@@ -180,9 +180,47 @@ Risk references carried from frozen #31:
 
 The first implementation intentionally does **not** include same-day hindsight fills, arbitrary T+2/T+3 waiting, retest bands, inferred limit fills, or performance-selected entry timing. X1-X4/X3 remain historical frozen execution research and are not the #36 theory-faithful contract.
 
-Direct semantic boundary logic check passed. GitHub Actions has not yet produced a terminal run for the newly added workflow, therefore #36 is not yet implementation-frozen and performance research remains closed.
+### Semantic validation
 
-Decision/start record: `docs/decisions/2026-09-14-36-execution-entry-v1-start.md`.
+Initial run `34784341195` failed during collection with `ModuleNotFoundError: No module named 'canslim_research'`. This was classified as a **validation-tooling/import-path issue** because no semantic assertion executed.
+
+The CI workflow alone was corrected by setting `PYTHONPATH=src`; no execution semantic, threshold, implementation behavior, upstream contract, or evidence was changed.
+
+Canonical semantic-validation run:
+
+- run `34785545504`;
+- commit `a5785aeb91a154840295b6058862d9d9dbb501dc`;
+- **SUCCESS**;
+- **11 passed**.
+
+Freeze decision:
+
+`docs/decisions/2026-09-14-36-execution-entry-v1-freeze.md`
+
+Terminal baseline state:
+
+`IMPLEMENTATION COMPLETE / FROZEN v1`
+
+### Variant research
+
+Alternative execution rules remain separate research variants and do not rewrite the canonical baseline.
+
+Preregistration:
+
+`docs/methodology/36-entry-variants-prereg-v1.md`
+
+Status:
+
+`PREREGISTERED / NOT YET RUN`
+
+Frozen comparison set:
+
+- E36-R0: canonical T+1-open baseline;
+- E36-R1: first valid observed open T+1 through T+3;
+- E36-R2: full daily pivot hold on T+1/T+2, then next observed open within the buy zone;
+- E36-R3: legacy +2% near-pivot retest/reclaim research proxy, then next observed open; explicitly non-authoritative and non-tunable.
+
+Pre-performance causality/integrity checks must pass before outcome metrics are inspected. Fixed outcome horizons, if reached, are 5/10/20/30 completed sessions; this comparison does not authorize CAGR, portfolio sizing, stop optimization, or exit optimization.
 
 ## Data boundary for #35/#36
 
@@ -196,9 +234,10 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. Obtain terminal E36 semantic-validation run for `36-execution-entry-v1`.
-2. Require zero E36-A..F semantic findings before implementation freeze.
-3. Do not inspect trading performance as an implementation acceptance criterion.
-4. After semantic freeze, preregister any delayed/retest/pivot-reclaim execution variant before testing it.
-5. Keep #33/#34/#35 and the frozen 60-case corpus untouched; preserve upstream #33 morphology debt.
-6. Keep P6 advanced patterns out of production and FWD1/EXH2 unchanged.
+1. Implement the preregistered E36-R0/R1/R2/R3 comparison without altering frozen `36-execution-entry-v1`.
+2. Run causality/integrity validation before inspecting any performance metric.
+3. Require zero fill-before-information, synthetic-fill, buy-zone, or chronology findings.
+4. Only after integrity is green, compute the preregistered descriptive execution metrics and fixed 5/10/20/30-session outcome metrics.
+5. Do not promote the numerically best variant automatically; any promotion requires a separate freeze + independent validation decision.
+6. Keep #33/#34/#35 and the frozen 60-case corpus untouched; preserve upstream #33 morphology debt.
+7. Keep P6 advanced patterns out of production and FWD1/EXH2 unchanged.

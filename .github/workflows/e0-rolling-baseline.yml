@@ -21,6 +21,7 @@ jobs:
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
       R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       PYTHONUNBUFFERED: '1'
+      CANDIDATE_V2_SMOKE_SECURITIES: '100'
     steps:
       - uses: actions/checkout@v7
       - name: Checkout frozen #33 dependency
@@ -37,8 +38,8 @@ jobs:
           python -m pip install -e ./_deps/ussy-oneil-patterns
       - name: Run #34 candidate unit tests
         run: PYTHONPATH=src pytest -q tests/test_candidate_v2.py
-      - name: Run #34 live R2 smoke
-        run: PYTHONPATH=src python scripts/run_candidate_v2_smoke.py
+      - name: Run bounded #34 live R2 smoke
+        run: PYTHONPATH=src python scripts/run_candidate_v2_smoke_bounded.py
       - name: Show #34 summary
         run: cat results/candidate-v2-smoke/summary.json
       - name: Run E0 rolling baseline smoke

@@ -4,6 +4,7 @@ import io
 import json
 import os
 import sys
+from collections import Counter
 from hashlib import sha256
 from pathlib import Path
 
@@ -17,6 +18,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from canslim_research.candidate_v2 import DailyBar, PatternAssessment, build_candidate
 from canslim_research.candidate_v2_adapters import build_candidate_evidence
 from canslim_research.validation_corpus_v1 import select_corpus
+from canslim_research.validation_v2 import audit_candidate_record
 from oneil_patterns.production.engine import analyze_security
 from scripts.run_candidate_v2_smoke import build_spy_state, fundamental_evidence, load_fundamentals, read_json, read_parquet
 
@@ -111,6 +113,7 @@ def main() -> None:
 
     rows: list[dict] = []
     availability: list[dict] = []
+    findings: list[dict] = []
     for asof in dates:
         rs_map = rs_percentiles(histories, asof)
         m = market[market["date"] <= asof]
@@ -131,15 +134,20 @@ def main() -> None:
             adapted = build_candidate_evidence(asof_date=asof.date().isoformat(), quarterly_eps_yoy=q_eps, quarterly_available_on=q_available, annual_eps=annual, rs_rating_proxy_percentile=rs_map.get(sid), market_state=market_state)
             for item in assessments:
                 pattern = PatternAssessment.from_mapping(item.to_dict())
-                row = as_dict(build_candidate(pattern, bars, adapted.evidence))
+                candidate = build_candidate(pattern, bars, adapted.evidence)
+                for finding in audit_candidate_record(candidate):
+                    findings.append({"candidate_id": candidate.candidate_id, "asof_date": candidate.asof_date, "code": finding.code, "severity": finding.severity, "detail": finding.detail})
+                row = as_dict(candidate)
                 row["annual_eps_growth_measure"] = adapted.annual_eps_growth_measure
                 row["evidence_adapter_reason_codes"] = list(adapted.reason_codes)
                 rows.append(row)
 
     pd.DataFrame(rows).to_json(OUT / "observations.jsonl", orient="records", lines=True)
     pd.DataFrame(availability).to_csv(OUT / "availability.csv", index=False)
+    pd.DataFrame(findings, columns=["candidate_id", "asof_date", "code", "severity", "detail"]).to_csv(OUT / "validation_findings.csv", index=False)
     selected = select_corpus(rows)
     (OUT / "selected_manifest.json").write_text(json.dumps(selected, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    finding_counts = Counter(x["code"] for x in findings)
     summary = {
         "workstream": 35,
         "corpus_version": "v35-independent-corpus-v1",
@@ -152,10 +160,14 @@ def main() -> None:
         "observation_count": len(rows),
         "selected_case_count": len(selected),
         "selected_status_counts": pd.Series([x["pattern_status"] for x in selected]).value_counts().to_dict() if selected else {},
+        "v35_abc_finding_count": len(findings),
+        "v35_abc_finding_counts": dict(sorted(finding_counts.items())),
         "future_performance_fields_used": False,
     }
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps(summary, indent=2, sort_keys=True))
+    if findings:
+        raise RuntimeError(f"V35-A/B/C semantic validation failed with {len(findings)} findings")
 
 
 if __name__ == "__main__":

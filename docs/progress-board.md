@@ -55,7 +55,7 @@ Historical v1 results remain frozen evidence and must not be used to tune the th
 | 32 | **Theory-faithful candidate specification** | **COMPLETE / FROZEN v1** |
 | 33 | **O'Neil Pattern Recognition Engine** | **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS** |
 | 34 | **Theory-faithful candidate generator** | **COMPLETE / FROZEN v1** |
-| 35 | **New-candidate validation** | **NEXT / READY TO START** |
+| 35 | **New-candidate validation** | **IN PROGRESS** |
 | 36 | Execution / entry research | **PARKED** |
 
 ## #32/#34 staged contract
@@ -101,11 +101,28 @@ Final verification: GitHub Actions run `34758050282` → **SUCCESS** on commit `
 
 The zero confirmed/eligible count is not a strategy verdict; the run is semantic/plumbing verification only. Canonical freeze record: `docs/decisions/2026-09-13-34-theory-faithful-candidate-generator-freeze.md`.
 
+## #35 — New-Candidate Validation — IN PROGRESS
+
+Preregistered assets now include:
+
+- candidate validation protocol v1;
+- frozen historical source `ussy-data/backtest/ohlcv/{security_id}.parquet`;
+- fixed 2021Q1–2025Q4 as-of calendar;
+- 300-session minimum warm-up;
+- deterministic SHA-256 corpus sampling;
+- target 60-case independent audit corpus (20 RECOGNIZED / 20 AMBIGUOUS / 20 REJECTED, subject to natural availability);
+- automated semantic validator for V35-A/B/C;
+- dedicated historical-pool workflow with pinned #33 dependency.
+
+The historical runner uses the full research archive for cross-sectional RS/provenance but passes only the final 300 bars through each historical as-of date into the frozen #33 morphology engine, matching the production rolling-window contract. No future performance field is used in sampling.
+
+V35-D manual real-chart audit remains closed until the historical observation pool and deterministic selected-case manifest are generated and V35-A/B/C have no unresolved PIT/chronology defects.
+
 ## Data boundary for #35
 
 Production daily scanning may continue to use the compact R2 ready snapshot (~300 bars/security). #35 historical/new-candidate validation is **not constrained to that production retention**.
 
-When #35 needs longer historical windows, acquire purpose-built historical OHLCV of sufficient length and run the frozen #33 + #34 chain on it. Do not enlarge or reinterpret the production R2 contract merely to make it serve as a backtest archive.
+The purpose-built full-history archive is used to construct historical as-of slices and RS cross-sections. The production 300-bar contract remains unchanged.
 
 ## Forward tracks remain frozen
 
@@ -113,8 +130,9 @@ FWD1 boundary remains exclusive 2026-09-09 with formal review only after both >=
 
 ## Active work from here
 
-1. Begin #35 New-Candidate Validation against the frozen #33 + #34 chain.
-2. Design the validation dataset/protocol before inspecting trading outcomes.
-3. Use purpose-built historical OHLCV where longer history is required; production R2 300-bar retention is not a backtest constraint.
-4. Do not retune #33 morphology or #34 thresholds from return, CAGR, PF, breakout success, or entry optimization.
-5. Keep P6 advanced patterns out of production, FWD1/EXH2 unchanged, and #36 parked.
+1. Complete deterministic #35 historical observation-pool generation.
+2. Run V35-A/B/C against the generated historical records.
+3. Freeze the selected-case manifest before manual chart review.
+4. Open V35-D only after automated chronology/PIT checks are green.
+5. Do not retune #33 morphology or #34 thresholds from return, CAGR, PF, breakout success, or entry optimization.
+6. Keep P6 advanced patterns out of production, FWD1/EXH2 unchanged, and #36 parked.

@@ -1,0 +1,27 @@
+name: '#36 Execution / Entry v1 semantic validation'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/36-execution-entry-v1.yml'
+      - 'src/canslim_research/execution_entry_v1.py'
+      - 'tests/test_execution_entry_v1.py'
+      - 'docs/methodology/36-execution-entry-spec-v1.md'
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run E36 semantic boundary tests
+        run: python -m pytest -q tests/test_execution_entry_v1.py

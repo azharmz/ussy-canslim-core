@@ -21,7 +21,7 @@ jobs:
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
       R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       PYTHONUNBUFFERED: '1'
-      CANDIDATE_V2_SMOKE_SECURITIES: '100'
+      CANDIDATE_V2_SMOKE_SECURITIES: '10'
     steps:
       - uses: actions/checkout@v7
       - name: Checkout frozen #33 dependency

@@ -22,3 +22,7 @@ Selection must not use future returns, CAGR, PF, win rate, breakout success/fail
 ## Fixed as-of calendar
 
 Use quarter-end anchors from 2021-03-31 through 2025-12-31. For each anchor, use the latest completed trading session on or before that date. The initial corpus excludes 2026.
+
+## Warm-up
+
+Require at least 300 completed daily sessions for every evaluated historical date.

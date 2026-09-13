@@ -135,6 +135,8 @@ def build_candidate_evidence(
             S_evidence_state=s_evidence_state,
             I_evidence_state=i_state,
             industry_evidence_state=industry_evidence_state,
+            rs_rating_proxy_percentile=rs_rating_proxy_percentile,
+            M_market_state=market_state or "UNKNOWN",
         ),
         rs_rating_proxy_percentile=rs_rating_proxy_percentile,
         annual_eps_growth_measure=a_growth,

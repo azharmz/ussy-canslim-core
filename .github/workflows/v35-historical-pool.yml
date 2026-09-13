@@ -1,0 +1,47 @@
+name: V35 historical pool
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/v35-historical-pool.yml'
+      - 'scripts/run_v35_historical_pool.py'
+      - 'src/canslim_research/validation_corpus_v1.py'
+
+permissions:
+  contents: read
+
+jobs:
+  v35:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy scipy
+          python -m pip install --disable-pip-version-check git+https://github.com/azharmz/ussy-oneil-patterns.git@main
+      - name: Generate historical observation pool
+        run: python scripts/run_v35_historical_pool.py
+      - name: Show summary
+        run: cat results/v35-historical-pool/summary.json
+      - name: Upload V35 pool evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: v35-historical-pool-${{ github.run_id }}
+          path: |
+            results/v35-historical-pool/summary.json
+            results/v35-historical-pool/selected_manifest.json
+            results/v35-historical-pool/availability.csv
+            results/v35-historical-pool/observations.jsonl
+          retention-days: 30

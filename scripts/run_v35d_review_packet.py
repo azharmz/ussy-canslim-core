@@ -91,13 +91,13 @@ def main() -> None:
             "expected_pattern": case.pattern,
             "expected_status": case.pattern_status,
             "actual_pattern": item.get("pattern"),
-            "actual_status": item.get("pattern_status"),
+            "actual_status": item.get("normalized_status"),
             "structural_start": item.get("structural_start"),
             "structural_end": item.get("structural_end"),
             "pivot_level": item.get("pivot_level"),
             "pivot_source_date": item.get("pivot_source_date"),
             "depth_pct": item.get("depth_pct"),
-            "native_detector_state": item.get("native_detector_state"),
+            "native_detector_state": item.get("native_state"),
             "detector_faults": json.dumps(item.get("detector_faults") or [], separators=(",", ":")),
         })
 

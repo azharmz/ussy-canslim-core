@@ -1,0 +1,42 @@
+name: '#36 Entry source population audit'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/36-entry-source-population-audit.yml'
+      - 'scripts/run_36_entry_source_population_audit.py'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Download frozen canonical V35 pool artifact
+        run: |
+          mkdir -p input/v35
+          gh run download 34763920536 \
+            --repo azharmz/ussy-canslim-research \
+            --name v35-historical-pool-34763920536 \
+            --dir input/v35
+      - name: Audit preregistered actionable source population
+        run: |
+          python scripts/run_36_entry_source_population_audit.py \
+            --observations input/v35/observations.jsonl \
+            --out results/e36-entry-source-population/summary.json
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: e36-entry-source-population-${{ github.run_id }}
+          path: results/e36-entry-source-population/summary.json
+          retention-days: 30

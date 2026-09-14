@@ -1,0 +1,27 @@
+name: "#43 Position Lifecycle v2 semantic validation"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/canslim_research/position_lifecycle_v2.py"
+      - "tests/test_position_lifecycle_v2.py"
+      - "docs/methodology/43-position-lifecycle-v2-spec.md"
+      - ".github/workflows/43-position-lifecycle-v2.yml"
+
+env:
+  PYTHONPATH: src
+
+jobs:
+  semantic-validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run L43 semantic boundary tests
+        run: python -m pytest -q tests/test_position_lifecycle_v2.py

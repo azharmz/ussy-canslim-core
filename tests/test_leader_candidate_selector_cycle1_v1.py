@@ -58,7 +58,8 @@ def test_below_rs_threshold_fails():
 def test_near_high_90_boundary_passes():
     membership = [MembershipRecord(str(i), f"S{i}") for i in range(1, 6)]
     prices = {str(i): hist(100, 105 + i * 5) for i in range(1, 6)}
-    special = hist(100, 200)
+    special = hist(100, 179)
+    special[-2] = 200.0
     special[-1] = 180.0
     prices["5"] = special
     out = select_candidate_cohort(membership, prices, hist(100, 100))
@@ -70,7 +71,8 @@ def test_near_high_90_boundary_passes():
 def test_below_near_high_threshold_fails_even_with_top_rs():
     membership = [MembershipRecord(str(i), f"S{i}") for i in range(1, 6)]
     prices = {str(i): hist(100, 105 + i * 5) for i in range(1, 6)}
-    special = hist(100, 200)
+    special = hist(100, 178)
+    special[-2] = 200.0
     special[-1] = 179.0
     prices["5"] = special
     out = select_candidate_cohort(membership, prices, hist(100, 100))

@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
+from canslim_research.eligibility_contract import evaluate_letter_states
+
 PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
 EXPECTED_PATTERN_ENGINE_VERSION = "33-core-p8-frozen-v1"
 EXPECTED_LABELLED_VALIDATION_STATUS = "P8_CONDITIONAL_PASS_FROZEN"
@@ -283,6 +285,14 @@ def build_candidate(
     elif pivot_defined:
         reasons.append("BREAKOUT_BAR_NOT_EVALUABLE")
 
+    n_price_state = "PASS" if first_cross else evidence.N_price_state
+    if volume_state == "CONFIRMED_ON_BREAKOUT":
+        s_evidence_state = "POSITIVE"
+    elif volume_state == "PENDING_CONFIRMATION":
+        s_evidence_state = "NEUTRAL"
+    else:
+        s_evidence_state = evidence.S_evidence_state
+
     if not recognized:
         stage = "NOT_ELIGIBLE"
     elif not pivot_defined:
@@ -292,24 +302,17 @@ def build_candidate(
     elif volume_state != "CONFIRMED_ON_BREAKOUT":
         stage = "PIVOT_CROSSED"
     else:
-        hard_states = {
-            "C": evidence.C_screen_state == "PASS",
-            "A": evidence.A_screen_state == "PASS",
-            "L": evidence.L_individual_leadership_state in {"PASS", "STRONG"},
-            "M": evidence.M_entry_state == "ALLOW_NEW_BUYS",
-        }
-        for key, passed in hard_states.items():
-            if not passed:
-                reasons.append(f"{key}_CORE_NOT_PASS")
-        stage = "CANSLIM_ELIGIBLE" if all(hard_states.values()) else "BREAKOUT_CONFIRMED"
-
-    n_price_state = "PASS" if first_cross else evidence.N_price_state
-    if volume_state == "CONFIRMED_ON_BREAKOUT":
-        s_evidence_state = "POSITIVE"
-    elif volume_state == "PENDING_CONFIRMATION":
-        s_evidence_state = "NEUTRAL"
-    else:
-        s_evidence_state = evidence.S_evidence_state
+        eligible, gate_reasons = evaluate_letter_states({
+            "C": evidence.C_screen_state,
+            "A": evidence.A_screen_state,
+            "N": n_price_state,
+            "S": s_evidence_state,
+            "L": evidence.L_individual_leadership_state,
+            "I": evidence.I_evidence_state,
+            "M": evidence.M_entry_state,
+        })
+        reasons.extend(gate_reasons)
+        stage = "CANSLIM_ELIGIBLE" if eligible else "BREAKOUT_CONFIRMED"
 
     return CandidateRecord(
         assessment_id=pattern.assessment_id,

@@ -1,0 +1,47 @@
+name: remediation-phase3-institutional
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remediation-phase3-institutional.yml'
+      - 'src/canslim_research/institutional_pit.py'
+      - 'tests/test_institutional_pit.py'
+      - 'scripts/audit_phase3_institutional_wiring.py'
+      - 'scripts/run_candidate_v2_smoke.py'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3
+      - name: Phase 3 PIT resolver tests
+        run: python -m pytest -q tests/test_institutional_pit.py
+      - name: Candidate regression tests
+        run: python -m pytest -q tests/test_candidate_v2.py
+      - name: Real R2 prospective I integration audit
+        run: python scripts/audit_phase3_institutional_wiring.py
+      - name: Show Phase 3 evidence
+        run: cat results/remediation-phase3-institutional/summary.json
+      - name: Upload Phase 3 evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: remediation-phase3-institutional-${{ github.run_id }}
+          path: results/remediation-phase3-institutional/summary.json
+          retention-days: 30

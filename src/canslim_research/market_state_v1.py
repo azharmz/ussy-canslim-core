@@ -8,6 +8,7 @@ from typing import Optional, Sequence
 VERSION = "46-market-state-classification-v1"
 FTD_MIN_GAIN_PCT = 1.25
 DISTRIBUTION_MAX_RETURN_PCT = -0.20
+EPS = 1e-12
 
 
 class MarketState(str, Enum):
@@ -73,27 +74,22 @@ def classify_index(index_id: str, bars: Sequence[IndexBar]) -> IndexEvidence:
                 day1_idx, day1_low = i, b.low
 
     b, prev = bars[-1], bars[-2]
+    ret = _pct_change(b.close, prev.close)
     distribution: Optional[bool]
     if b.volume is None or prev.volume is None:
         distribution = None
     else:
-        distribution = _pct_change(b.close, prev.close) <= DISTRIBUTION_MAX_RETURN_PCT and b.volume > prev.volume
+        distribution = ret <= DISTRIBUTION_MAX_RETURN_PCT + EPS and b.volume > prev.volume
 
     if day1_idx is None:
         return IndexEvidence(index_id, b.date, None, None, False, distribution, False)
 
     rally_day = len(bars) - day1_idx
-    # Day 1 itself counts as 1, hence index distance + 1.
-    rally_day += 1
     ftd: Optional[bool]
     if b.volume is None or prev.volume is None:
         ftd = None if rally_day >= 4 else False
     else:
-        ftd = (
-            rally_day >= 4
-            and _pct_change(b.close, prev.close) >= FTD_MIN_GAIN_PCT
-            and b.volume > prev.volume
-        )
+        ftd = rally_day >= 4 and ret + EPS >= FTD_MIN_GAIN_PCT and b.volume > prev.volume
     return IndexEvidence(index_id, b.date, rally_day, day1_low, ftd, distribution, True)
 
 
@@ -113,12 +109,10 @@ def classify_market(
         return MarketClassification(asof, MarketState.NOT_EVALUABLE.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "NO_EVALUABLE_MAJOR_INDEX")
-
     if correction_reset:
         return MarketClassification(asof, MarketState.CORRECTION.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "EXPLICIT_CORRECTION_RESET")
-
     if weakening_confirmed is True and prior_state in {
         MarketState.FOLLOW_THROUGH_CONFIRMED.value,
         MarketState.UPTREND_HEALTHY.value,
@@ -127,25 +121,20 @@ def classify_market(
         return MarketClassification(asof, MarketState.UPTREND_WEAKENING.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "EXPLICIT_WEAKENING_EVIDENCE")
-
     if any(e.follow_through_today is True for e in evaluable):
         return MarketClassification(asof, MarketState.FOLLOW_THROUGH_CONFIRMED.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "VALID_DAY4_PLUS_FOLLOW_THROUGH")
-
     if prior_state == MarketState.FOLLOW_THROUGH_CONFIRMED.value and leadership_confirming is True:
         return MarketClassification(asof, MarketState.UPTREND_HEALTHY.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "LEADERSHIP_CONFIRMS_FOLLOW_THROUGH")
-
     if prior_state in {MarketState.UPTREND_HEALTHY.value, MarketState.UPTREND_WEAKENING.value,
                        MarketState.FOLLOW_THROUGH_CONFIRMED.value}:
         return MarketClassification(asof, prior_state, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "NO_NEW_STATE_CHANGING_EVIDENCE")
-
-    intact = [e for e in evaluable if e.attempt_intact is True]
-    if intact:
+    if any(e.attempt_intact is True for e in evaluable):
         return MarketClassification(asof, MarketState.RALLY_ATTEMPT.value, evidences,
                                     leadership_confirming, weakening_confirmed,
                                     "MAJOR_INDEX_RALLY_ATTEMPT_INTACT")

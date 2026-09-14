@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-15
 
-The theory-fidelity path through #54 is now closed. #54 is **COMPLETE / FROZEN WITH EXPLICIT PRODUCTION DEBT**. The project will not extend the research chain merely to reproduce proprietary IBD infrastructure. The next phase is an end-to-end CAN SLIM v1 integration audit followed by a production-baseline freeze.
+The theory-fidelity path through #54 is now closed. #54 is **COMPLETE / FROZEN WITH EXPLICIT PRODUCTION DEBT**. The project has entered the **CAN SLIM v1 post-audit remediation cycle**. Phase 0 governance/scope lock is complete; Phase 1/F02 SEC decision-time PIT remediation is next. Canonical remediation register: `docs/remediation/canslim-v1-post-audit-remediation.md`.
 
 ## Repository boundary for #33
 
@@ -110,12 +110,26 @@ Canonical closure decision: `docs/decisions/2026-09-15-54-terminal-closure.md`.
 
 FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into FWD1/X3/EXH2.
 
-## Active work from here — CAN SLIM v1 closure only
+## CAN SLIM v1 post-audit remediation
 
-1. **Do not open another theory-expansion workstream.** #54 is closed.
-2. Run an end-to-end integration audit across production OHLCV, C/A fundamentals, #33 patterns, #34 candidate semantics, stock-level L/RS evidence, canonical SEC 13F sponsorship `I`, #49/#50 market-state input, #36 entry and #43 lifecycle/exit.
-3. Preserve all frozen contracts and explicit debt. Integration may wire components and expose provenance; it must not retune #33/#34/#36/#45/#46 semantics.
-4. Verify fail-closed behavior for missing/stale fundamentals, unavailable #51 booleans, non-evaluable 13F identity, missing index volume, and absent next-session execution bars.
-5. Verify one canonical end-to-end artifact/schema can explain why a stock is eligible, ineligible, or not evaluable at an `asof_date`, with source/version lineage.
-6. After integration verification, publish the CAN SLIM v1 known-limitations/debt register and declare **CAN SLIM v1 — PRODUCTION BASELINE FROZEN**.
-7. Then run prospectively. Reopen frozen research only for production bugs or genuinely new governance-compliant evidence.
+Canonical register: `docs/remediation/canslim-v1-post-audit-remediation.md`.
+
+| Phase | Work | Status |
+|---:|---|---|
+| 0 | Governance & remediation scope lock | **COMPLETE / SCOPE LOCKED** |
+| 1 | F02 SEC decision-time PIT fix | **NEXT** |
+| 2 | Freeze C/A/N/S/L/I/M semantics | PENDING |
+| 3 | Prospective I wiring | PENDING |
+| 4 | Canonical M + dependency pinning | PENDING |
+| 5 | Correct `CANSLIM_ELIGIBLE` | PENDING |
+| 6 | Production candidate publisher | PENDING |
+| 7 | Candidate → entry | PENDING |
+| 8 | Entry → lifecycle | PENDING |
+| 9 | E2E production orchestrator | PENDING |
+| 10 | E2E integration CI | PENDING |
+| 11 | Manifest/reproducibility | PENDING |
+| 12 | Clean prospective dry-run | PENDING |
+| 13 | Independent re-audit | PENDING |
+| 14 | Production Baseline Freeze | LOCKED UNTIL GO |
+
+Remediation rule: **fix integration and correctness only. No strategy expansion, tuning, optimization, or new theory workstream.** F01–F11 are active remediation scope; F12–F15 remain controlled debt unless production-critical evidence emerges.

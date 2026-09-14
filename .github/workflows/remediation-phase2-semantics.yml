@@ -1,0 +1,25 @@
+name: remediation-phase2-semantics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/canslim_research/eligibility_contract.py'
+      - 'tests/test_eligibility_contract.py'
+      - 'docs/remediation/phase-2-canslim-semantics-freeze.md'
+      - '.github/workflows/remediation-phase2-semantics.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest
+      - name: Phase 2 eligibility contract tests
+        run: PYTHONPATH=src pytest -q tests/test_eligibility_contract.py
+      - name: Candidate regression tests
+        run: PYTHONPATH=src pytest -q tests/test_candidate_v2.py

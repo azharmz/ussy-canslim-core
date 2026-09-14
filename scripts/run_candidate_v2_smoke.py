@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from canslim_research.candidate_v2 import DailyBar, PatternAssessment, build_candidate
 from canslim_research.candidate_v2_adapters import AnnualEpsObservation, build_candidate_evidence
+from canslim_research.decision_time import regular_close_cutoff
 from canslim_research.technical import DISTRIBUTION_BLOCK_COUNT, DISTRIBUTION_RETURN_MAX, FTD_RETURN_MIN
 from oneil_patterns.production.engine import analyze_security
 from oneil_patterns.production.runner import run_from_r2
@@ -129,6 +130,9 @@ def pick_col(df: pd.DataFrame, names: list[str]) -> str | None:
 
 
 def fundamental_evidence(wide: pd.DataFrame, long: pd.DataFrame, ticker: str, asof: str):
+    session_date = date.fromisoformat(asof)
+    information_cutoff = pd.Timestamp(regular_close_cutoff(session_date))
+
     w_symbol = pick_col(wide, ["symbol", "ticker"])
     w_accept = pick_col(wide, ["accepted_at", "filed_at"])
     eps_yoy = pick_col(wide, ["quarterly_eps_yoy", "eps_yoy"])
@@ -138,13 +142,12 @@ def fundamental_evidence(wide: pd.DataFrame, long: pd.DataFrame, ticker: str, as
     if w.empty:
         return None, None, []
     w[w_accept] = pd.to_datetime(w[w_accept], errors="coerce", utc=True)
-    cutoff = pd.Timestamp(asof, tz="UTC") + pd.Timedelta(days=1) - pd.Timedelta(microseconds=1)
-    w = w[w[w_accept] <= cutoff].sort_values(w_accept)
+    w = w[w[w_accept] <= information_cutoff].sort_values(w_accept)
     if w.empty:
         return None, None, []
     latest = w.iloc[-1]
     q_eps = None if pd.isna(latest[eps_yoy]) else float(latest[eps_yoy])
-    q_available = latest[w_accept].date().isoformat()
+    q_available = latest[w_accept].isoformat()
 
     l_symbol = pick_col(long, ["symbol", "ticker"])
     l_fy = pick_col(long, ["fiscal_year", "fy"])
@@ -156,10 +159,10 @@ def fundamental_evidence(wide: pd.DataFrame, long: pd.DataFrame, ticker: str, as
         if "form" in rows.columns:
             rows = rows[rows["form"].astype(str).str.upper().isin(["10-K", "10-K/A"])]
         rows[l_accept] = pd.to_datetime(rows[l_accept], errors="coerce", utc=True)
-        rows = rows[rows[l_accept] <= cutoff].sort_values([l_fy, l_accept]).drop_duplicates(l_fy, keep="last")
+        rows = rows[rows[l_accept] <= information_cutoff].sort_values([l_fy, l_accept]).drop_duplicates(l_fy, keep="last")
         for _, r in rows.iterrows():
             if pd.notna(r[l_fy]) and pd.notna(r[l_eps]) and pd.notna(r[l_accept]):
-                annual.append(AnnualEpsObservation(int(r[l_fy]), float(r[l_eps]), r[l_accept].date().isoformat()))
+                annual.append(AnnualEpsObservation(int(r[l_fy]), float(r[l_eps]), r[l_accept].isoformat()))
     return q_eps, q_available, annual
 
 
@@ -222,6 +225,9 @@ def main() -> None:
         "workstream": 34,
         "mode": "LIVE_R2_SMOKE",
         "asof_date": asof.isoformat(),
+        "decision_asof_timestamp": regular_close_cutoff(asof).isoformat(),
+        "market_session": "REGULAR_US_SESSION_CLOSE",
+        "information_cutoff": regular_close_cutoff(asof).isoformat(),
         "pattern_schema": "oneil-pattern-output-v2",
         "pattern_record_count": len(pattern_rows),
         "candidate_record_count": len(output),

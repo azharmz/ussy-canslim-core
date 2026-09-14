@@ -56,6 +56,19 @@ def latest_ready_date(s3, bucket: str) -> date:
     return pd.to_datetime(f["date"], errors="raise").dt.date.max()
 
 
+def _group_inputs(live: pd.DataFrame, hist: pd.DataFrame, unc: pd.DataFrame):
+    live = live.copy()
+    hist = hist.copy()
+    unc = unc.copy()
+    live["security_id"] = live["security_id"].astype(str).str.upper()
+    hist["cusip"] = hist["cusip"].astype(str).str.upper()
+    unc["cusip"] = unc["cusip"].astype(str).str.upper()
+    live_groups = {k: g.copy() for k, g in live.groupby("security_id", sort=False)}
+    hist_groups = {k: g.copy() for k, g in hist.groupby("cusip", sort=False)}
+    unc_groups = {k: g.copy() for k, g in unc.groupby("cusip", sort=False)}
+    return live, live_groups, hist_groups, unc_groups
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     s3 = client()
@@ -70,15 +83,22 @@ def main() -> None:
     asof = latest_ready_date(s3, bucket)
     cutoff = regular_close_cutoff(asof)
 
-    # One result per deterministic security in the canonical live snapshot.
+    live, live_groups, hist_groups, unc_groups = _group_inputs(live, hist, unc)
+    empty_live = live.iloc[0:0].copy()
+    empty_hist = hist.iloc[0:0].copy()
+    empty_unc = unc.iloc[0:0].copy()
+
     states = Counter()
     reasons = Counter()
     examples = []
-    security_ids = sorted(set(live["security_id"].dropna().astype(str)))
+    security_ids = sorted(live_groups)
     for sid in security_ids:
+        cusip = sid[2:11] if len(sid) == 12 and sid.startswith("US") else ""
         r = resolve_institutional_pit(
             security_id=sid, decision_cutoff=cutoff,
-            live_state=live, history_events=hist, uncertainty_events=unc)
+            live_state=live_groups.get(sid, empty_live),
+            history_events=hist_groups.get(cusip, empty_hist),
+            uncertainty_events=unc_groups.get(cusip, empty_unc))
         states[r.state] += 1
         reasons[r.reason] += 1
         if len(examples) < 25:

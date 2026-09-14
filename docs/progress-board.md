@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #45. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45 adds the independent portfolio-level CAN SLIM `M` exposure action layer.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #46. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path.
 
 ## Repository boundary for #33
 
@@ -33,25 +33,22 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 43 | Position lifecycle / exit arbiter v2 | **IMPLEMENTATION COMPLETE / FROZEN v2** |
 | 44 | Climax / exhaustion evidence | **EVIDENCE LAYER COMPLETE / FROZEN v1** |
 | 45 | Market exposure action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+| 46 | Market state evidence / classification | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 
 ## Current canonical architecture
 
 ```text
-#33 Pattern
-→ #34 Candidate
-→ #35 Validation
-→ #36 Entry
+STOCK
+#33 Pattern → #34 Candidate → #35 Validation → #36 Entry
 → OPEN POSITION
-→ #37 Capital Protection
-   / #40 Technical Deterioration
-   / #42 Round-Trip
-→ #43 Stock Lifecycle Arbiter
-→ CLOSED POSITION
+→ #37 Capital Protection / #40 Technical Deterioration / #42 Round-Trip
+→ #43 Stock Lifecycle Arbiter → CLOSED POSITION
 
 #44 Climax/Exhaustion = evidence sidecar only
 
-General market / CAN SLIM M
-→ upstream market-state evidence/classification [separate]
+GENERAL MARKET / CAN SLIM M
+major-index OHLCV + PIT leadership/weakening evidence
+→ #46 Market State Classification
 → #45 Portfolio Exposure Action
 → target exposure band E0..E4
 ```
@@ -72,49 +69,47 @@ Canonical validations remain green: #36 `34785545504`; #37 `34787905360`; #38 `3
 
 ## #44 — Climax / Exhaustion Evidence
 
-Contract `44-climax-exhaustion-evidence-v1` remains evidence-only. It records reproducible climax/exhaustion channels without creating a fourth exit. Prior-advance/base-stage context remains unresolved for a canonical action rule. EXH2 remains separate and unchanged.
-
-Canonical run `34797449482` / job `103833195506` → **SUCCESS, 10 passed in 0.03s**.
+Contract `44-climax-exhaustion-evidence-v1` remains evidence-only. It records reproducible climax/exhaustion channels without creating a fourth exit. Prior-advance/base-stage context remains unresolved for a canonical action rule. EXH2 remains separate and unchanged. Canonical run `34797449482` → **SUCCESS, 10 passed**.
 
 ## #45 — Market Exposure Action
 
-Specification: `docs/methodology/45-market-exposure-action-spec-v1.md`.
+Contract `45-market-exposure-action-v1` remains frozen. Portfolio exposure vocabulary is E0=0-20%, E1=20-40%, E2=40-60%, E3=60-80%, E4=80-100%. Correction maps to E0/block new entries; follow-through permits gradual re-entry; healthy uptrend can raise at most one band; weakening lowers one band. It is portfolio-level and not a stock liquidation rule.
 
-Contract: `45-market-exposure-action-v1`.
+Canonical run `34802432732` / job `103847631050` → **SUCCESS, 12 passed**.
 
-Frozen portfolio exposure vocabulary:
+## #46 — Market State Evidence / Classification
+
+Specification: `docs/methodology/46-market-state-evidence-classification-spec-v1.md`.
+
+Contract: `46-market-state-classification-v1`.
+
+Frozen state chronology:
 
 ```text
-E0 = 0-20%
-E1 = 20-40%
-E2 = 40-60%
-E3 = 60-80%
-E4 = 80-100%
+CORRECTION
+→ RALLY_ATTEMPT (first qualifying major-index up-close = Day 1)
+→ FOLLOW_THROUGH_CONFIRMED (Day 4+; >=1.25% close gain; volume > prior session)
+→ UPTREND_HEALTHY (PIT leadership confirmation)
+→ UPTREND_WEAKENING (explicit PIT weakening evidence)
+→ CORRECTION (explicit correction reset)
 ```
 
-Frozen action semantics:
-- `CORRECTION` → E0 and block new entries;
-- `RALLY_ATTEMPT` does not authorize bullish re-entry;
-- `FOLLOW_THROUGH_CONFIRMED` from E0 → E1, gradual re-engagement;
-- `UPTREND_HEALTHY` → at most one-band increase, capped E4;
-- `UPTREND_WEAKENING` → one-band reduction, floored E0;
-- `NOT_EVALUABLE` remains explicit and does not authorize new entries.
-
-#45 is portfolio-level. It does **not** automatically liquidate every stock, choose which holding to sell, alter #36 fills, or enter #43 as a stock-level exit.
+A strict undercut of rally Day-1 low resets the attempt. Distribution evidence is a >=0.20% decline on volume above the prior session, but #46 deliberately does not invent a universal distribution-count threshold for weakening/correction because authoritative guidance also uses leadership and index context.
 
 Implementation:
-- `src/canslim_research/market_exposure_action_v1.py`
-- `tests/test_market_exposure_action_v1.py`
-- `.github/workflows/45-market-exposure-action-v1.yml`
+- `src/canslim_research/market_state_v1.py`
+- `tests/test_market_state_v1.py`
+- `.github/workflows/46-market-state-v1.yml`
 
-Canonical semantic-validation run:
-- run `34802432732`
-- job `103847631050`
-- commit `4c1f5cbf536d1d144abcd41360019dab7dfca3b8`
+Initial CI `34803646653` exposed only an implementation off-by-one and floating exact-boundary issue; preregistered semantics were unchanged. Fix commit `cc20bdfb35433b5afacf2d8a51ee56acc76b682e`.
+
+Canonical semantic validation:
+- run `34803676270`
+- job `103851194650`
 - **SUCCESS**
-- **12 passed**
+- **13 passed in 0.02s**
 
-Freeze decision: `docs/decisions/2026-09-14-45-market-exposure-action-freeze.md`.
+Freeze decision: `docs/decisions/2026-09-14-46-market-state-classification-freeze.md`.
 
 Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
 
@@ -124,10 +119,10 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33-#45 frozen.
+1. Keep #33-#46 frozen.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-3. Do not tune entry, exits, lifecycle arbitration, climax evidence, or exposure transitions from historical returns.
-4. #45 still needs a separately specified **market-state evidence/classification layer** if the system is to derive `CORRECTION`, `RALLY_ATTEMPT`, `FOLLOW_THROUGH_CONFIRMED`, `UPTREND_HEALTHY`, and `UPTREND_WEAKENING` directly from index OHLCV/leadership evidence rather than consume them as inputs.
+3. Do not tune entry, exits, lifecycle arbitration, climax evidence, market-state classification or exposure transitions from historical returns.
+4. #46 production wiring still needs an explicit major-index data-source contract and PIT provenance for leadership/weakening evidence; exact index tickers/providers are intentionally not hard-coded in the classifier.
 5. A future portfolio executor may translate #45 target exposure into concrete position-level actions; that must not be conflated with stock-level O'Neil sell rules.
 6. A canonical climax action remains unauthorized until prior-advance/base-stage context is resolved.
 7. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

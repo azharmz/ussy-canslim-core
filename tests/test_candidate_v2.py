@@ -49,12 +49,19 @@ def bars(breakout_volume=150.0):
     return rows
 
 
-def evidence():
-    return CandidateEvidence(
-        "PASS", "PASS", "PASS", "ALLOW_NEW_BUYS",
+def evidence(**overrides):
+    values = dict(
+        C_screen_state="PASS",
+        A_screen_state="PASS",
+        L_individual_leadership_state="PASS",
+        M_entry_state="ALLOW_NEW_BUYS",
+        N_catalyst_state="NOT_IMPLEMENTED",
+        I_evidence_state="POSITIVE",
         rs_rating_proxy_percentile=85.0,
-        M_market_state="CONFIRMED_UPTREND",
+        M_market_state="FOLLOW_THROUGH_CONFIRMED",
     )
+    values.update(overrides)
+    return CandidateEvidence(**values)
 
 
 def test_rejects_advanced_pattern_from_frozen_contract():
@@ -77,7 +84,7 @@ def test_ambiguous_is_preserved_and_not_promoted():
     assert "PATTERN_AMBIGUOUS" in result.eligibility_reason_codes
 
 
-def test_recognized_confirmed_breakout_can_be_eligible():
+def test_recognized_confirmed_breakout_can_be_eligible_with_all_mandatory_letters():
     pattern = PatternAssessment.from_mapping(pattern_row())
     result = build_candidate(pattern, bars(150.0), evidence())
     assert result.pivot_crossed_intraday is True
@@ -90,9 +97,25 @@ def test_recognized_confirmed_breakout_can_be_eligible():
     assert result.volume_confirmation_date == "2026-09-11"
     assert result.N_price_state == "PASS"
     assert result.S_evidence_state == "POSITIVE"
+    assert result.I_evidence_state == "POSITIVE"
+    assert result.N_catalyst_state == "NOT_IMPLEMENTED"
     assert result.rs_rating_proxy_percentile == 85.0
-    assert result.M_market_state == "CONFIRMED_UPTREND"
+    assert result.M_market_state == "FOLLOW_THROUGH_CONFIRMED"
     assert result.candidate_stage == "CANSLIM_ELIGIBLE"
+    assert result.eligibility_reason_codes == ()
+
+
+def test_catalyst_not_implemented_is_evidence_only_not_a_mandatory_gate():
+    pattern = PatternAssessment.from_mapping(pattern_row())
+    result = build_candidate(pattern, bars(), evidence(N_catalyst_state="NOT_IMPLEMENTED"))
+    assert result.candidate_stage == "CANSLIM_ELIGIBLE"
+
+
+def test_institutional_not_evaluable_blocks_full_eligibility():
+    pattern = PatternAssessment.from_mapping(pattern_row())
+    result = build_candidate(pattern, bars(), evidence(I_evidence_state="NOT_EVALUABLE"))
+    assert result.candidate_stage == "BREAKOUT_CONFIRMED"
+    assert "I_NOT_PASS:NOT_EVALUABLE" in result.eligibility_reason_codes
 
 
 def test_low_volume_cross_remains_pivot_crossed():
@@ -123,13 +146,12 @@ def test_prior_breakout_is_not_recounted_at_current_asof():
     assert "BREAKOUT_ALREADY_OCCURRED" in result.eligibility_reason_codes
 
 
-def test_failed_core_evidence_does_not_erase_confirmed_breakout():
+def test_failed_mandatory_evidence_does_not_erase_confirmed_breakout():
     pattern = PatternAssessment.from_mapping(pattern_row())
-    ev = CandidateEvidence("PASS", "NOT_EVALUABLE", "PASS", "ALLOW_NEW_BUYS")
-    result = build_candidate(pattern, bars(), ev)
+    result = build_candidate(pattern, bars(), evidence(A_screen_state="NOT_EVALUABLE"))
     assert result.volume_confirmation_state == "CONFIRMED_ON_BREAKOUT"
     assert result.candidate_stage == "BREAKOUT_CONFIRMED"
-    assert "A_CORE_NOT_PASS" in result.eligibility_reason_codes
+    assert "A_NOT_PASS:NOT_EVALUABLE" in result.eligibility_reason_codes
 
 
 def test_c_adapter_is_pit_safe_and_uses_25pct_eps_core():

@@ -154,23 +154,34 @@ def test_failed_mandatory_evidence_does_not_erase_confirmed_breakout():
     assert "A_NOT_PASS:NOT_EVALUABLE" in result.eligibility_reason_codes
 
 
-def test_c_adapter_is_pit_safe_and_uses_25pct_eps_core():
-    assert c_screen_state(quarterly_eps_yoy=0.30, available_on="2026-08-01", asof_date="2026-09-11")[0] == "PASS"
-    assert c_screen_state(quarterly_eps_yoy=0.20, available_on="2026-08-01", asof_date="2026-09-11")[0] == "FAIL"
-    assert c_screen_state(quarterly_eps_yoy=0.40, available_on="2026-09-12", asof_date="2026-09-11")[0] == "NOT_EVALUABLE"
+def test_c_adapter_requires_eps_and_revenue_and_is_pit_safe():
+    assert c_screen_state(quarterly_eps_yoy=0.30, quarterly_revenue_yoy=0.35, available_on="2026-08-01", asof_date="2026-09-11")[0] == "PASS"
+    assert c_screen_state(quarterly_eps_yoy=0.30, quarterly_revenue_yoy=0.20, available_on="2026-08-01", asof_date="2026-09-11")[0] == "FAIL"
+    assert c_screen_state(quarterly_eps_yoy=0.40, quarterly_revenue_yoy=None, available_on="2026-08-01", asof_date="2026-09-11")[0] == "NOT_EVALUABLE"
+    assert c_screen_state(quarterly_eps_yoy=0.40, quarterly_revenue_yoy=0.40, available_on="2026-09-12", asof_date="2026-09-11")[0] == "NOT_EVALUABLE"
 
 
-def test_a_adapter_uses_latest_three_year_eps_growth_span():
+def test_a_adapter_requires_latest_three_consecutive_annual_eps_yoy_states():
     rows = [
-        AnnualEpsObservation(2021, 0.50, "2022-02-15"),
-        AnnualEpsObservation(2022, 1.00, "2023-02-15"),
-        AnnualEpsObservation(2023, 1.30, "2024-02-15"),
-        AnnualEpsObservation(2024, 1.70, "2025-02-15"),
-        AnnualEpsObservation(2025, 2.20, "2026-02-15"),
+        AnnualEpsObservation(2022, 0.10, "2023-02-15"),
+        AnnualEpsObservation(2023, 0.30, "2024-02-15"),
+        AnnualEpsObservation(2024, 0.31, "2025-02-15"),
+        AnnualEpsObservation(2025, 0.32, "2026-02-15"),
     ]
-    state, growth, _ = a_screen_state(rows, asof_date="2026-09-11")
+    state, latest_growth, _ = a_screen_state(rows, asof_date="2026-09-11")
     assert state == "PASS"
-    assert growth is not None and growth >= 0.25
+    assert latest_growth == 0.32
+
+
+def test_a_adapter_fails_closed_on_nonconsecutive_fy():
+    rows = [
+        AnnualEpsObservation(2022, 0.30, "2023-02-15"),
+        AnnualEpsObservation(2024, 0.31, "2025-02-15"),
+        AnnualEpsObservation(2025, 0.32, "2026-02-15"),
+    ]
+    state, _, reason = a_screen_state(rows, asof_date="2026-09-11")
+    assert state == "NOT_EVALUABLE"
+    assert reason == "NON_CONSECUTIVE_ANNUAL_FY"
 
 
 def test_l_m_and_i_adapters_preserve_theory_roles():

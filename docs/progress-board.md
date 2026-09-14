@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #47, with #48 major-index source audit complete. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47/#48 now define and validate its major-index input boundary.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #52. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines the leadership/weakening evidence contract; #52 audits its broad-market source boundary.
 
 ## Repository boundary for #33
 
@@ -36,6 +36,10 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 46 | Market state evidence / classification | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 47 | Market input data contract | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 48 | Major index source audit | **SOURCE AUDIT COMPLETE — YAHOO/YFINANCE APPROVED FOR INITIAL PRODUCTION INPUT v1** |
+| 49 | Production market index publisher | **PRODUCTION WIRING COMPLETE / LIVE v1** |
+| 50 | Production market-state consumer | **PRODUCTION CONSUMER COMPLETE / LIVE v1** |
+| 51 | Market leadership / weakening evidence | **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED** |
+| 52 | PIT broad-market leadership source audit | **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED** |
 
 ## Current canonical architecture
 
@@ -49,9 +53,14 @@ STOCK
 #44 Climax/Exhaustion = evidence sidecar only
 
 GENERAL MARKET / CAN SLIM M
-#47 canonical indexes + #48 audited source
+#49 production major-index data
 NASDAQ_COMPOSITE(^IXIC) / SP500(^GSPC) / DJIA(^DJI)
-→ #46 Market State Classification
+→ #50 production consumer
+→ frozen #46 Market State Classification
+↑
+#51 Leadership / Weakening Evidence contract
+↑
+#52 broad-market source audit (production boolean source still deferred)
 → #45 Portfolio Exposure Action
 → target exposure band E0..E4
 ```
@@ -98,35 +107,43 @@ SPY/QQQ/DIA are explicitly forbidden as canonical substitutes. Missing index vol
 
 Semantic-validation run `34806193999` / job `103858438691` → **SUCCESS, 13 passed in 0.04s**.
 
-## #48 — Major Index Source Audit
+## #48–#50 — Major-index production path
 
-Audit executed in `azharmz/ussy-data` using preregistered diagnostics-only workflow.
+#48 approved Yahoo/yfinance for initial production input v1 for `^IXIC`, `^GSPC`, and `^DJI` after reproducible source audit. This approval is operational and does not claim exchange-official volume equivalence.
 
-Frozen provider mappings approved for initial production input v1:
+#49 publishes immutable major-index run objects and advances `market/indexes/official.json` only after a complete successful publication. First live publication run `34808006835` succeeded.
 
-```text
-NASDAQ_COMPOSITE -> Yahoo/yfinance ^IXIC
-SP500            -> Yahoo/yfinance ^GSPC
-DJIA             -> Yahoo/yfinance ^DJI
-```
+#50 verifies the official pointer, manifest/object SHA-256 lineage and frozen #47 identity contract, then imports the canonical frozen #46 implementation rather than duplicating it. First live run `34809438828` produced `FOLLOW_THROUGH_CONFIRMED` as of 2026-09-11. Because leadership/weakening booleans remain unresolved, #50 must not promote the state to `UPTREND_HEALTHY` or `UPTREND_WEAKENING` from fabricated evidence.
 
-Run `34807791390` / job `103862942417` completed successfully. Artifact `major-index-source-audit-34807791390` (id `10333836848`, digest `sha256:c4943ec895549b1ddd192f7a4c7d37704555fd6616db5cec6d436c19acfd5dab`) recorded 548 rows for each index from 2024-07-08 through 2026-09-11. All three passed non-empty/schema/date/OHLC/recent-volume completeness/nonnegative/nonzero/variation checks over the latest 60 returned sessions.
+## #51 — Leadership / Weakening Evidence
 
-Decision: `docs/decisions/2026-09-14-48-major-index-source-audit-decision.md`.
+Contract `51-market-leadership-weakening-evidence-v1` freezes what acceptable auxiliary market evidence must contain. Broad-market leaders making/approaching new highs with institutional demand may confirm leadership; a majority of valid observed leaders ceasing to make new highs/breaking down together with institutional selling may confirm weakening. Required channels are tri-state and remain `NOT_EVALUABLE` when provenance/evidence is incomplete.
 
-Status: **SOURCE AUDIT COMPLETE / YAHOO-YFINANCE APPROVED FOR INITIAL PRODUCTION INPUT v1**.
+The current USSY/Musaffa universe is explicitly prohibited as a proxy for broad-U.S.-market leadership.
+
+Status: **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED**.
+
+## #52 — PIT Broad-Market Leadership Source Audit
+
+Contract `52-pit-broad-market-leadership-source-audit-v1` audits candidate source stacks upstream of #51.
+
+Nasdaq Trader `nasdaqlisted.txt` + `otherlisted.txt` are accepted only as a candidate broad-current-U.S.-exchange membership source for prospective immutable snapshots. They do not themselves designate O'Neil-style leaders or provide institutional accumulation/selling evidence.
+
+Broad OHLCV alone is not a leader selector. IBD/MarketSurge leadership lists and ratings are theory-aligned, but no stable permitted machine-readable/PIT-auditable production access contract has yet been established. Therefore no source stack is approved to emit production #51 booleans.
+
+Status: **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED**.
 
 ## Forward / production boundaries
 
-FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Production integration remains blocked by the FWD1 gate. Theory-fidelity findings must not be retrofitted into FWD1/X3/EXH2.
+FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into FWD1/X3/EXH2.
 
 ## Active work from here
 
-1. Keep #33-#47 frozen; preserve #48 audit decision unless new source-quality evidence requires reopening the provider layer only.
+1. Keep frozen contracts frozen; do not retune semantic thresholds from returns.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-3. Do not tune entry, exits, lifecycle arbitration, climax evidence, market-state classification, source selection or exposure transitions from historical returns.
-4. Next clean workstream is **production publication/wiring of the three #48-approved index series in `ussy-data`**, using immutable run objects + official pointers and the frozen #47 provenance/validation contract.
-5. PIT `leadership_confirming` and `weakening_confirmed` still require separately versioned upstream evidence contracts before fully automatic `UPTREND_HEALTHY` / `UPTREND_WEAKENING` production state is complete.
-6. A future portfolio executor may translate #45 target exposure into concrete position-level actions; that must not be conflated with stock-level O'Neil sell rules.
+3. Prospectively archive immutable Nasdaq Trader broad-market membership snapshots in the data layer if continuing the open-data path.
+4. Audit whether a permitted machine-accessible IBD/MarketSurge leadership/rating source can satisfy #52 PIT requirements; otherwise preregister a separate open-data leader-selector study before introducing numeric thresholds.
+5. Until an approved #52 source stack exists, #50 must continue passing `leadership_confirming=None` and `weakening_confirmed=None`.
+6. A future production exposure consumer may translate frozen #45 target exposure into a published E0–E4 portfolio state; it must not conflate portfolio exposure with stock-level sell rules.
 7. A canonical climax action remains unauthorized until prior-advance/base-stage context is resolved.
 8. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

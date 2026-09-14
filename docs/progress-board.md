@@ -2,13 +2,11 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #44. #43 remains the current lifecycle arbiter for the three frozen executable exit channels (#37/#40/#42); #44 adds climax/exhaustion evidence only and does not alter lifecycle execution.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #45. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45 adds the independent portfolio-level CAN SLIM `M` exposure action layer.
 
 ## Repository boundary for #33
 
-**Canonical #33 implementation and P8 morphology validation live in `azharmz/ussy-oneil-patterns`.**
-
-Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DOUBLE_BOTTOM`, `CUP_WITHOUT_HANDLE`, and `CUP_WITH_HANDLE`. P6 advanced patterns remain excluded and frozen.
+**Canonical #33 implementation and P8 morphology validation live in `azharmz/ussy-oneil-patterns`.** Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DOUBLE_BOTTOM`, `CUP_WITHOUT_HANDLE`, and `CUP_WITH_HANDLE`. P6 advanced patterns remain excluded and frozen.
 
 ## Theory Fidelity / v2 path
 
@@ -34,119 +32,91 @@ Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DO
 | 42 | Round-trip sell action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 43 | Position lifecycle / exit arbiter v2 | **IMPLEMENTATION COMPLETE / FROZEN v2** |
 | 44 | Climax / exhaustion evidence | **EVIDENCE LAYER COMPLETE / FROZEN v1** |
+| 45 | Market exposure action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+
+## Current canonical architecture
+
+```text
+#33 Pattern
+→ #34 Candidate
+→ #35 Validation
+→ #36 Entry
+→ OPEN POSITION
+→ #37 Capital Protection
+   / #40 Technical Deterioration
+   / #42 Round-Trip
+→ #43 Stock Lifecycle Arbiter
+→ CLOSED POSITION
+
+#44 Climax/Exhaustion = evidence sidecar only
+
+General market / CAN SLIM M
+→ upstream market-state evidence/classification [separate]
+→ #45 Portfolio Exposure Action
+→ target exposure band E0..E4
+```
 
 ## #34–#35 candidate and validation state
 
-Frozen candidate stages remain:
+Frozen candidate stages: `BASE_RECOGNIZED → PIVOT_DEFINED → PIVOT_CROSSED → BREAKOUT_CONFIRMED → CANSLIM_ELIGIBLE`.
 
-```text
-BASE_RECOGNIZED
-→ PIVOT_DEFINED
-→ PIVOT_CROSSED
-→ BREAKOUT_CONFIRMED
-→ CANSLIM_ELIGIBLE
-```
+#34 final verification `34758050282` → **SUCCESS, 9 tests**. #35 canonical historical run `34763920536` produced 265,642 observations with zero V35-A/B/C findings and a frozen 60-case corpus. Independent source-evidence audit `34765922653` → **SUCCESS**, C/A/L/M 60/60 MATCH and PIT violations = 0. #35 remains `CONDITIONAL PASS` solely with upstream #33 morphology debt preserved.
 
-#34 final verification run `34758050282` → **SUCCESS**, 9 tests. #35 canonical historical run `34763920536` produced 265,642 observations with zero V35-A/B/C findings and a frozen 60-case corpus. Independent source-evidence audit `34765922653` → **SUCCESS**, C/A/L/M 60/60 MATCH and PIT violations = 0. #35 remains `CONDITIONAL PASS` solely with upstream #33 morphology debt preserved.
+## #36–#43 stock lifecycle
 
-## #36 — Entry
+#36 canonical T+1-open execution remains frozen; primary performance validation remains `BLOCKED_ON_ELIGIBLE_POPULATION` because canonical #35 has 0 `CANSLIM_ELIGIBLE` observations.
 
-Canonical `36-execution-entry-v1` remains frozen: eligible signal known after close T, earliest daily-EOD causal execution convention T+1 open, fill only inside pivot through pivot*1.05. T/T+1/T+3 are dataset/backtest clocks, not O'Neil terminology.
+#37 capital protection, #40 technical deterioration and #42 round-trip are the three frozen executable stock-level exit channels. #43 v2 arbitrates them by earliest causal executable exit, preserving same-session ambiguity/source conflicts rather than inventing an OHLC path.
 
-Semantic validation `34785545504` → **SUCCESS, 11 passed**. Variant integrity `34785658367` → **SUCCESS**. Primary performance validation remains `BLOCKED_ON_ELIGIBLE_POPULATION` because canonical #35 has 0 `CANSLIM_ELIGIBLE` observations.
-
-## #37 — Sell / Risk
-
-`37-sell-risk-v1` remains frozen with practical ~7% capital protection from actual fill, legacy 8% severity evidence, observed-open gap-through handling, +20%-25% profit-management state from pivot without automatic full exit, and exceptional-winner/eight-week context.
-
-Semantic validation `34787905360` → **SUCCESS, 10 passed**.
-
-## #38 — Daily Deterioration Evidence
-
-`38-technical-deterioration-evidence-v1` remains evidence-only: MA10/21/50, strict-below-MA breaks, prior-50 volume ratio, project-consistent >=1.40x heavy-volume proxy, largest down-volume evidence, below-pivot and loss-from-fill evidence.
-
-Semantic validation `34788119495` → **SUCCESS, 12 passed**.
-
-## #39 — Weekly / 10-Week Evidence
-
-`39-weekly-10w-evidence-v1` remains frozen: completed ISO-week aggregation, holiday-shortened weeks, weekly OHLCV, true 10-completed-week MA, strict-below break, prior-10 weekly volume ratio and post-week causality. MA50 daily is not treated as identical to the 10-week line.
-
-Semantic validation `34788414986` → **SUCCESS, 10 passed**.
-
-## #40 — Technical Deterioration Action
-
-`40-technical-deterioration-action-v1` remains frozen. Canonical trigger is completed weekly close below MA10w with weekly volume above the prior-10 completed-week average. Low-volume breaks remain evidence. Execution is the first observed trading-session open after the completed signal week. Semantic validation `34789559782` → **SUCCESS**.
-
-## #41 — Position Lifecycle v1
-
-`41-position-lifecycle-exit-arbiter-v1` remains frozen historical integration for #37 + #40 only. Canonical semantic-validation run `34790106465` / job `103812624227` → **SUCCESS, 11 passed in 0.03s**.
-
-## #42 — Round-Trip Sell Action
-
-`42-round-trip-sell-action-v1` remains frozen. Canonical semantics: prior completed-session max high >= pivot*1.10, followed by a later completed daily close <= pivot, then execution at first later observed session open. Same-bar first +10% plus return-to/below-pivot remains explicit ambiguity. Canonical run `34793348883` / job `103821631323` → **SUCCESS, 10 passed in 0.03s**.
-
-## #43 — Position Lifecycle / Exit Arbiter v2
-
-Contract: `43-position-lifecycle-exit-arbiter-v2`.
-
-#43 integrates #37 capital protection, #40 technical deterioration and #42 round-trip. Different dates use earliest executable date. Same-session observed-open exits converge only if their price agrees; conflicting claimed open prices become `NOT_EVALUABLE_SOURCE_CONFLICT`; session-open execution precedes same-date #37 stop convention; otherwise unsupported ordering remains explicit ambiguity.
-
-Canonical run `34796938374` / job `103831748596` → **SUCCESS, 11 passed in 0.03s**.
-
-Freeze decision: `docs/decisions/2026-09-14-43-position-lifecycle-v2-freeze.md`.
+Canonical validations remain green: #36 `34785545504`; #37 `34787905360`; #38 `34788119495`; #39 `34788414986`; #40 `34789559782`; #41 `34790106465`; #42 `34793348883`; #43 `34796938374`.
 
 ## #44 — Climax / Exhaustion Evidence
 
-Specification: `docs/methodology/44-climax-exhaustion-evidence-spec-v1.md`.
+Contract `44-climax-exhaustion-evidence-v1` remains evidence-only. It records reproducible climax/exhaustion channels without creating a fourth exit. Prior-advance/base-stage context remains unresolved for a canonical action rule. EXH2 remains separate and unchanged.
 
-Contract: `44-climax-exhaustion-evidence-v1`.
+Canonical run `34797449482` / job `103833195506` → **SUCCESS, 10 passed in 0.03s**.
 
-Frozen evidence channels:
-- strict largest close-to-close up-day point gain since breakout;
-- strict heaviest daily volume since breakout;
-- 7-of-8 completed-session up-day sequence;
-- 8-of-10 completed-session up-day sequence;
-- raw exhaustion gap where current low > prior high;
-- weekly range and strict largest weekly range since breakout when weekly bars are supplied;
-- explicit completed-session/week chronology since breakout;
-- prior-advance context recorded but not promoted to a universal 12/18-week action rule because current production lineage lacks a canonical base-stage contract.
+## #45 — Market Exposure Action
 
-#44 is **evidence-only**. It creates no fourth executable exit and does not modify #43.
+Specification: `docs/methodology/45-market-exposure-action-spec-v1.md`.
 
-EXH2 remains a separate prospective diagnostic. Its `5.33333333333332%` extreme-shock boundary and T+1 rejection mechanism are not imported into #44.
+Contract: `45-market-exposure-action-v1`.
 
-Implementation:
-- `src/canslim_research/climax_exhaustion_evidence_v1.py`
-- `tests/test_climax_exhaustion_evidence_v1.py`
-- `.github/workflows/44-climax-exhaustion-evidence-v1.yml`
-
-Canonical semantic-validation run:
-- run `34797449482`
-- job `103833195506`
-- commit `4697283dbd57c5cc15b5ac7d718f9d6a551ed85b`
-- **SUCCESS**
-- **10 passed in 0.03s**
-
-Freeze decision: `docs/decisions/2026-09-14-44-climax-exhaustion-evidence-freeze.md`.
-
-Terminal state: `EVIDENCE LAYER COMPLETE / FROZEN v1`.
-
-## Current end-to-end frozen lifecycle
+Frozen portfolio exposure vocabulary:
 
 ```text
-#33 pattern
-→ #34 candidate
-→ #35 independent validation
-→ #36 executable entry
-→ OPEN POSITION
-→ #37 capital protection
-   OR #38/#39/#40 technical deterioration
-   OR #42 round-trip
-→ #43 lifecycle v2 arbitration
-→ CLOSED POSITION
-
-#44 climax/exhaustion = frozen evidence sidecar only
+E0 = 0-20%
+E1 = 20-40%
+E2 = 40-60%
+E3 = 60-80%
+E4 = 80-100%
 ```
+
+Frozen action semantics:
+- `CORRECTION` → E0 and block new entries;
+- `RALLY_ATTEMPT` does not authorize bullish re-entry;
+- `FOLLOW_THROUGH_CONFIRMED` from E0 → E1, gradual re-engagement;
+- `UPTREND_HEALTHY` → at most one-band increase, capped E4;
+- `UPTREND_WEAKENING` → one-band reduction, floored E0;
+- `NOT_EVALUABLE` remains explicit and does not authorize new entries.
+
+#45 is portfolio-level. It does **not** automatically liquidate every stock, choose which holding to sell, alter #36 fills, or enter #43 as a stock-level exit.
+
+Implementation:
+- `src/canslim_research/market_exposure_action_v1.py`
+- `tests/test_market_exposure_action_v1.py`
+- `.github/workflows/45-market-exposure-action-v1.yml`
+
+Canonical semantic-validation run:
+- run `34802432732`
+- job `103847631050`
+- commit `4c1f5cbf536d1d144abcd41360019dab7dfca3b8`
+- **SUCCESS**
+- **12 passed**
+
+Freeze decision: `docs/decisions/2026-09-14-45-market-exposure-action-freeze.md`.
+
+Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
 
 ## Forward / production boundaries
 
@@ -154,10 +124,10 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33-#44 frozen.
+1. Keep #33-#45 frozen.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-3. Do not tune #36 entry, #37 stop, #40 deterioration, #42 round-trip, #43 arbitration or #44 evidence from historical returns.
-4. A canonical climax action is not yet authorized; it requires a separate specification resolving prior-advance/base-stage context and exact evidence-combination semantics.
-5. Remaining independent theory module after #44 is market-exposure action.
-6. Any newly validated executable exit must enter via a new lifecycle version; do not mutate #43 v2.
+3. Do not tune entry, exits, lifecycle arbitration, climax evidence, or exposure transitions from historical returns.
+4. #45 still needs a separately specified **market-state evidence/classification layer** if the system is to derive `CORRECTION`, `RALLY_ATTEMPT`, `FOLLOW_THROUGH_CONFIRMED`, `UPTREND_HEALTHY`, and `UPTREND_WEAKENING` directly from index OHLCV/leadership evidence rather than consume them as inputs.
+5. A future portfolio executor may translate #45 target exposure into concrete position-level actions; that must not be conflated with stock-level O'Neil sell rules.
+6. A canonical climax action remains unauthorized until prior-advance/base-stage context is resolved.
 7. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

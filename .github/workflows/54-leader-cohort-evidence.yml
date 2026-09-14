@@ -1,0 +1,25 @@
+name: 54 leader cohort evidence v1
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/canslim_research/leader_cohort_evidence_v1.py'
+      - 'tests/test_leader_cohort_evidence_v1.py'
+      - 'docs/methodology/54-pit-leader-cohort-institutional-demand-study-v1.md'
+      - '.github/workflows/54-leader-cohort-evidence.yml'
+
+jobs:
+  semantic-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pytest
+        run: python -m pip install pytest
+      - name: Run #54 semantic tests
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_leader_cohort_evidence_v1.py

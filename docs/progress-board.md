@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 now has a frozen Cycle 1 research selector but still lacks production-authorized institutional-demand evidence.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 now has a frozen Cycle 1 research selector, a frozen data-readiness gate, and live broad-market provider audits, but no production-authorized broad-market OHLCV panel or institutional-demand evidence.
 
 ## Repository boundary for #33
 
@@ -41,7 +41,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 51 | Market leadership / weakening evidence | **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED** |
 | 52 | PIT broad-market leadership source audit | **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED** |
 | 53 | Prospective broad-market membership publisher | **PRODUCTION MEMBERSHIP ARCHIVE LIVE / LEADERSHIP BOOLEAN STILL DEFERRED** |
-| 54 | PIT leader-cohort / institutional-demand evidence study | **CYCLE 1 SEMANTIC BASELINE FROZEN / PROSPECTIVE PIT VALIDATION PENDING / NOT PRODUCTION AUTHORIZED** |
+| 54 | PIT leader-cohort / institutional-demand evidence study | **CYCLE 1 SEMANTIC BASELINE FROZEN / BROAD-MARKET OHLCV SOURCE STACK INCOMPLETE / NOT PRODUCTION AUTHORIZED** |
 
 ## Current canonical architecture
 
@@ -64,6 +64,7 @@ GENERAL MARKET / CAN SLIM M
 ↑
 #53 prospective broad-market membership archive
 → #54 Cycle 1 research leader candidate selector
+→ [broad-market stock OHLCV source stack incomplete]
 → [institutional-demand source still unresolved]
 → #45 Portfolio Exposure Action once evidence is complete
 ```
@@ -100,9 +101,9 @@ The current USSY/Musaffa universe remains prohibited as a proxy for broad-U.S.-m
 
 Study `54-pit-leader-cohort-institutional-demand-study-v1` freezes the admissible evidence families upstream of #51. Its base semantic packet remains validated by run `34823754541` / job `103911008100` → **SUCCESS, 8 tests**.
 
-### Experimental Cycle 1
+### Experimental Cycle 1 selector
 
-Preregistered selector `54-cycle1-candidate-leader-selector-v1` now freezes a research-only candidate cohort:
+Preregistered selector `54-cycle1-candidate-leader-selector-v1` freezes a research-only candidate cohort:
 
 - PIT #53 broad-market membership;
 - ETF/test issues excluded;
@@ -117,7 +118,27 @@ Canonical Cycle 1 semantic run `34828024938` / job `103924556850` → **SUCCESS,
 
 Cycle 1 can emit only `LEADER_CANDIDATE`, `NOT_LEADER_CANDIDATE`, or `NOT_EVALUABLE`. It cannot emit #51 production booleans because PIT institutional-demand/selling evidence remains unresolved.
 
-Status: **CYCLE 1 SEMANTIC BASELINE FROZEN / PROSPECTIVE PIT VALIDATION PENDING / NOT PRODUCTION AUTHORIZED**.
+### Cycle 1 data readiness
+
+A separate data-readiness gate confirmed that the existing `ussy-data` rolling stock panel is restricted to the confirmed compliant USSY/Musaffa universe and therefore cannot serve as the broad-market RS cross-section required by #54.
+
+Canonical readiness run `34846025920` / job `103982067238` → **SUCCESS**.
+
+Verdict: **BLOCKED_ON_BROAD_MARKET_OHLCV / SELECTOR NOT EXECUTED**.
+
+### Broad-market OHLCV provider audits
+
+Two read-only audits were run against the same live #53 membership run `34823149519`, using a deterministic 100-symbol sample from 7,504 non-ETF/non-test symbols and requiring >=252 adjusted-close observations.
+
+**Tiingo-only audit** — run `34847652001` / job `103987413383` → **SUCCESS**. The report recorded 68 successful responses, 32 errors, and 56/100 sampled symbols with >=252 adjusted-close observations. Artifact `10348671364`, ZIP SHA-256 `97ba227b22459d2f0b538a0e0f907ceb7a41cc3c271a36108362ec37477bf427`.
+
+**Tiingo → Yahoo/yfinance provider-stack audit** — run `34848036669` / job `103988656423` → **SUCCESS, 7 tests**. The stack resolved 72/100 sampled symbols with >=252 adjusted-close observations and left 28 unresolved. In that run all 72 selected observations came through Yahoo/yfinance fallback and zero were selected from Tiingo.
+
+The difference between the Tiingo-only report (56 symbols with >=252 bars) and the provider-stack report (zero Tiingo selections) is preserved as an unresolved source-audit inconsistency; it must be investigated rather than silently reconciled.
+
+The unresolved sample visibly includes preferred/share-class, warrant and right-like symbol forms. Cycle 1 currently excludes only ETFs and test issues, so those instruments cannot be silently removed after seeing provider failures.
+
+Current #54 terminal status: **CYCLE 1 SEMANTIC BASELINE FROZEN / BROAD-MARKET OHLCV SOURCE STACK INCOMPLETE / NOT PRODUCTION AUTHORIZED**.
 
 ## Forward / production boundaries
 
@@ -128,8 +149,9 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 1. Keep frozen contracts and Cycle 1 semantics frozen; do not retune thresholds from returns.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
 3. Allow #53 to accumulate prospective immutable membership history; never backfill old membership using a later snapshot.
-4. Validate #54 Cycle 1 prospectively using PIT membership/OHLCV provenance and descriptive diagnostics only: coverage, missingness, cohort size, reproducibility and turnover/stability.
-5. Continue auditing a permitted PIT institutional-demand/selling source; candidate cohort alone is insufficient for #51.
-6. Until an approved selector + demand source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
-7. A future production exposure consumer may publish frozen #45 E0–E4 state after the market-state evidence path is complete.
-8. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.
+4. Inside #54, perform a preregistered **security-type / provider-symbol identity audit** before authorizing any broad-market OHLCV publisher. Resolve the Tiingo audit inconsistency explicitly.
+5. Do not compute broad-market RS percentiles from a provider-availability subset or from the restricted USSY/Musaffa rolling universe.
+6. Continue auditing a permitted PIT institutional-demand/selling source; candidate cohort alone is insufficient for #51.
+7. Until an approved selector + data + demand source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
+8. A future production exposure consumer may publish frozen #45 E0–E4 state after the market-state evidence path is complete.
+9. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

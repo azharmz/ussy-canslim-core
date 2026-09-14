@@ -38,9 +38,17 @@ Cycle 1 uses a transparent project calculation rather than claiming equivalence 
 
 `relative_return_252 = stock_total_price_return_252 - benchmark_total_price_return_252`
 
-The cross-sectional percentile rank of `relative_return_252` is then calculated over the valid broad-market membership observations available at T.
+where each 252-session price return is:
 
-This is explicitly named `PROJECT_RS_PERCENTILE_252_V1`, not `IBD_RS_RATING`.
+`last_adj_close / first_adj_close - 1` over the latest 252 completed observations through T.
+
+The cross-sectional percentile rank is frozen as:
+
+`100 * count(relative_return_252 <= value_s) / N_evaluable`
+
+Ties therefore receive the same upper empirical-CDF percentile. This is a preregistered implementation convention, not an O'Neil proprietary formula.
+
+This metric is explicitly named `PROJECT_RS_PERCENTILE_252_V1`, not `IBD_RS_RATING`.
 
 The 252-session calculation window is a preregistered research convention approximating one trading year. It is not claimed to be O'Neil's proprietary RS formula.
 

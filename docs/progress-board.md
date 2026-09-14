@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #42. #41 remains the frozen lifecycle v1 for #37/#40 exits; #42 adds a separately frozen round-trip action that must enter only through a later lifecycle version.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #43. #43 is the current lifecycle arbiter for the three frozen executable exit channels (#37/#40/#42); #41 remains frozen historical lifecycle v1.
 
 ## Repository boundary for #33
 
@@ -32,6 +32,7 @@ Frozen production contract: `oneil-pattern-output-v2` with only `FLAT_BASE`, `DO
 | 40 | Technical deterioration action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 41 | Position lifecycle / exit arbiter | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 42 | Round-trip sell action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+| 43 | Position lifecycle / exit arbiter v2 | **IMPLEMENTATION COMPLETE / FROZEN v2** |
 
 ## #34–#35 candidate and validation state
 
@@ -86,25 +87,17 @@ Low-volume breaks remain evidence. Execution is the first observed trading-sessi
 
 Semantic validation `34789559782` → **SUCCESS**.
 
-## #41 — Position Lifecycle / Exit Arbiter
+## #41 — Position Lifecycle v1
 
-Contract: `41-position-lifecycle-exit-arbiter-v1`.
-
-#41 combines frozen #37 and #40 executable exits only. Earliest causal executable exit wins; same observed-open convergence closes once; #40 session-open precedes a same-date #37 daily-low stop-convention execution; otherwise unsupported same-session ordering remains explicit ambiguity.
+`41-position-lifecycle-exit-arbiter-v1` remains frozen historical integration for #37 + #40 only. It is not rewritten by later modules.
 
 Canonical semantic-validation run `34790106465` / job `103812624227` → **SUCCESS, 11 passed in 0.03s**.
 
-Freeze decision: `docs/decisions/2026-09-14-41-position-lifecycle-freeze.md`.
-
 ## #42 — Round-Trip Sell Action
 
-Specification: `docs/methodology/42-round-trip-sell-action-spec-v1.md`.
+`42-round-trip-sell-action-v1` remains frozen.
 
-Contract: `42-round-trip-sell-action-v1`.
-
-Authoritative evidence resolved the previously missing numeric precondition: the round-trip rule applies after a stock produces a double-digit gain from the ideal/proper buy point and then gives that gain back toward/below the buy point.
-
-Frozen reproducible v1 semantics:
+Canonical reproducible semantics:
 
 ```text
 prior completed-session max high >= pivot * 1.10
@@ -113,30 +106,53 @@ AND later completed daily close <= pivot
 → execute at first later observed session open
 ```
 
-Important boundaries:
-- reference is pivot / proper buy point, not actual fill;
-- +10% is the lower bound of authoritative double-digit-gain language, not a backtest-selected threshold;
-- gain must occur before the trigger session;
-- no unsupported numeric `near pivot` band is invented;
-- first +10% high plus return-to/below-pivot close on the same daily bar remains `AMBIGUOUS_SAME_SESSION` because OHLCV cannot establish ordering;
-- missing next bar remains `NO_NEXT_SESSION_BAR`;
-- #37 capital protection is unchanged;
-- #41 v1 is not mutated.
+The +10% threshold is the lower bound of authoritative double-digit-gain language, not a backtest-selected threshold. Same-bar first +10% plus return-to/below-pivot remains explicit ambiguity.
 
-Initial CI run `34793309984` exposed only a binary floating-point exact-10% boundary defect. The threshold/spec were unchanged; implementation comparison was stabilized in commit `8685869e0030abd55b9082c9c8c922f0d747b835`.
+Canonical semantic-validation run `34793348883` / job `103821631323` → **SUCCESS, 10 passed in 0.03s**.
+
+## #43 — Position Lifecycle / Exit Arbiter v2
+
+Specification: `docs/methodology/43-position-lifecycle-v2-spec.md`.
+
+Contract: `43-position-lifecycle-exit-arbiter-v2`.
+
+#43 integrates all currently frozen executable stock-level exits:
+
+```text
+#37 CAPITAL_PROTECTION
+#40 TECHNICAL_DETERIORATION
+#42 ROUND_TRIP
+        ↓
+#43 earliest causal executable exit
+```
+
+Frozen arbitration rules:
+- different dates → earliest executable date wins;
+- same-date #40/#42/#37 gap-through executions are session-open events;
+- session-open action precedes same-date #37 daily-low stop convention;
+- multiple open actions at the same observed open and same price converge into one close;
+- conflicting prices claimed for the same observed daily open are `NOT_EVALUABLE_SOURCE_CONFLICT`;
+- unsupported same-session ordering remains `AMBIGUOUS_SAME_SESSION`;
+- no OHLC intraday path is invented;
+- no exit before entry and no double exit.
+
+Implementation:
+- `src/canslim_research/position_lifecycle_v2.py`
+- `tests/test_position_lifecycle_v2.py`
+- `.github/workflows/43-position-lifecycle-v2.yml`
 
 Canonical semantic-validation run:
-- run `34793348883`
-- job `103821631323`
-- commit `8685869e0030abd55b9082c9c8c922f0d747b835`
+- run `34796938374`
+- job `103831748596`
+- commit `879c50109f90a73d5ea7cd9f42988b3542d00e90`
 - **SUCCESS**
-- **10 passed in 0.03s**
+- **11 passed in 0.03s**
 
-Freeze decision: `docs/decisions/2026-09-14-42-round-trip-sell-action-freeze.md`.
+Freeze decision: `docs/decisions/2026-09-14-43-position-lifecycle-v2-freeze.md`.
 
-Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
+Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v2`.
 
-## Current lifecycle boundary
+## Current end-to-end frozen lifecycle
 
 ```text
 #33 pattern
@@ -146,12 +162,12 @@ Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
 → OPEN POSITION
 → #37 capital protection
    OR #38/#39/#40 technical deterioration
-→ #41 lifecycle v1 arbitration
+   OR #42 round-trip
+→ #43 lifecycle v2 arbitration
 → CLOSED POSITION
-
-#42 round-trip action = frozen additional exit channel,
-not yet merged into frozen #41 v1.
 ```
+
+This is semantic completeness for the current three-channel stock-level action set, not a performance-validation claim.
 
 ## Forward / production boundaries
 
@@ -159,9 +175,9 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33-#42 frozen.
-2. Clean next integration work is a new lifecycle version that adds #42 as a third exit channel without mutating #41 v1.
-3. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-4. Do not tune #36 entry, #37 stop, #40 deterioration, #42 round-trip, or lifecycle arbitration from historical returns.
-5. Remaining independent theory modules after round-trip are climax/exhaustion and market-exposure action; each requires authoritative specification before implementation.
+1. Keep #33-#43 frozen.
+2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
+3. Do not tune #36 entry, #37 stop, #40 deterioration, #42 round-trip, or #43 arbitration from historical returns.
+4. Remaining independent theory modules are climax/exhaustion and market-exposure action; each requires authoritative specification before implementation.
+5. Any newly validated executable exit must enter via a new lifecycle version; do not mutate #43 v2.
 6. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

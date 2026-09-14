@@ -8,6 +8,7 @@ from typing import Optional, Sequence
 ACTION_VERSION = "42-round-trip-sell-action-v1"
 SOURCE_SELL_RISK_VERSION = "37-sell-risk-v1"
 DOUBLE_DIGIT_GAIN = 0.10
+BOUNDARY_EPSILON = 1e-12
 
 
 class RoundTripState(str, Enum):
@@ -48,6 +49,10 @@ class RoundTripAction:
     action_version: str
 
 
+def _meets_double_digit_gain(high: float, pivot: float) -> bool:
+    return high / pivot - 1.0 >= DOUBLE_DIGIT_GAIN - BOUNDARY_EPSILON
+
+
 def decide_round_trip_action(
     *,
     candidate_id: str,
@@ -71,13 +76,11 @@ def decide_round_trip_action(
         if bar.date < entry_date:
             continue
         prior_gain = None if prior_high is None else prior_high / pivot_level - 1.0
-        had_double_digit_prior = prior_high is not None and prior_high >= pivot_level * (1.0 + DOUBLE_DIGIT_GAIN)
+        had_double_digit_prior = prior_high is not None and _meets_double_digit_gain(prior_high, pivot_level)
 
-        # If the first +10% high and return to/below pivot are on the same daily bar,
-        # OHLCV cannot establish sequence, so preserve ambiguity.
         same_session_first_gain = (
             not had_double_digit_prior
-            and float(bar.high) >= pivot_level * (1.0 + DOUBLE_DIGIT_GAIN)
+            and _meets_double_digit_gain(float(bar.high), pivot_level)
             and float(bar.close) <= pivot_level
         )
         if same_session_first_gain:
@@ -111,7 +114,7 @@ def validate_round_trip_action(x: RoundTripAction) -> list[str]:
     if x.source_sell_risk_version != SOURCE_SELL_RISK_VERSION:
         findings.append("R42-A_SOURCE_37_MISMATCH")
     if x.round_trip_state == RoundTripState.ROUND_TRIP_EXIT_REQUIRED.value:
-        if x.prior_max_gain_from_buy_point_pct is None or x.prior_max_gain_from_buy_point_pct < DOUBLE_DIGIT_GAIN:
+        if x.prior_max_gain_from_buy_point_pct is None or x.prior_max_gain_from_buy_point_pct < DOUBLE_DIGIT_GAIN - BOUNDARY_EPSILON:
             findings.append("R42-C_MISSING_PRIOR_DOUBLE_DIGIT_GAIN")
         if x.trigger_close is None or x.trigger_close > x.pivot_level:
             findings.append("R42-D_INVALID_RETURN_TO_BUY_POINT")

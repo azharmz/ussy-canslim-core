@@ -1,0 +1,25 @@
+name: remediation-f02-decision-time-pit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/canslim_research/decision_time.py'
+      - 'scripts/run_candidate_v2_smoke.py'
+      - 'tests/test_decision_time.py'
+      - '.github/workflows/remediation-f02-decision-time-pit.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest pandas
+      - name: F02 decision-time PIT tests
+        run: PYTHONPATH=src pytest -q tests/test_decision_time.py
+      - name: Candidate regression tests
+        run: PYTHONPATH=src pytest -q tests/test_candidate_v2.py

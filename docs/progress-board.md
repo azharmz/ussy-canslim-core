@@ -1,8 +1,8 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 now has a frozen Cycle 1 research selector, a frozen data-readiness gate, and live broad-market provider audits, but no production-authorized broad-market OHLCV panel or institutional-demand evidence.
+The theory-fidelity path through #54 is now closed. #54 is **COMPLETE / FROZEN WITH EXPLICIT PRODUCTION DEBT**. The project will not extend the research chain merely to reproduce proprietary IBD infrastructure. The next phase is an end-to-end CAN SLIM v1 integration audit followed by a production-baseline freeze.
 
 ## Repository boundary for #33
 
@@ -41,7 +41,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 51 | Market leadership / weakening evidence | **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED** |
 | 52 | PIT broad-market leadership source audit | **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED** |
 | 53 | Prospective broad-market membership publisher | **PRODUCTION MEMBERSHIP ARCHIVE LIVE / LEADERSHIP BOOLEAN STILL DEFERRED** |
-| 54 | PIT leader-cohort / institutional-demand evidence study | **CYCLE 1 SEMANTIC BASELINE FROZEN / BROAD-MARKET OHLCV SOURCE STACK INCOMPLETE / NOT PRODUCTION AUTHORIZED** |
+| 54 | PIT leader-cohort / institutional-demand evidence study | **COMPLETE / FROZEN WITH EXPLICIT PRODUCTION DEBT** |
 
 ## Current canonical architecture
 
@@ -60,13 +60,12 @@ GENERAL MARKET / CAN SLIM M
 ↑
 #51 Leadership / Weakening Evidence contract
 ↑
-#52 source audit
-↑
-#53 prospective broad-market membership archive
-→ #54 Cycle 1 research leader candidate selector
-→ [broad-market stock OHLCV source stack incomplete]
-→ [institutional-demand source still unresolved]
-→ #45 Portfolio Exposure Action once evidence is complete
+#54 minimum evidence study CLOSED/FROZEN
+  ├─ RS line vs canonical SP500: reproducible evidence complete
+  ├─ stock-level institutional sponsorship: canonical SEC 13F source available
+  ├─ full-market OHLCV / project IBD-RS replication: deferred, non-blocking
+  └─ market-level leader aggregation boolean: NOT_EVALUABLE without new authorized evidence
+→ #45 Portfolio Exposure Action
 ```
 
 ## Key frozen validation state
@@ -89,69 +88,34 @@ GENERAL MARKET / CAN SLIM M
 
 #48 approved Yahoo/yfinance for initial production input v1 for `^IXIC`, `^GSPC`, and `^DJI` after reproducible source audit. #49 publishes immutable major-index run objects and advances `market/indexes/official.json` only after complete publication; first live run `34808006835` succeeded. #50 verifies the pointer, manifest/object SHA-256 lineage and frozen #47 identity contract, then imports frozen #46. First live run `34809438828` produced `FOLLOW_THROUGH_CONFIRMED` as of 2026-09-11.
 
-Because leadership/weakening booleans remain unresolved, #50 must not promote the state to `UPTREND_HEALTHY` or `UPTREND_WEAKENING` from fabricated evidence.
+Because #51 market-level leadership/weakening booleans have no separately authorized deterministic source, #50 must preserve them as unavailable rather than fabricate promotion to `UPTREND_HEALTHY` or `UPTREND_WEAKENING`.
 
-## #51–#53 — Leadership evidence prerequisites
+## #51–#54 — Leadership evidence closure
 
-#51 freezes acceptable leadership/weakening evidence and keeps missing channels tri-state. #52 concludes no current source stack satisfies every production gate. #53 is live in `azharmz/ussy-data` and prospectively archives Nasdaq Trader `nasdaqlisted.txt` and `otherlisted.txt` into immutable R2 runs with raw files, normalized membership, digests, timestamps and an official pointer. First live #53 run `34823149519` / job `103909085792` succeeded.
+#51 freezes acceptable leadership/weakening evidence and keeps missing channels tri-state. #52 found no existing source stack that directly satisfies every production gate. #53 remains a live prospective PIT broad-market membership archive; membership is not itself a leader selector.
 
-The current USSY/Musaffa universe remains prohibited as a proxy for broad-U.S.-market leadership.
+#54 has now reached its terminal evidence boundary. The earlier Cycle 1 broad-market percentile selector and provider audits are retained as frozen research history, but the ~7,500-security OHLCV reconstruction is **DEFERRED / NON-BLOCKING** for CAN SLIM v1. The project will not approximate proprietary IBD RS Rating merely to force this path.
 
-## #54 — PIT Leader-Cohort / Institutional-Demand Evidence Study
+Contract `54-rs-line-evidence-v1` provides reproducible PIT stock-versus-canonical-`SP500` evidence: RS-line value, prior-session direction, input-window-high/new-high state, provenance, and fail-closed `NOT_EVALUABLE` handling. Canonical CI run `34850590642` / job `103997238890` → **SUCCESS, 12 passed**.
 
-Study `54-pit-leader-cohort-institutional-demand-study-v1` freezes the admissible evidence families upstream of #51. Its base semantic packet remains validated by run `34823754541` / job `103911008100` → **SUCCESS, 8 tests**.
+Stock-level CAN SLIM `I` is also no longer a missing source. The canonical SEC 13F path in `azharmz/ussy-fundamentals` provides PIT-audited institutional sponsorship evidence and a live canonical R2 snapshot. Current-state run `34603142916` succeeded; canonical sponsorship publication run `34663714292` succeeded. SEC 13F remains delayed stock-level ownership/sponsorship evidence and is not treated as real-time institutional flow or a #51 market-state boolean.
 
-### Experimental Cycle 1 selector
+Authoritative O'Neil market-direction material supports observing new leaders moving to new highs, strong price/volume behavior, and institutional accumulation/selling as market-leading-stock evidence. What it does not provide is a universal reproducible aggregation threshold for converting a project-defined cohort into the frozen #51 booleans. The project therefore will not invent `N leaders`, `X% of leaders`, or a new RS/volume threshold simply to make the boolean evaluable.
 
-Preregistered selector `54-cycle1-candidate-leader-selector-v1` freezes a research-only candidate cohort:
+Terminal #54 decision: **COMPLETE / FROZEN WITH EXPLICIT PRODUCTION DEBT**. Market-level `leadership_confirming` / `weakening_confirmed` remain `NOT_EVALUABLE` without new authorized evidence. This debt does not block CAN SLIM v1 integration/closure.
 
-- PIT #53 broad-market membership;
-- ETF/test issues excluded;
-- 252 completed adjusted-close observations;
-- canonical `SP500` benchmark;
-- transparent project 252-session relative-return percentile >= 80;
-- current adjusted close >= 90% of trailing 252-session adjusted-close high.
-
-The 80 percentile and 10%-from-high anchors come from O'Neil/AAII screening guidance. The 252-session calculation and upper empirical-CDF percentile are explicit project research conventions and are not represented as proprietary IBD RS Rating semantics.
-
-Canonical Cycle 1 semantic run `34828024938` / job `103924556850` → **SUCCESS, 11 tests**. The first attempt failed only because a synthetic boundary fixture did not contain the intended exact high; the fixture was corrected without changing selector semantics.
-
-Cycle 1 can emit only `LEADER_CANDIDATE`, `NOT_LEADER_CANDIDATE`, or `NOT_EVALUABLE`. It cannot emit #51 production booleans because PIT institutional-demand/selling evidence remains unresolved.
-
-### Cycle 1 data readiness
-
-A separate data-readiness gate confirmed that the existing `ussy-data` rolling stock panel is restricted to the confirmed compliant USSY/Musaffa universe and therefore cannot serve as the broad-market RS cross-section required by #54.
-
-Canonical readiness run `34846025920` / job `103982067238` → **SUCCESS**.
-
-Verdict: **BLOCKED_ON_BROAD_MARKET_OHLCV / SELECTOR NOT EXECUTED**.
-
-### Broad-market OHLCV provider audits
-
-Two read-only audits were run against the same live #53 membership run `34823149519`, using a deterministic 100-symbol sample from 7,504 non-ETF/non-test symbols and requiring >=252 adjusted-close observations.
-
-**Tiingo-only audit** — run `34847652001` / job `103987413383` → **SUCCESS**. The report recorded 68 successful responses, 32 errors, and 56/100 sampled symbols with >=252 adjusted-close observations. Artifact `10348671364`, ZIP SHA-256 `97ba227b22459d2f0b538a0e0f907ceb7a41cc3c271a36108362ec37477bf427`.
-
-**Tiingo → Yahoo/yfinance provider-stack audit** — run `34848036669` / job `103988656423` → **SUCCESS, 7 tests**. The stack resolved 72/100 sampled symbols with >=252 adjusted-close observations and left 28 unresolved. In that run all 72 selected observations came through Yahoo/yfinance fallback and zero were selected from Tiingo.
-
-The difference between the Tiingo-only report (56 symbols with >=252 bars) and the provider-stack report (zero Tiingo selections) is preserved as an unresolved source-audit inconsistency; it must be investigated rather than silently reconciled.
-
-The unresolved sample visibly includes preferred/share-class, warrant and right-like symbol forms. Cycle 1 currently excludes only ETFs and test issues, so those instruments cannot be silently removed after seeing provider failures.
-
-Current #54 terminal status: **CYCLE 1 SEMANTIC BASELINE FROZEN / BROAD-MARKET OHLCV SOURCE STACK INCOMPLETE / NOT PRODUCTION AUTHORIZED**.
+Canonical closure decision: `docs/decisions/2026-09-15-54-terminal-closure.md`.
 
 ## Forward / production boundaries
 
 FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Theory-fidelity findings must not be retrofitted into FWD1/X3/EXH2.
 
-## Active work from here
+## Active work from here — CAN SLIM v1 closure only
 
-1. Keep frozen contracts and Cycle 1 semantics frozen; do not retune thresholds from returns.
-2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-3. Allow #53 to accumulate prospective immutable membership history; never backfill old membership using a later snapshot.
-4. Inside #54, perform a preregistered **security-type / provider-symbol identity audit** before authorizing any broad-market OHLCV publisher. Resolve the Tiingo audit inconsistency explicitly.
-5. Do not compute broad-market RS percentiles from a provider-availability subset or from the restricted USSY/Musaffa rolling universe.
-6. Continue auditing a permitted PIT institutional-demand/selling source; candidate cohort alone is insufficient for #51.
-7. Until an approved selector + data + demand source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
-8. A future production exposure consumer may publish frozen #45 E0–E4 state after the market-state evidence path is complete.
-9. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.
+1. **Do not open another theory-expansion workstream.** #54 is closed.
+2. Run an end-to-end integration audit across production OHLCV, C/A fundamentals, #33 patterns, #34 candidate semantics, stock-level L/RS evidence, canonical SEC 13F sponsorship `I`, #49/#50 market-state input, #36 entry and #43 lifecycle/exit.
+3. Preserve all frozen contracts and explicit debt. Integration may wire components and expose provenance; it must not retune #33/#34/#36/#45/#46 semantics.
+4. Verify fail-closed behavior for missing/stale fundamentals, unavailable #51 booleans, non-evaluable 13F identity, missing index volume, and absent next-session execution bars.
+5. Verify one canonical end-to-end artifact/schema can explain why a stock is eligible, ineligible, or not evaluable at an `asof_date`, with source/version lineage.
+6. After integration verification, publish the CAN SLIM v1 known-limitations/debt register and declare **CAN SLIM v1 — PRODUCTION BASELINE FROZEN**.
+7. Then run prospectively. Reopen frozen research only for production bugs or genuinely new governance-compliant evidence.

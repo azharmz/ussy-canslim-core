@@ -1,0 +1,33 @@
+name: remediation-phase5-eligibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remediation-phase5-eligibility.yml'
+      - 'src/canslim_research/candidate_v2.py'
+      - 'src/canslim_research/eligibility_contract.py'
+      - 'tests/test_candidate_v2.py'
+      - 'tests/test_eligibility_contract.py'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Frozen eligibility contract tests
+        run: python -m pytest -q tests/test_eligibility_contract.py
+      - name: Candidate eligibility regression tests
+        run: python -m pytest -q tests/test_candidate_v2.py

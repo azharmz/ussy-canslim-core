@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #53. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 now prospectively archives broad-market membership.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 preregisters the PIT leader-cohort/institutional-demand evidence study without authorizing a deterministic production selector.
 
 ## Repository boundary for #33
 
@@ -41,6 +41,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 51 | Market leadership / weakening evidence | **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED** |
 | 52 | PIT broad-market leadership source audit | **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED** |
 | 53 | Prospective broad-market membership publisher | **PRODUCTION MEMBERSHIP ARCHIVE LIVE / LEADERSHIP BOOLEAN STILL DEFERRED** |
+| 54 | PIT leader-cohort / institutional-demand evidence study | **PREREGISTERED EVIDENCE STUDY / DETERMINISTIC PRODUCTION SELECTOR NOT YET AUTHORIZED** |
 
 ## Current canonical architecture
 
@@ -55,17 +56,16 @@ STOCK
 
 GENERAL MARKET / CAN SLIM M
 #49 production major-index data
-NASDAQ_COMPOSITE(^IXIC) / SP500(^GSPC) / DJIA(^DJI)
-→ #50 production consumer
-→ frozen #46 Market State Classification
+→ #50 production consumer → frozen #46 Market State Classification
 ↑
 #51 Leadership / Weakening Evidence contract
 ↑
 #52 source audit
 ↑
 #53 prospective broad-market membership archive
-→ #45 Portfolio Exposure Action
-→ target exposure band E0..E4
+→ #54 PIT leader-cohort / institutional-demand evidence study
+→ [production selector still unauthorized]
+→ #45 Portfolio Exposure Action once evidence is complete
 ```
 
 ## Key frozen validation state
@@ -90,44 +90,21 @@ NASDAQ_COMPOSITE(^IXIC) / SP500(^GSPC) / DJIA(^DJI)
 
 Because leadership/weakening booleans remain unresolved, #50 must not promote the state to `UPTREND_HEALTHY` or `UPTREND_WEAKENING` from fabricated evidence.
 
-## #51 — Leadership / Weakening Evidence
+## #51–#53 — Leadership evidence prerequisites
 
-Contract `51-market-leadership-weakening-evidence-v1` freezes acceptable auxiliary market evidence. Broad-market leaders making/approaching new highs with institutional demand may confirm leadership; a majority of valid observed leaders ceasing to make new highs/breaking down together with institutional selling may confirm weakening. Required channels are tri-state and remain `NOT_EVALUABLE` when provenance/evidence is incomplete.
+#51 freezes acceptable leadership/weakening evidence and keeps missing channels tri-state. #52 concludes no current source stack satisfies every production gate. #53 is live in `azharmz/ussy-data` and prospectively archives Nasdaq Trader `nasdaqlisted.txt` and `otherlisted.txt` into immutable R2 runs with raw files, normalized membership, digests, timestamps and an official pointer. First live #53 run `34823149519` / job `103909085792` succeeded.
 
-The current USSY/Musaffa universe is explicitly prohibited as a proxy for broad-U.S.-market leadership.
+The current USSY/Musaffa universe remains prohibited as a proxy for broad-U.S.-market leadership.
 
-Status: **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED**.
+## #54 — PIT Leader-Cohort / Institutional-Demand Evidence Study
 
-## #52 — PIT Broad-Market Leadership Source Audit
+Study `54-pit-leader-cohort-institutional-demand-study-v1` freezes the admissible research evidence families upstream of #51: relative strength, price/new-high leadership, price-volume demand/accumulation, PIT institutional sponsorship, and later leader deterioration/institutional selling.
 
-Contract `52-pit-broad-market-leadership-source-audit-v1` accepts Nasdaq Trader `nasdaqlisted.txt` + `otherlisted.txt` only as a candidate broad-current-U.S.-exchange membership source for prospective immutable snapshots. They do not designate O'Neil-style leaders or provide institutional accumulation/selling evidence.
+The study explicitly does not create a production leader label. The machine adapter `leader_cohort_evidence_v1.py` only determines whether an evidence packet is eligible for a preregistered study. It rejects future-return selection, restricted-universe substitution and invalid PIT membership chronology.
 
-Broad OHLCV alone is not a leader selector. IBD/MarketSurge leadership lists and ratings are theory-aligned, but no stable permitted machine-readable/PIT-auditable production access contract has been established. Therefore no source stack is approved to emit production #51 booleans.
+Semantic CI run `34823754541` / job `103911008100` → **SUCCESS, 8 tests**.
 
-Status: **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED**.
-
-## #53 — Prospective Broad-Market Membership Publisher
-
-Contract `53-broad-market-membership-publisher-v1` is implemented in `azharmz/ussy-data`.
-
-Source files:
-
-- Nasdaq Trader `nasdaqlisted.txt`
-- Nasdaq Trader `otherlisted.txt`
-
-Each run preserves the raw source files, a normalized `membership.parquet`, source File Creation Time metadata, fetch timestamp, object SHA-256 digests and an immutable manifest under:
-
-`market/membership/runs/{run_id}/`
-
-The stable pointer is:
-
-`market/membership/official.json`
-
-The workflow runs on weekdays at 23:30 UTC and supports manual dispatch. It preserves ETF/test/status fields rather than silently deciding a leader cohort.
-
-First live publication: run `34823149519` / job `103909085792` → **SUCCESS** on `ussy-data` commit `00d6325668fb0896c379024b131f4d51d47ed703`.
-
-Status: **PRODUCTION MEMBERSHIP ARCHIVE LIVE / LEADERSHIP BOOLEAN STILL DEFERRED**.
+Status: **PREREGISTERED EVIDENCE STUDY / DETERMINISTIC PRODUCTION SELECTOR NOT YET AUTHORIZED**.
 
 ## Forward / production boundaries
 
@@ -138,8 +115,8 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 1. Keep frozen contracts frozen; do not retune semantic thresholds from returns.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
 3. Allow #53 to accumulate prospective immutable membership history; never backfill old membership using a later snapshot.
-4. Next clean research step is a separately preregistered **leader-cohort / institutional-demand evidence study** using #53 membership as the PIT universe boundary. It must not select leaders from future returns.
-5. Audit whether a permitted machine-accessible IBD/MarketSurge source can satisfy #52; otherwise any open-data selector must be explicitly preregistered and validated before it can feed #51.
-6. Until an approved source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
+4. #54 may proceed only through preregistered candidate-selector research; numeric conventions unsupported by authoritative evidence must be labeled research conventions and frozen before untouched validation.
+5. Continue auditing whether a permitted machine-accessible IBD/MarketSurge source can satisfy #52/#54; do not scrape or fabricate proprietary ratings.
+6. Until an approved selector/source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
 7. A future production exposure consumer may publish frozen #45 E0–E4 state after the market-state evidence path is complete.
 8. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

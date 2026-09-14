@@ -1,7 +1,7 @@
 """Theory-faithful evidence adapters for CAN SLIM candidate generator #34.
 
 These adapters translate already-PIT-safe upstream facts into the explicit states
-required by frozen #32. They do not fetch data and do not reinterpret #33
+required by frozen semantics. They do not fetch data and do not reinterpret #33
 morphology. Missing/non-PIT-safe evidence stays NOT_EVALUABLE.
 """
 from __future__ import annotations
@@ -11,12 +11,13 @@ from math import isfinite
 from typing import Sequence
 
 from canslim_research.candidate_v2 import CandidateEvidence
+from canslim_research.labels import a_label, c_label
 
 
 @dataclass(frozen=True, slots=True)
 class AnnualEpsObservation:
     fiscal_year: int
-    eps: float | None
+    eps_yoy: float | None
     available_on: str
 
 
@@ -28,37 +29,48 @@ class EvidenceAdapterResult:
     reason_codes: tuple[str, ...]
 
 
-def c_screen_state(*, quarterly_eps_yoy: float | None, available_on: str | None, asof_date: str) -> tuple[str, str]:
+def c_screen_state(
+    *,
+    quarterly_eps_yoy: float | None,
+    quarterly_revenue_yoy: float | None,
+    available_on: str | None,
+    asof_date: str,
+) -> tuple[str, str]:
     if available_on is None or available_on > asof_date:
         return "NOT_EVALUABLE", "C_NOT_PIT_AVAILABLE"
-    if quarterly_eps_yoy is None or not isfinite(float(quarterly_eps_yoy)):
-        return "NOT_EVALUABLE", "C_EPS_YOY_UNDEFINED"
-    return ("PASS", "C_EPS_YOY_GE_25") if float(quarterly_eps_yoy) >= 0.25 else ("FAIL", "C_EPS_YOY_LT_25")
+    eps = None if quarterly_eps_yoy is None or not isfinite(float(quarterly_eps_yoy)) else float(quarterly_eps_yoy)
+    revenue = None if quarterly_revenue_yoy is None or not isfinite(float(quarterly_revenue_yoy)) else float(quarterly_revenue_yoy)
+    result = c_label(eps, revenue)
+    return result.state, result.reason
 
 
-def annual_eps_cagr(observations: Sequence[AnnualEpsObservation], *, asof_date: str) -> float | None:
-    """Latest three-year-span EPS CAGR using four consecutive PIT-available FY values."""
-    usable = sorted(
-        (x for x in observations if x.available_on <= asof_date and x.eps is not None),
-        key=lambda x: x.fiscal_year,
-    )
-    if len(usable) < 4:
-        return None
-    window = usable[-4:]
-    years = [x.fiscal_year for x in window]
-    if years != list(range(years[0], years[0] + 4)):
-        return None
-    first, last = window[0], window[-1]
-    if float(first.eps) <= 0 or float(last.eps) <= 0:
-        return None
-    return (float(last.eps) / float(first.eps)) ** (1.0 / 3.0) - 1.0
+def a_screen_state(
+    observations: Sequence[AnnualEpsObservation], *, asof_date: str
+) -> tuple[str, float | None, str]:
+    usable = [x for x in observations if x.available_on <= asof_date]
+    if not usable:
+        result = a_label([])
+        return result.state, None, result.reason
 
+    # One latest accepted state per explicit SEC fiscal year, then the latest
+    # three distinct FYs. Missing or non-consecutive identity fails closed.
+    by_year: dict[int, AnnualEpsObservation] = {}
+    for obs in sorted(usable, key=lambda x: (x.fiscal_year, x.available_on)):
+        by_year[obs.fiscal_year] = obs
+    years = sorted(by_year)[-3:]
+    if len(years) < 3:
+        result = a_label([])
+        return result.state, None, result.reason
+    if years != list(range(years[0], years[0] + 3)):
+        return "NOT_EVALUABLE", None, "NON_CONSECUTIVE_ANNUAL_FY"
 
-def a_screen_state(observations: Sequence[AnnualEpsObservation], *, asof_date: str) -> tuple[str, float | None, str]:
-    growth = annual_eps_cagr(observations, asof_date=asof_date)
-    if growth is None or not isfinite(growth):
-        return "NOT_EVALUABLE", None, "A_3Y_EPS_CAGR_NOT_EVALUABLE"
-    return ("PASS", growth, "A_3Y_EPS_CAGR_GE_25") if growth >= 0.25 else ("FAIL", growth, "A_3Y_EPS_CAGR_LT_25")
+    growths = [by_year[y].eps_yoy for y in years]
+    growths = [None if x is None or not isfinite(float(x)) else float(x) for x in growths]
+    result = a_label(growths)
+    # Preserve the legacy result slot only for compatibility; it now exposes
+    # the latest annual YoY observation, not a synthetic CAGR.
+    latest_growth = growths[-1] if growths and growths[-1] is not None else None
+    return result.state, latest_growth, result.reason
 
 
 def l_screen_state(rs_rating_proxy_percentile: float | None) -> tuple[str, str]:
@@ -79,7 +91,7 @@ def m_entry_state(market_state: str | None) -> tuple[str, str]:
         None: ("NOT_EVALUABLE", "M_MISSING"),
     }
     if market_state not in mapping:
-        raise ValueError(f"unsupported M market state: {market_state!r}")
+        raise ValueError(f"unsupported legacy M market state: {market_state!r}")
     return mapping[market_state]
 
 
@@ -98,6 +110,7 @@ def build_candidate_evidence(
     *,
     asof_date: str,
     quarterly_eps_yoy: float | None,
+    quarterly_revenue_yoy: float | None,
     quarterly_available_on: str | None,
     annual_eps: Sequence[AnnualEpsObservation],
     rs_rating_proxy_percentile: float | None,
@@ -112,6 +125,7 @@ def build_candidate_evidence(
 ) -> EvidenceAdapterResult:
     c_state, c_reason = c_screen_state(
         quarterly_eps_yoy=quarterly_eps_yoy,
+        quarterly_revenue_yoy=quarterly_revenue_yoy,
         available_on=quarterly_available_on,
         asof_date=asof_date,
     )

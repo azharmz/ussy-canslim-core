@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #46. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now has frozen contracts through #47, with #48 major-index source audit complete. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47/#48 now define and validate its major-index input boundary.
 
 ## Repository boundary for #33
 
@@ -34,6 +34,8 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 44 | Climax / exhaustion evidence | **EVIDENCE LAYER COMPLETE / FROZEN v1** |
 | 45 | Market exposure action semantics | **IMPLEMENTATION COMPLETE / FROZEN v1** |
 | 46 | Market state evidence / classification | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+| 47 | Market input data contract | **IMPLEMENTATION COMPLETE / FROZEN v1** |
+| 48 | Major index source audit | **SOURCE AUDIT COMPLETE — YAHOO/YFINANCE APPROVED FOR INITIAL PRODUCTION INPUT v1** |
 
 ## Current canonical architecture
 
@@ -47,7 +49,8 @@ STOCK
 #44 Climax/Exhaustion = evidence sidecar only
 
 GENERAL MARKET / CAN SLIM M
-major-index OHLCV + PIT leadership/weakening evidence
+#47 canonical indexes + #48 audited source
+NASDAQ_COMPOSITE(^IXIC) / SP500(^GSPC) / DJIA(^DJI)
 → #46 Market State Classification
 → #45 Portfolio Exposure Action
 → target exposure band E0..E4
@@ -79,39 +82,39 @@ Canonical run `34802432732` / job `103847631050` → **SUCCESS, 12 passed**.
 
 ## #46 — Market State Evidence / Classification
 
-Specification: `docs/methodology/46-market-state-evidence-classification-spec-v1.md`.
+Contract `46-market-state-classification-v1` remains frozen. State chronology is `CORRECTION → RALLY_ATTEMPT → FOLLOW_THROUGH_CONFIRMED → UPTREND_HEALTHY → UPTREND_WEAKENING`, with Day-1-low reset, Day-4+ follow-through, >=1.25% close gain and higher volume. Distribution evidence is >=0.20% decline on higher volume, but no universal distribution-count threshold is invented.
 
-Contract: `46-market-state-classification-v1`.
+Canonical run `34803676270` / job `103851194650` → **SUCCESS, 13 passed**.
 
-Frozen state chronology:
+## #47 — Market Input Data Contract
+
+Contract `47-market-input-data-contract-v1` freezes canonical major-index identities:
+
+- `NASDAQ_COMPOSITE`
+- `SP500`
+- `DJIA`
+
+SPY/QQQ/DIA are explicitly forbidden as canonical substitutes. Missing index volume is never imputed. Index identity, provider, source symbol, fetch timestamp and source-contract version are required provenance.
+
+Semantic-validation run `34806193999` / job `103858438691` → **SUCCESS, 13 passed in 0.04s**.
+
+## #48 — Major Index Source Audit
+
+Audit executed in `azharmz/ussy-data` using preregistered diagnostics-only workflow.
+
+Frozen provider mappings approved for initial production input v1:
 
 ```text
-CORRECTION
-→ RALLY_ATTEMPT (first qualifying major-index up-close = Day 1)
-→ FOLLOW_THROUGH_CONFIRMED (Day 4+; >=1.25% close gain; volume > prior session)
-→ UPTREND_HEALTHY (PIT leadership confirmation)
-→ UPTREND_WEAKENING (explicit PIT weakening evidence)
-→ CORRECTION (explicit correction reset)
+NASDAQ_COMPOSITE -> Yahoo/yfinance ^IXIC
+SP500            -> Yahoo/yfinance ^GSPC
+DJIA             -> Yahoo/yfinance ^DJI
 ```
 
-A strict undercut of rally Day-1 low resets the attempt. Distribution evidence is a >=0.20% decline on volume above the prior session, but #46 deliberately does not invent a universal distribution-count threshold for weakening/correction because authoritative guidance also uses leadership and index context.
+Run `34807791390` / job `103862942417` completed successfully. Artifact `major-index-source-audit-34807791390` (id `10333836848`, digest `sha256:c4943ec895549b1ddd192f7a4c7d37704555fd6616db5cec6d436c19acfd5dab`) recorded 548 rows for each index from 2024-07-08 through 2026-09-11. All three passed non-empty/schema/date/OHLC/recent-volume completeness/nonnegative/nonzero/variation checks over the latest 60 returned sessions.
 
-Implementation:
-- `src/canslim_research/market_state_v1.py`
-- `tests/test_market_state_v1.py`
-- `.github/workflows/46-market-state-v1.yml`
+Decision: `docs/decisions/2026-09-14-48-major-index-source-audit-decision.md`.
 
-Initial CI `34803646653` exposed only an implementation off-by-one and floating exact-boundary issue; preregistered semantics were unchanged. Fix commit `cc20bdfb35433b5afacf2d8a51ee56acc76b682e`.
-
-Canonical semantic validation:
-- run `34803676270`
-- job `103851194650`
-- **SUCCESS**
-- **13 passed in 0.02s**
-
-Freeze decision: `docs/decisions/2026-09-14-46-market-state-classification-freeze.md`.
-
-Terminal state: `IMPLEMENTATION COMPLETE / FROZEN v1`.
+Status: **SOURCE AUDIT COMPLETE / YAHOO-YFINANCE APPROVED FOR INITIAL PRODUCTION INPUT v1**.
 
 ## Forward / production boundaries
 
@@ -119,10 +122,11 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep #33-#46 frozen.
+1. Keep #33-#47 frozen; preserve #48 audit decision unless new source-quality evidence requires reopening the provider layer only.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
-3. Do not tune entry, exits, lifecycle arbitration, climax evidence, market-state classification or exposure transitions from historical returns.
-4. #46 production wiring still needs an explicit major-index data-source contract and PIT provenance for leadership/weakening evidence; exact index tickers/providers are intentionally not hard-coded in the classifier.
-5. A future portfolio executor may translate #45 target exposure into concrete position-level actions; that must not be conflated with stock-level O'Neil sell rules.
-6. A canonical climax action remains unauthorized until prior-advance/base-stage context is resolved.
-7. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.
+3. Do not tune entry, exits, lifecycle arbitration, climax evidence, market-state classification, source selection or exposure transitions from historical returns.
+4. Next clean workstream is **production publication/wiring of the three #48-approved index series in `ussy-data`**, using immutable run objects + official pointers and the frozen #47 provenance/validation contract.
+5. PIT `leadership_confirming` and `weakening_confirmed` still require separately versioned upstream evidence contracts before fully automatic `UPTREND_HEALTHY` / `UPTREND_WEAKENING` production state is complete.
+6. A future portfolio executor may translate #45 target exposure into concrete position-level actions; that must not be conflated with stock-level O'Neil sell rules.
+7. A canonical climax action remains unauthorized until prior-advance/base-stage context is resolved.
+8. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

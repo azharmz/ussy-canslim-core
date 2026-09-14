@@ -1,0 +1,30 @@
+name: 52 market leadership source audit v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/52-market-leadership-source-audit-v1.yml'
+      - 'src/canslim_research/market_leadership_source_audit_v1.py'
+      - 'tests/test_market_leadership_source_audit_v1.py'
+      - 'docs/methodology/52-pit-broad-market-leadership-source-audit-v1.md'
+      - 'docs/decisions/2026-09-14-52-pit-broad-market-leadership-source-audit.md'
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install project and pytest
+        run: |
+          python -m pip install -e .
+          python -m pip install pytest
+      - name: Run #52 semantic tests
+        run: pytest -q tests/test_market_leadership_source_audit_v1.py

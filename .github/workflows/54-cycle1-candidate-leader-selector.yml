@@ -1,0 +1,29 @@
+name: 54 Cycle 1 candidate leader selector
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/canslim_research/leader_candidate_selector_cycle1_v1.py'
+      - 'tests/test_leader_candidate_selector_cycle1_v1.py'
+      - 'docs/methodology/54-cycle1-candidate-leader-selector-prereg-v1.md'
+      - '.github/workflows/54-cycle1-candidate-leader-selector.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-validation:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pytest
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Run Cycle 1 semantic tests
+        run: python -m pytest -q tests/test_leader_candidate_selector_cycle1_v1.py

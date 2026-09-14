@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14
 
-Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 preregisters the PIT leader-cohort/institutional-demand evidence study without authorizing a deterministic production selector.
+Frozen quantitative v1 remains research-complete but not production-ready. FWD1 and EXH2 continue unchanged. The theory-fidelity path now extends through #54. #43 remains the current stock-level lifecycle arbiter; #44 is climax/exhaustion evidence-only; #45/#46 form the portfolio-level CAN SLIM `M` state-to-exposure path; #47-#50 define and operate the major-index production path; #51 defines leadership/weakening evidence; #52 audits its source boundary; #53 prospectively archives broad-market membership; #54 now has a frozen Cycle 1 research selector but still lacks production-authorized institutional-demand evidence.
 
 ## Repository boundary for #33
 
@@ -41,7 +41,7 @@ Frozen quantitative v1 remains research-complete but not production-ready. FWD1 
 | 51 | Market leadership / weakening evidence | **EVIDENCE CONTRACT COMPLETE / PRODUCTION BOOLEAN SOURCE DEFERRED** |
 | 52 | PIT broad-market leadership source audit | **SOURCE AUDIT COMPLETE / NO PRODUCTION BOOLEAN SOURCE APPROVED** |
 | 53 | Prospective broad-market membership publisher | **PRODUCTION MEMBERSHIP ARCHIVE LIVE / LEADERSHIP BOOLEAN STILL DEFERRED** |
-| 54 | PIT leader-cohort / institutional-demand evidence study | **PREREGISTERED EVIDENCE STUDY / DETERMINISTIC PRODUCTION SELECTOR NOT YET AUTHORIZED** |
+| 54 | PIT leader-cohort / institutional-demand evidence study | **CYCLE 1 SEMANTIC BASELINE FROZEN / PROSPECTIVE PIT VALIDATION PENDING / NOT PRODUCTION AUTHORIZED** |
 
 ## Current canonical architecture
 
@@ -63,8 +63,8 @@ GENERAL MARKET / CAN SLIM M
 #52 source audit
 ↑
 #53 prospective broad-market membership archive
-→ #54 PIT leader-cohort / institutional-demand evidence study
-→ [production selector still unauthorized]
+→ #54 Cycle 1 research leader candidate selector
+→ [institutional-demand source still unresolved]
 → #45 Portfolio Exposure Action once evidence is complete
 ```
 
@@ -98,13 +98,26 @@ The current USSY/Musaffa universe remains prohibited as a proxy for broad-U.S.-m
 
 ## #54 — PIT Leader-Cohort / Institutional-Demand Evidence Study
 
-Study `54-pit-leader-cohort-institutional-demand-study-v1` freezes the admissible research evidence families upstream of #51: relative strength, price/new-high leadership, price-volume demand/accumulation, PIT institutional sponsorship, and later leader deterioration/institutional selling.
+Study `54-pit-leader-cohort-institutional-demand-study-v1` freezes the admissible evidence families upstream of #51. Its base semantic packet remains validated by run `34823754541` / job `103911008100` → **SUCCESS, 8 tests**.
 
-The study explicitly does not create a production leader label. The machine adapter `leader_cohort_evidence_v1.py` only determines whether an evidence packet is eligible for a preregistered study. It rejects future-return selection, restricted-universe substitution and invalid PIT membership chronology.
+### Experimental Cycle 1
 
-Semantic CI run `34823754541` / job `103911008100` → **SUCCESS, 8 tests**.
+Preregistered selector `54-cycle1-candidate-leader-selector-v1` now freezes a research-only candidate cohort:
 
-Status: **PREREGISTERED EVIDENCE STUDY / DETERMINISTIC PRODUCTION SELECTOR NOT YET AUTHORIZED**.
+- PIT #53 broad-market membership;
+- ETF/test issues excluded;
+- 252 completed adjusted-close observations;
+- canonical `SP500` benchmark;
+- transparent project 252-session relative-return percentile >= 80;
+- current adjusted close >= 90% of trailing 252-session adjusted-close high.
+
+The 80 percentile and 10%-from-high anchors come from O'Neil/AAII screening guidance. The 252-session calculation and upper empirical-CDF percentile are explicit project research conventions and are not represented as proprietary IBD RS Rating semantics.
+
+Canonical Cycle 1 semantic run `34828024938` / job `103924556850` → **SUCCESS, 11 tests**. The first attempt failed only because a synthetic boundary fixture did not contain the intended exact high; the fixture was corrected without changing selector semantics.
+
+Cycle 1 can emit only `LEADER_CANDIDATE`, `NOT_LEADER_CANDIDATE`, or `NOT_EVALUABLE`. It cannot emit #51 production booleans because PIT institutional-demand/selling evidence remains unresolved.
+
+Status: **CYCLE 1 SEMANTIC BASELINE FROZEN / PROSPECTIVE PIT VALIDATION PENDING / NOT PRODUCTION AUTHORIZED**.
 
 ## Forward / production boundaries
 
@@ -112,11 +125,11 @@ FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate a
 
 ## Active work from here
 
-1. Keep frozen contracts frozen; do not retune semantic thresholds from returns.
+1. Keep frozen contracts and Cycle 1 semantics frozen; do not retune thresholds from returns.
 2. Primary lifecycle/performance validation remains blocked until a genuine frozen `CANSLIM_ELIGIBLE` population exists.
 3. Allow #53 to accumulate prospective immutable membership history; never backfill old membership using a later snapshot.
-4. #54 may proceed only through preregistered candidate-selector research; numeric conventions unsupported by authoritative evidence must be labeled research conventions and frozen before untouched validation.
-5. Continue auditing whether a permitted machine-accessible IBD/MarketSurge source can satisfy #52/#54; do not scrape or fabricate proprietary ratings.
-6. Until an approved selector/source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
+4. Validate #54 Cycle 1 prospectively using PIT membership/OHLCV provenance and descriptive diagnostics only: coverage, missingness, cohort size, reproducibility and turnover/stability.
+5. Continue auditing a permitted PIT institutional-demand/selling source; candidate cohort alone is insufficient for #51.
+6. Until an approved selector + demand source stack exists, #50 continues passing `leadership_confirming=None` and `weakening_confirmed=None`.
 7. A future production exposure consumer may publish frozen #45 E0–E4 state after the market-state evidence path is complete.
 8. Preserve #33 morphology debt, keep P6 out of production, and keep FWD1/EXH2 unchanged.

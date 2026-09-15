@@ -18,7 +18,8 @@ on:
         required: true
         default: '2'
         type: string
-  # Temporary audit trigger v2. Push is structurally incapable of --apply.
+  # One-shot audited cleanup trigger. Hard-scoped to 2026-09-14 and still
+  # protected by the script's pointer re-read / protected-prefix abort guards.
   push:
     branches: [main]
     paths:
@@ -45,12 +46,12 @@ jobs:
           python-version: '3.12'
       - name: Install R2 client
         run: python -m pip install --disable-pip-version-check boto3
-      - name: Plan or apply cleanup
+      - name: Apply audited one-shot cleanup or manual mode
         shell: bash
         run: |
           set -euo pipefail
           if [[ '${{ github.event_name }}' == 'push' ]]; then
-            python scripts/cleanup_duplicate_candidate_snapshots.py --date 2026-09-14 --keep-newest 2
+            python scripts/cleanup_duplicate_candidate_snapshots.py --date 2026-09-14 --keep-newest 2 --apply
             exit 0
           fi
           args=(--keep-newest '${{ inputs.keep_newest }}')

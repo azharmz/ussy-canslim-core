@@ -8,6 +8,18 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/remediation-phase9-e2e-orchestrator.yml'
+      - 'scripts/publish_production_entries.py'
+      - 'scripts/publish_production_lifecycle.py'
+      - 'scripts/publish_production_candidates.py'
+      - 'scripts/compact_candidate_snapshot.py'
+      - 'scripts/retain_candidate_snapshots.py'
+      - 'scripts/audit_r2_storage.py'
+      - 'src/canslim_research/execution_entry_v1.py'
+      - 'src/canslim_research/position_lifecycle_v2.py'
+      - 'tests/test_execution_entry_v1.py'
+      - 'tests/test_phase7_entry_publisher_contract.py'
+      - 'tests/test_phase8_lifecycle_publisher_contract.py'
+      - 'tests/test_phase9_cross_session_handoff.py'
 
 permissions:
   contents: read
@@ -46,8 +58,8 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
           python -m pip install --disable-pip-version-check -e ./oneil-patterns
-      - name: Cross-session handoff regression
-        run: python -m pytest -q tests/test_execution_entry_v1.py tests/test_phase7_entry_publisher_contract.py tests/test_phase9_cross_session_handoff.py
+      - name: Production-boundary integration regressions
+        run: python -m pytest -q tests/test_execution_entry_v1.py tests/test_phase7_entry_publisher_contract.py tests/test_phase8_lifecycle_publisher_contract.py tests/test_phase9_cross_session_handoff.py
       - name: Preflight R2 storage hard guard
         run: python scripts/audit_r2_storage.py
       - name: Consume prior candidate after T+1 becomes available

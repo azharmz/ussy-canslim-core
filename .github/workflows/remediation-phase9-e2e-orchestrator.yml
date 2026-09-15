@@ -1,0 +1,48 @@
+name: remediation-phase9-e2e-orchestrator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 2 * * 2-6'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: canslim-production-e2e
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: src:.
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+jobs:
+  production:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - name: Checkout frozen O'Neil pattern repo
+        uses: actions/checkout@v7
+        with:
+          repository: azharmz/ussy-oneil-patterns
+          path: oneil-patterns
+          ref: c433cc1e35a5aa32a46f732cd8c5545935e36e40
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+          python -m pip install --disable-pip-version-check -e ./oneil-patterns
+      - name: Cross-session handoff regression
+        run: python -m pytest -q tests/test_execution_entry_v1.py tests/test_phase7_entry_publisher_contract.py tests/test_phase9_cross_session_handoff.py
+      - name: Consume prior candidate after T+1 becomes available
+        run: python scripts/publish_production_entries.py
+      - name: Advance lifecycle from resulting entry snapshot
+        run: python scripts/publish_production_lifecycle.py
+      - name: Publish current-session candidates last
+        run: python scripts/publish_production_candidates.py

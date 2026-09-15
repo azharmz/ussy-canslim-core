@@ -14,8 +14,9 @@ import pandas as pd
 from canslim_research.execution_entry_v1 import EXECUTION_VERSION, decide_t1_open_execution, validate_execution_decision
 
 POINTER_KEY = "canslim/entries/current.json"
-PUBLISHER_VERSION = "canslim-production-entry-publisher-v1"
+PUBLISHER_VERSION = "canslim-production-entry-publisher-v2-cross-session"
 CANDIDATE_SCHEMA = "canslim-candidate-output-v2"
+CANDIDATE_POINTER_KEY = "canslim/candidates/current.json"
 
 
 def env(name: str) -> str:
@@ -55,22 +56,27 @@ def next_bar(ready: pd.DataFrame, security_id: str, signal_date: date):
     return row["date"].date(), float(row["open"]), prior_close
 
 
-def main() -> None:
-    s3 = s3_client(); bucket = env("R2_BUCKET_NAME")
-    cptr = js(s3, bucket, "canslim/candidates/current.json")
+def resolve_candidate_source(s3, bucket: str, ready_max_date: date) -> tuple[dict, str]:
+    """Resolve the immutable candidate snapshot whose T+1 bar can exist.
+
+    The mutable candidate current pointer is only a discovery pointer. Entry never
+    consumes a same-session candidate when Ready has no later session. Once a
+    candidate as-of is mature, its immutable manifest/artifact keys are pinned into
+    the entry manifest, so later movement of candidates/current.json cannot change
+    the decision provenance.
+    """
+    cptr = js(s3, bucket, CANDIDATE_POINTER_KEY)
     if cptr.get("status") != "READY":
         raise RuntimeError("candidate pointer is not READY")
-    candidate_bytes = raw(s3, bucket, cptr["candidates_key"])
-    if sha(candidate_bytes) != cptr["candidates_sha256"]:
-        raise RuntimeError("candidate artifact hash mismatch")
+    signal_date = date.fromisoformat(str(cptr["asof_date"]))
+    if ready_max_date <= signal_date:
+        return cptr, "WAITING_FOR_T1_BAR"
+    return cptr, "MATURE"
 
-    rows = [json.loads(line) for line in candidate_bytes.splitlines() if line.strip()]
-    if len(rows) != int(cptr["candidate_count"]):
-        raise RuntimeError("candidate count mismatch")
-    if any(r.get("candidate_output_schema_version") != CANDIDATE_SCHEMA for r in rows):
-        raise RuntimeError("unsupported candidate schema")
 
-    eligible = [r for r in rows if r.get("candidate_stage") == "CANSLIM_ELIGIBLE"]
+def main() -> None:
+    s3 = s3_client(); bucket = env("R2_BUCKET_NAME")
+
     rptr = js(s3, bucket, "production/ready/current.json")
     ready_bytes = raw(s3, bucket, rptr["parquet_key"])
     expected_ready_sha = rptr.get("parquet_sha256") or rptr.get("sha256")
@@ -78,7 +84,23 @@ def main() -> None:
         raise RuntimeError("ready artifact hash mismatch")
     ready = pd.read_parquet(io.BytesIO(ready_bytes))
     ready["date"] = pd.to_datetime(ready["date"], errors="raise").dt.normalize()
+    ready_max_date = ready["date"].max().date()
 
+    cptr, maturity = resolve_candidate_source(s3, bucket, ready_max_date)
+    if maturity == "WAITING_FOR_T1_BAR":
+        print(json.dumps({"status": maturity, "candidate_asof_date": cptr["asof_date"], "ready_max_date": ready_max_date.isoformat()}, sort_keys=True))
+        return
+
+    candidate_bytes = raw(s3, bucket, cptr["candidates_key"])
+    if sha(candidate_bytes) != cptr["candidates_sha256"]:
+        raise RuntimeError("candidate artifact hash mismatch")
+    rows = [json.loads(line) for line in candidate_bytes.splitlines() if line.strip()]
+    if len(rows) != int(cptr["candidate_count"]):
+        raise RuntimeError("candidate count mismatch")
+    if any(r.get("candidate_output_schema_version") != CANDIDATE_SCHEMA for r in rows):
+        raise RuntimeError("unsupported candidate schema")
+
+    eligible = [r for r in rows if r.get("candidate_stage") == "CANSLIM_ELIGIBLE"]
     decisions = []
     for r in eligible:
         signal = date.fromisoformat(r["asof_date"])
@@ -87,49 +109,21 @@ def main() -> None:
         findings = validate_execution_decision(d)
         if findings:
             raise RuntimeError(f"entry contract violation {r['candidate_id']}: {findings}")
-        out = asdict(d)
-        out["execution_state"] = d.execution_state.value
+        out = asdict(d); out["execution_state"] = d.execution_state.value
         for k, v in list(out.items()):
             if isinstance(v, date): out[k] = v.isoformat()
         decisions.append(out)
 
     payload = b"".join(canonical(x) + b"\n" for x in decisions)
-    run_id = os.getenv("GITHUB_RUN_ID", "manual")
-    asof = str(cptr["asof_date"])
-    prefix = f"canslim/entries/snapshots/{asof}/run-{run_id}"
-    entries_key = f"{prefix}/entries.jsonl"
+    run_id = os.getenv("GITHUB_RUN_ID", "manual"); asof = str(cptr["asof_date"])
+    prefix = f"canslim/entries/snapshots/{asof}/run-{run_id}"; entries_key = f"{prefix}/entries.jsonl"
     s3.put_object(Bucket=bucket, Key=entries_key, Body=payload, ContentType="application/x-ndjson")
-
     states = Counter(x["execution_state"] for x in decisions)
-    manifest = {
-        "schema_version": 1,
-        "type": "canslim_production_entry_manifest",
-        "status": "READY",
-        "publisher_version": PUBLISHER_VERSION,
-        "publisher_commit": os.getenv("GITHUB_SHA", "unknown"),
-        "publisher_run_id": run_id,
-        "asof_date": asof,
-        "execution_version": EXECUTION_VERSION,
-        "source_candidate_pointer": "canslim/candidates/current.json",
-        "source_candidate_manifest_key": cptr["manifest_key"],
-        "source_candidate_manifest_sha256": cptr["manifest_sha256"],
-        "source_candidate_count": len(rows),
-        "eligible_candidate_count": len(eligible),
-        "entry_decision_count": len(decisions),
-        "execution_state_counts": dict(sorted(states.items())),
-        "ready_pointer": "production/ready/current.json",
-        "ready_parquet_key": rptr["parquet_key"],
-        "entries_key": entries_key,
-        "entries_sha256": sha(payload),
-        "strategy_returns_inspected": False,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    mbytes = canonical(manifest); mkey = f"{prefix}/manifest.json"
-    s3.put_object(Bucket=bucket, Key=mkey, Body=mbytes, ContentType="application/json")
-    pointer = {"schema_version":1,"type":"canslim_production_entry_pointer","status":"READY","asof_date":asof,"snapshot_prefix":prefix,"manifest_key":mkey,"manifest_sha256":sha(mbytes),"entries_key":entries_key,"entries_sha256":sha(payload),"entry_decision_count":len(decisions),"eligible_candidate_count":len(eligible),"publisher_run_id":run_id,"updated_at":datetime.now(timezone.utc).isoformat()}
-    s3.put_object(Bucket=bucket, Key=POINTER_KEY, Body=canonical(pointer), ContentType="application/json")
-    print(json.dumps({"pointer": pointer, "execution_state_counts": dict(states)}, indent=2, sort_keys=True))
-
+    manifest = {"schema_version":1,"type":"canslim_production_entry_manifest","status":"READY","publisher_version":PUBLISHER_VERSION,"publisher_commit":os.getenv("GITHUB_SHA","unknown"),"publisher_run_id":run_id,"asof_date":asof,"execution_version":EXECUTION_VERSION,"source_candidate_pointer":CANDIDATE_POINTER_KEY,"source_candidate_snapshot_prefix":cptr["snapshot_prefix"],"source_candidate_manifest_key":cptr["manifest_key"],"source_candidate_manifest_sha256":cptr["manifest_sha256"],"source_candidate_artifact_key":cptr["candidates_key"],"source_candidate_artifact_sha256":cptr["candidates_sha256"],"source_candidate_count":len(rows),"eligible_candidate_count":len(eligible),"entry_decision_count":len(decisions),"execution_state_counts":dict(sorted(states.items())),"ready_pointer":"production/ready/current.json","ready_parquet_key":rptr["parquet_key"],"ready_max_date":ready_max_date.isoformat(),"entries_key":entries_key,"entries_sha256":sha(payload),"cross_session_handoff":"IMMUTABLE_SOURCE_PINNED","strategy_returns_inspected":False,"created_at":datetime.now(timezone.utc).isoformat()}
+    mbytes=canonical(manifest); mkey=f"{prefix}/manifest.json"; s3.put_object(Bucket=bucket,Key=mkey,Body=mbytes,ContentType="application/json")
+    pointer={"schema_version":1,"type":"canslim_production_entry_pointer","status":"READY","asof_date":asof,"snapshot_prefix":prefix,"manifest_key":mkey,"manifest_sha256":sha(mbytes),"entries_key":entries_key,"entries_sha256":sha(payload),"entry_decision_count":len(decisions),"eligible_candidate_count":len(eligible),"publisher_run_id":run_id,"updated_at":datetime.now(timezone.utc).isoformat()}
+    s3.put_object(Bucket=bucket,Key=POINTER_KEY,Body=canonical(pointer),ContentType="application/json")
+    print(json.dumps({"pointer":pointer,"execution_state_counts":dict(states)},indent=2,sort_keys=True))
 
 if __name__ == "__main__":
     main()

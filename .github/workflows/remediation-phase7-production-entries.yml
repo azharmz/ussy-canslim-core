@@ -1,0 +1,40 @@
+name: remediation-phase7-production-entries
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/publish_production_entries.py'
+      - 'src/canslim_research/execution_entry_v1.py'
+      - 'tests/test_execution_entry_v1.py'
+      - 'tests/test_phase7_entry_publisher_contract.py'
+      - '.github/workflows/remediation-phase7-production-entries.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: src
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3
+      - name: Frozen #36 entry regression
+        run: |
+          python -m pytest -q tests/test_execution_entry_v1.py
+          python -m pytest -q tests/test_phase7_entry_publisher_contract.py
+      - name: Publish immutable entry snapshot then pointer
+        run: python scripts/publish_production_entries.py

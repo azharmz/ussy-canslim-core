@@ -22,6 +22,10 @@ env:
   R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
   R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+  CANSLIM_RETENTION_DAYS: '7'
+  CANSLIM_RETENTION_KEEP_NEWEST: '2'
+  R2_STORAGE_WARNING_GIB: '7'
+  R2_STORAGE_HARD_STOP_GIB: '9'
 
 jobs:
   production:
@@ -44,11 +48,17 @@ jobs:
           python -m pip install --disable-pip-version-check -e ./oneil-patterns
       - name: Cross-session handoff regression
         run: python -m pytest -q tests/test_execution_entry_v1.py tests/test_phase7_entry_publisher_contract.py tests/test_phase9_cross_session_handoff.py
+      - name: Preflight R2 storage hard guard
+        run: python scripts/audit_r2_storage.py
       - name: Consume prior candidate after T+1 becomes available
         run: python scripts/publish_production_entries.py
       - name: Advance lifecycle from resulting entry snapshot
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
         run: python scripts/publish_production_candidates.py
-      - name: Losslessly compact candidate snapshot
+      - name: Losslessly compact candidate snapshot with immutable manifest
         run: python scripts/compact_candidate_snapshot.py
+      - name: Apply protected rolling 7-day retention
+        run: python scripts/retain_candidate_snapshots.py
+      - name: Verify post-retention R2 storage
+        run: python scripts/audit_r2_storage.py

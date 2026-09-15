@@ -18,11 +18,6 @@ on:
         required: true
         default: '2'
         type: string
-  # Temporary read-only verification trigger. Push path runs no cleanup/apply.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/r2-candidate-snapshot-cleanup.yml'
 
 permissions:
   contents: read
@@ -34,8 +29,6 @@ env:
   R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
   R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-  R2_STORAGE_WARNING_GIB: '7'
-  R2_STORAGE_HARD_STOP_GIB: '9'
 jobs:
   cleanup:
     runs-on: ubuntu-24.04
@@ -47,15 +40,10 @@ jobs:
           python-version: '3.12'
       - name: Install R2 client
         run: python -m pip install --disable-pip-version-check boto3
-      - name: Read-only post-cleanup verification or manual cleanup
+      - name: Plan or apply cleanup
         shell: bash
         run: |
           set -euo pipefail
-          if [[ '${{ github.event_name }}' == 'push' ]]; then
-            python scripts/cleanup_duplicate_candidate_snapshots.py --date 2026-09-14 --keep-newest 1
-            python scripts/audit_r2_storage.py
-            exit 0
-          fi
           args=(--keep-newest '${{ inputs.keep_newest }}')
           if [[ -n '${{ inputs.as_of_date }}' ]]; then args+=(--date '${{ inputs.as_of_date }}'); fi
           if [[ '${{ inputs.mode }}' == 'apply' ]]; then args+=(--apply); fi

@@ -133,6 +133,18 @@ def load_institutional(s3, bucket: str):
     return ptr, manifest, csv(s3,bucket,ptr['live_sponsorship_mapped_key']), pq(s3,bucket,ptr['history_state_events_key']), pq(s3,bucket,ptr['uncertainty_state_events_key'])
 
 
+def _group(df: pd.DataFrame, column: str) -> dict[str, pd.DataFrame]:
+    if df.empty:
+        return {}
+    keys = df[column].astype(str).str.upper()
+    return {str(k).upper(): g for k, g in df.assign(_cache_key=keys).groupby('_cache_key', sort=False)}
+
+
+def _cusip9(security_id: str) -> str | None:
+    sid = str(security_id).strip().upper()
+    return sid[2:11] if len(sid) == 12 and sid.startswith('US') else None
+
+
 def publish():
     log('START publisher')
     s3 = s3_client(); bucket = env('R2_BUCKET_NAME'); run_id = env('GITHUB_RUN_ID'); repo_sha = env('GITHUB_SHA')
@@ -169,17 +181,58 @@ def publish():
     prices = add_rs(prices); rs_day = prices[prices['date'].eq(pd.Timestamp(asof))][['security_id','rs_percentile']]; rsmap = dict(zip(rs_day['security_id'].astype(str),rs_day['rs_percentile'])); bysid = {str(k):g.sort_values('date') for k,g in prices.groupby('security_id')}
     log(f'RS COMPLETE: asof securities={len(rsmap):,}')
 
-    outputs=[]; ca_reasons=Counter(); i_reasons=Counter(); total=len(patterns)
-    log(f'Building candidates: total assessments={total:,}')
-    for idx,p in enumerate(patterns,1):
-        if idx == 1 or idx % 25 == 0 or idx == total: log(f'Candidate progress: {idx:,}/{total:,} ({idx/max(total,1):.1%}) ticker={p.ticker}')
-        g=bysid.get(p.security_id)
-        if g is None: continue
-        bars=[DailyBar(r.date.date().isoformat(),float(r.open),float(r.high),float(r.low),float(r.close),float(r.volume)) for r in g.itertuples()]
-        c_state,a_state,c_reason,a_reason=fundamental_states(fsym,wide,annual,p.ticker,cutoff,p.asof_date); ca_reasons[c_reason]+=1; ca_reasons[a_reason]+=1
-        inst=resolve_institutional_pit(security_id=p.security_id,decision_cutoff=cutoff,live_state=ilive,history_events=ihist,uncertainty_events=iunc); i_reasons[inst.reason]+=1
-        rs=rsmap.get(p.security_id); l_state,_=l_screen_state(None if pd.isna(rs) else float(rs))
+    # Phase-6 performance remediation: all values below are security/decision-time
+    # evidence. Compute them once per security and reuse them across the frozen #33
+    # morphology assessments. This changes computation shape only, not semantics.
+    log('Preparing security-level caches (bars + C/A/L/I/M evidence)')
+    wide_by_ticker = _group(wide, fsym)
+    annual_by_ticker = _group(annual, fsym)
+    live_by_sid = _group(ilive, 'security_id')
+    hist_by_cusip = _group(ihist, 'cusip')
+    unc_by_cusip = _group(iunc, 'cusip')
+    empty_wide = wide.iloc[0:0]
+    empty_annual = annual.iloc[0:0]
+    empty_live = ilive.iloc[0:0]
+    empty_hist = ihist.iloc[0:0]
+    empty_unc = iunc.iloc[0:0]
+
+    security_ticker: dict[str, str] = {}
+    for p in patterns:
+        security_ticker.setdefault(p.security_id, p.ticker)
+
+    bars_cache: dict[str, list[DailyBar]] = {}
+    evidence_cache: dict[str, tuple[CandidateEvidence, str, str, object]] = {}
+    for n, (sid, ticker) in enumerate(security_ticker.items(), 1):
+        if n == 1 or n % 25 == 0 or n == len(security_ticker):
+            log(f'Evidence cache progress: {n:,}/{len(security_ticker):,} security={ticker}')
+        g = bysid.get(sid)
+        if g is None:
+            continue
+        bars_cache[sid] = [DailyBar(r.date.date().isoformat(),float(r.open),float(r.high),float(r.low),float(r.close),float(r.volume)) for r in g.itertuples()]
+        twide = wide_by_ticker.get(str(ticker).upper(), empty_wide)
+        tannual = annual_by_ticker.get(str(ticker).upper(), empty_annual)
+        c_state,a_state,c_reason,a_reason = fundamental_states(fsym, twide, tannual, ticker, cutoff, asof.isoformat())
+        cusip = _cusip9(sid)
+        inst = resolve_institutional_pit(
+            security_id=sid,
+            decision_cutoff=cutoff,
+            live_state=live_by_sid.get(str(sid).upper(), empty_live),
+            history_events=hist_by_cusip.get(cusip, empty_hist) if cusip else empty_hist,
+            uncertainty_events=unc_by_cusip.get(cusip, empty_unc) if cusip else empty_unc,
+        )
+        rs=rsmap.get(sid); l_state,_=l_screen_state(None if pd.isna(rs) else float(rs))
         evidence=CandidateEvidence(C_screen_state=c_state,A_screen_state=a_state,L_individual_leadership_state=l_state,M_entry_state=m.M_entry_state,I_evidence_state=inst.state,N_catalyst_state='NOT_IMPLEMENTED',industry_evidence_state='NOT_IMPLEMENTED',rs_rating_proxy_percentile=None if pd.isna(rs) else float(rs),M_market_state=m.market_state)
+        evidence_cache[sid] = (evidence, c_reason, a_reason, inst)
+    log(f'Security caches COMPLETE: bars={len(bars_cache):,}, evidence={len(evidence_cache):,}')
+
+    outputs=[]; ca_reasons=Counter(); i_reasons=Counter(); total=len(patterns)
+    log(f'Building candidates from cached security evidence: total assessments={total:,}')
+    for idx,p in enumerate(patterns,1):
+        if idx == 1 or idx % 10000 == 0 or idx == total: log(f'Candidate progress: {idx:,}/{total:,} ({idx/max(total,1):.1%}) ticker={p.ticker}')
+        bars=bars_cache.get(p.security_id); cached=evidence_cache.get(p.security_id)
+        if bars is None or cached is None: continue
+        evidence,c_reason,a_reason,inst=cached
+        ca_reasons[c_reason]+=1; ca_reasons[a_reason]+=1; i_reasons[inst.reason]+=1
         cand=build_candidate(p,bars,evidence); row={name:getattr(cand,name) for name in cand.__dataclass_fields__}
         row.update({'C_reason':c_reason,'A_reason':a_reason,'I_reason':inst.reason,'I_latest_period':inst.latest_period,'I_prior_period':inst.prior_period,'I_latest_available_at':inst.latest_available_at,'I_prior_available_on':inst.prior_available_on,'M_state_key':m.state_key,'M_state_sha256':m.state_sha256}); outputs.append(row)
     log(f'Candidate build COMPLETE: outputs={len(outputs):,}')

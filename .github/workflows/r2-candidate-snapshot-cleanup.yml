@@ -8,9 +8,7 @@ on:
         required: true
         default: dry-run
         type: choice
-        options:
-          - dry-run
-          - apply
+        options: [dry-run, apply]
       as_of_date:
         description: 'Optional YYYY-MM-DD; blank audits all dates'
         required: false
@@ -20,8 +18,7 @@ on:
         required: true
         default: '2'
         type: string
-  # Temporary one-shot audit trigger. Push mode is hard-wired DRY-RUN and
-  # scoped to the known bloated 2026-09-14 snapshot date. Remove after audit.
+  # Temporary audit trigger v2. Push is structurally incapable of --apply.
   push:
     branches: [main]
     paths:
@@ -29,17 +26,14 @@ on:
 
 permissions:
   contents: read
-
 concurrency:
   group: canslim-r2-candidate-cleanup
   cancel-in-progress: false
-
 env:
   R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
   R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
   R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-
 jobs:
   cleanup:
     runs-on: ubuntu-24.04
@@ -56,15 +50,10 @@ jobs:
         run: |
           set -euo pipefail
           if [[ '${{ github.event_name }}' == 'push' ]]; then
-            # Deliberately no --apply path for push-triggered audit.
             python scripts/cleanup_duplicate_candidate_snapshots.py --date 2026-09-14 --keep-newest 2
             exit 0
           fi
           args=(--keep-newest '${{ inputs.keep_newest }}')
-          if [[ -n '${{ inputs.as_of_date }}' ]]; then
-            args+=(--date '${{ inputs.as_of_date }}')
-          fi
-          if [[ '${{ inputs.mode }}' == 'apply' ]]; then
-            args+=(--apply)
-          fi
+          if [[ -n '${{ inputs.as_of_date }}' ]]; then args+=(--date '${{ inputs.as_of_date }}'); fi
+          if [[ '${{ inputs.mode }}' == 'apply' ]]; then args+=(--apply); fi
           python scripts/cleanup_duplicate_candidate_snapshots.py "${args[@]}"

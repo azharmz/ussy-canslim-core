@@ -1,0 +1,27 @@
+name: candidate-retention-policy-regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/retain_candidate_snapshots.py'
+      - 'tests/test_candidate_retention_policy.py'
+      - '.github/workflows/candidate-retention-policy-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retention-policy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check pytest boto3
+      - name: Run retention policy regression
+        run: python -m pytest -q tests/test_candidate_retention_policy.py

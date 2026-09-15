@@ -1,13 +1,15 @@
 # CAN SLIM v1 — Post-Audit Remediation Register
 
-Status: **ACTIVE — REMEDIATION REQUIRED**
+Status: **COMPLETE — PRODUCTION BASELINE FROZEN**
 Target: **CAN SLIM v1 — PRODUCTION BASELINE FROZEN**
+Freeze decision: `docs/decisions/2026-09-16-canslim-v1-production-baseline-freeze.md`
+Independent re-audit: `docs/remediation/phase-13-independent-re-audit.md`
 
 ## Scope lock
 
-This remediation cycle fixes integration and correctness only.
+This remediation cycle fixed integration and correctness only.
 
-**No strategy expansion, tuning, optimization, or new theory workstream is permitted during remediation.**
+**No strategy expansion, tuning, optimization, or new theory workstream was permitted during remediation.**
 
 ### Frozen / preserved components
 
@@ -18,82 +20,80 @@ The following remain frozen and must not be redesigned merely to satisfy remedia
 - `oneil-pattern-output-v2`
 - `33-core-p8-frozen-v1`
 - P6 advanced-pattern exclusion
-- upstream SEC PIT infrastructure
+- accepted SEC PIT infrastructure
 - existing entry, risk, sell, and lifecycle semantics
 
 ### Finding disposition
 
-- **F01–F11:** active remediation scope; must be resolved or explicitly accepted by the independent re-audit before production freeze.
-- **F12–F15:** controlled/freezeable debt unless remediation uncovers production-critical impact.
+- **F01–F11:** engineering/integration remediation closed by Phase 13 re-audit. F11 production Entry → Lifecycle population observation remains legitimately blocked until a natural executable production entry exists.
+- **F12–F15:** controlled/freezeable debt unless future production-critical evidence emerges.
 
 ### Explicit prohibitions
 
 - Do not reopen/tune frozen #33/#34/#36/#45/#46 strategy semantics.
 - Do not invent missing CAN SLIM evidence or proprietary IBD-like proxies merely to force evaluability.
-- Do not create a #55/new research workstream as part of this remediation.
-- Do not optimize backtest/performance metrics during remediation.
+- Do not optimize backtest/performance metrics as an integration fix.
+- Do not convert an empty production population into PASS.
 
 ## Remediation phases
 
 | Phase | Work | Finding | Status |
 |---:|---|---|---|
-| 0 | Governance & remediation scope lock | all | **COMPLETE** |
-| 1 | SEC decision-time PIT fix | F02 / P0 | **NEXT** |
-| 2 | Freeze C/A/N/S/L/I/M semantics | F03/F05 | PENDING |
-| 3 | Prospective I wiring | F04/F06 | PENDING |
-| 4 | Canonical M + dependency pinning | F07/F08 | PENDING |
-| 5 | Correct `CANSLIM_ELIGIBLE` | F03 / P0 | PENDING |
-| 6 | Production candidate publisher | F10 | PENDING |
-| 7 | Candidate → entry | F01/F11 | PENDING |
-| 8 | Entry → lifecycle | F01/F11 | PENDING |
-| 9 | E2E production orchestrator | F01 / P0 | PENDING |
-| 10 | E2E integration CI | F09 | PENDING |
-| 11 | Manifest / reproducibility | F01/F09 | PENDING |
-| 12 | Clean prospective dry-run | acceptance | PENDING |
-| 13 | Independent re-audit | acceptance | PENDING |
-| 14 | Production Baseline Freeze | final | LOCKED UNTIL GO |
+| 0 | Governance & remediation scope lock | all | **COMPLETE / SCOPE LOCKED** |
+| 1 | SEC decision-time PIT fix | F02 / P0 | **COMPLETE** |
+| 2 | Freeze C/A/N/S/L/I/M semantics | F03/F05 | **COMPLETE / FROZEN** |
+| 3 | Prospective I wiring | F04/F06 | **COMPLETE** |
+| 4 | Canonical M + dependency pinning | F07/F08 | **COMPLETE** |
+| 5 | Correct `CANSLIM_ELIGIBLE` | F03 / P0 | **COMPLETE** |
+| 6 | Production candidate publisher | F10 | **COMPLETE** |
+| 7 | Candidate → entry | F01/F11 | **COMPLETE** |
+| 8A | Entry → lifecycle engineering | F01/F11 | **COMPLETE / ENGINEERING PASS** |
+| 8B | Entry → lifecycle production observation | F11 | **BLOCKED_ON_PRODUCTION_ENTRY_POPULATION** |
+| 9 | E2E production orchestrator | F01 / P0 | **PASS — run 34967865047** |
+| 10 | E2E integration CI | F09 | **PASS — terminal production-boundary acceptance green** |
+| 11 | Manifest / reproducibility / R2 storage | F01/F09 | **COMPLETE** |
+| 12 | Clean prospective dry-run | acceptance | **PASS — run 34967947364** |
+| 13 | Independent re-audit | acceptance | **PASS / CLEAN** |
+| 14 | Production Baseline Freeze | final | **COMPLETE / FROZEN** |
 
-## Phase 0 acceptance checklist
+## Terminal acceptance
 
-- [x] Independent audit findings are adopted as the remediation authority.
-- [x] F01–F11 are the active remediation scope.
-- [x] F12–F15 are controlled debt unless production-critical evidence emerges.
-- [x] Existing frozen production/research contracts remain frozen.
-- [x] Strategy/performance tuning is prohibited during remediation.
-- [x] No #55/new research workstream will be opened.
-- [x] A single freeze acceptance path is established: remediation → E2E CI → prospective dry-run → independent re-audit → freeze.
+Phase 9/10 run `34967865047` completed successfully across production-boundary regressions, R2 preflight guard, prior Candidate → Entry, Lifecycle, current Candidate publication LAST, lossless compaction, protected retention and post-retention R2 audit.
 
-**Phase 0 verdict: COMPLETE / SCOPE LOCKED.**
+Phase 12 run `34967947364` completed successfully. Its frozen remediation suite reported **62 passed**. It preserved natural empty-population states rather than fabricating entries: Entry returned `WAITING_FOR_T1_BAR`; Lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`. Current candidate publication completed with 926,223 assessments and no manufactured `CANSLIM_ELIGIBLE` population.
 
-## Phase 1 — F02 / SEC decision-time PIT
+Phase 13 found no remaining integration/correctness defect requiring a patch and no issue requiring reopening frozen semantics.
 
-This is the first technical remediation because a filing accepted after the relevant decision cutoff must not influence the same decision.
+## Production observation boundary
 
-Required contract:
+Lifecycle plumbing and entry/lifecycle enum compatibility are engineering-accepted. Canonical executable state is `EXECUTED_T1_OPEN`.
 
-- introduce an explicit `decision_asof_timestamp`
-- define `market_session` and `information_cutoff`
-- preserve full SEC `accepted_at` timestamp until availability is decided
-- require `accepted_at <= information_cutoff`
-- filings after cutoff become eligible only for the appropriate later session
-- amendments obey the same cutoff
-- remove end-of-calendar-day UTC as a proxy for decision-time information availability
+Final documentation must continue to state:
 
-Required negative/regression tests:
+`PRODUCTION ENTRY→LIFECYCLE OBSERVATION: BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`
 
-- before cutoff → available
-- exactly at cutoff → handled according to the frozen contract
-- after cutoff / after market close → unavailable to the same-close decision
-- later filing cannot leak backward
-- amendments cannot leak backward
-- timezone conversion preserves semantics
-- existing C, A, PIT, and candidate tests remain green
+until a natural executable production entry actually flows through Entry → Lifecycle.
 
-Phase 1 exit criterion: **no fundamental information with `accepted_at > information_cutoff` can influence that decision.**
+## Frozen cross-session architecture
+
+1. Entry consumes PRIOR Candidate after T+1 becomes available.
+2. Lifecycle consumes resulting Entry.
+3. Current-session Candidate is published LAST.
+4. Candidate/Pattern immutable artifacts are compacted losslessly.
+5. Protected retention is applied.
+6. Whole-bucket R2 storage is audited.
+
+Do not change this ordering without separately governed evidence.
 
 ## Controlled debt
 
-- F12 — silent missing-price accounting: may be closed while production manifest/accounting is implemented.
+- F12 — silent missing-price accounting: controlled debt unless demonstrated production-critical.
 - F13 — #33 conditional validation debt: remains frozen/disclosed.
-- F14 — stale documentation risk: clean up before final freeze.
-- F15 — historical/deprecated artifacts: no cleanup requirement during blocker remediation.
+- F14 — stale documentation risk: canonical remediation/freeze docs are now updated; older historical documents may retain their dated state.
+- F15 — historical/deprecated artifacts: no cleanup requirement for baseline freeze.
+- Market-level leadership/weakening remains unavailable where no authorized deterministic evidence exists.
+- R2 9 GiB hard stop remains an operational ceiling, not a guaranteed temporary publication-headroom reservation; current terminal acceptance was safely below it.
+
+## Final verdict
+
+**CAN SLIM v1 — PRODUCTION BASELINE FROZEN.**

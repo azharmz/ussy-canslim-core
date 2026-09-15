@@ -1,5 +1,9 @@
 {
-  "note": "R2 credentials are read-only for this consumer. Canonical persistence is Git repository history; Actions artifact is the detailed mirror.",
-  "reason": "AccessDenied",
-  "status": "NOT_PUBLISHED"
+  "immutable_prefix": "research/ussy-canslim-research/fwd1/runs/34952867679",
+  "manifest_key": "research/ussy-canslim-research/fwd1/runs/34952867679/manifest.json",
+  "manifest_sha256": "c2611d19428a4bed28b8a76932a36587d9e08a656a6d26e144cca94228e6ea8a",
+  "published_file_count": 10,
+  "run_id": "34952867679",
+  "status": "PUBLISHED",
+  "updated_at_utc": "2026-09-15T09:31:32.299193+00:00"
 }

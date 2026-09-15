@@ -20,6 +20,12 @@ on:
         required: true
         default: '2'
         type: string
+  # Temporary one-shot audit trigger. Push mode is hard-wired DRY-RUN and
+  # scoped to the known bloated 2026-09-14 snapshot date. Remove after audit.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/r2-candidate-snapshot-cleanup.yml'
 
 permissions:
   contents: read
@@ -49,6 +55,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ '${{ github.event_name }}' == 'push' ]]; then
+            # Deliberately no --apply path for push-triggered audit.
+            python scripts/cleanup_duplicate_candidate_snapshots.py --date 2026-09-14 --keep-newest 2
+            exit 0
+          fi
           args=(--keep-newest '${{ inputs.keep_newest }}')
           if [[ -n '${{ inputs.as_of_date }}' ]]; then
             args+=(--date '${{ inputs.as_of_date }}')

@@ -14,6 +14,8 @@ One production-observation boundary remains deliberately unresolved and must not
 
 This is caused by the absence of a natural executable production entry, not by an engineering failure.
 
+Checklist completion for the post-audit remediation path is **14/15 phases terminal (93.3%)**. Phase 8B is the sole unresolved acceptance item and closes only on natural production evidence; it must not be synthesized.
+
 ## Repository boundary for #33
 
 Canonical #33 implementation and P8 morphology validation live in `azharmz/ussy-oneil-patterns`.
@@ -118,7 +120,7 @@ Phase 9/10 run `34967865047` completed all production-boundary regression, R2 gu
 
 Phase 12 run `34967947364` completed successfully with **62 frozen remediation tests passed**. It did not synthesize production population: Entry returned `WAITING_FOR_T1_BAR`; Lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`. Candidate publication completed with 926,223 assessments and stage counts `NOT_ELIGIBLE=840143`, `PIVOT_DEFINED=84938`, `PIVOT_CROSSED=1077`, `BREAKOUT_CONFIRMED=65`.
 
-Post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guard `OK` against warning 7 GiB and hard stop 9 GiB.
+The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guard `OK` against warning 7 GiB and hard stop 9 GiB. Subsequent operational audit identified four same-date Candidate snapshots created by remediation workflow runs. Three redundant 2026-09-14 snapshots were removed in controlled cleanup runs, reclaiming a planned total of 954,651,232 bytes; `run-34967947364` remains the canonical current snapshot for that session. A fresh whole-bucket post-cleanup byte/object count remains an operational verification item rather than a CAN SLIM semantic acceptance gate.
 
 ## Frozen production principles
 
@@ -130,7 +132,8 @@ Post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guar
 - Actual fill is the stop reference; normal profit zone remains pivot-based.
 - Unsupported market-level leadership/weakening evidence remains unavailable rather than fabricated.
 - Immutable snapshots/manifests/hashes and pointer-last publication remain required.
-- R2 retention remains rolling 7 days / keep newest 2 with protected snapshots.
+- R2 retention remains rolling 7 days with protected snapshots and at least the two newest **distinct session dates** retained for cross-session handoff/recovery safety.
+- Within an as-of/session date, exactly one canonical Candidate snapshot is retained: the current-pointer snapshot when applicable, otherwise the newest run. Non-canonical same-date rerun/remediation snapshots are operational duplicates and may be removed immediately unless explicitly protected.
 
 ## Controlled debt / observation boundaries
 
@@ -139,6 +142,13 @@ Post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guar
 - Market-level `leadership_confirming` / `weakening_confirmed` remain `NOT_EVALUABLE` without new authorized evidence.
 - The 9 GiB R2 hard stop is an operational ceiling, not a guaranteed temporary publication-headroom reservation.
 - Historical/deprecated research artifacts may remain; they are not production semantics.
+
+## Operational verification after storage correction
+
+- Same-date duplicate retention semantics corrected in `scripts/retain_candidate_snapshots.py`.
+- 2026-09-14 canonical Candidate snapshot: `run-34967947364`.
+- Three redundant same-date snapshots removed; cleanup workflows restored to manual/fail-closed mode after use.
+- **OPEN:** perform a fresh read-only whole-bucket R2 audit and confirm actual post-cleanup object count/bytes and absence of removed prefixes.
 
 ## Forward / research boundaries
 

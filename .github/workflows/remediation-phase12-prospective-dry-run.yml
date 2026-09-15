@@ -1,5 +1,9 @@
 name: remediation-phase12-prospective-dry-run
 
+# Historical Phase-12 acceptance workflow.
+# After production-baseline freeze this workflow is validation-only: it MUST NOT
+# publish Candidate/Entry/Lifecycle objects or advance mutable R2 pointers.
+
 on:
   workflow_dispatch:
   push:
@@ -11,24 +15,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: canslim-production-e2e
+  group: canslim-validation
   cancel-in-progress: false
 
 env:
   PYTHONPATH: src:.
-  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-  R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-  R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-  CANSLIM_RETENTION_DAYS: '7'
-  CANSLIM_RETENTION_KEEP_NEWEST: '2'
-  R2_STORAGE_WARNING_GIB: '7'
-  R2_STORAGE_HARD_STOP_GIB: '9'
 
 jobs:
   prospective-dry-run:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - name: Checkout frozen O'Neil pattern repo
@@ -55,17 +51,10 @@ jobs:
           tests/test_phase8_lifecycle_publisher_contract.py
           tests/test_phase9_cross_session_handoff.py
           tests/test_position_lifecycle_v2.py
-      - name: Preflight R2 storage hard guard
-        run: python scripts/audit_r2_storage.py
-      - name: Consume prior immutable candidate prospectively
-        run: python scripts/publish_production_entries.py
-      - name: Advance lifecycle without synthetic population
-        run: python scripts/publish_production_lifecycle.py
-      - name: Publish current-session candidates from frozen contracts
-        run: python scripts/publish_production_candidates.py
-      - name: Losslessly compact immutable candidate snapshot
-        run: python scripts/compact_candidate_snapshot.py
-      - name: Apply protected retention
-        run: python scripts/retain_candidate_snapshots.py
-      - name: Verify post-run R2 storage
-        run: python scripts/audit_r2_storage.py
+      - name: Confirm validation is non-mutating
+        run: |
+          test -z "${R2_ACCESS_KEY_ID:-}"
+          test -z "${R2_SECRET_ACCESS_KEY:-}"
+          test -z "${R2_ENDPOINT:-}"
+          test -z "${R2_BUCKET_NAME:-}"
+          echo "Phase 12 frozen validation has no R2 credentials and cannot publish production snapshots."

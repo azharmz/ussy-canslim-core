@@ -50,3 +50,5 @@ jobs:
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
         run: python scripts/publish_production_candidates.py
+      - name: Losslessly compact candidate snapshot
+        run: python scripts/compact_candidate_snapshot.py

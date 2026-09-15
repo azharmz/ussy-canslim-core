@@ -120,7 +120,7 @@ Phase 9/10 run `34967865047` completed all production-boundary regression, R2 gu
 
 Phase 12 run `34967947364` completed successfully with **62 frozen remediation tests passed**. It did not synthesize production population: Entry returned `WAITING_FOR_T1_BAR`; Lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`. Candidate publication completed with 926,223 assessments and stage counts `NOT_ELIGIBLE=840143`, `PIVOT_DEFINED=84938`, `PIVOT_CROSSED=1077`, `BREAKOUT_CONFIRMED=65`.
 
-The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guard `OK` against warning 7 GiB and hard stop 9 GiB. Subsequent operational audit identified four same-date Candidate snapshots created by remediation workflow runs. Three redundant 2026-09-14 snapshots were removed in controlled cleanup runs, reclaiming a planned total of 954,651,232 bytes; `run-34967947364` remains the canonical current snapshot for that session. A fresh whole-bucket post-cleanup byte/object count remains an operational verification item rather than a CAN SLIM semantic acceptance gate.
+The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.06 GiB), guard `OK` against warning 7 GiB and hard stop 9 GiB. Subsequent operational audit identified four same-date Candidate snapshots created by remediation workflow runs. Three redundant 2026-09-14 snapshots were removed in controlled cleanup runs, reclaiming 954,651,232 bytes; `run-34967947364` remains the canonical current snapshot for that session. Fresh read-only whole-bucket verification after cleanup confirmed **1,737 objects / 1,254,563,268 bytes (~1.168 GiB)**, matching the Cloudflare R2 live dashboard object count and storage display.
 
 ## Frozen production principles
 
@@ -145,10 +145,16 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 
 ## Operational verification after storage correction
 
+**CLOSED / VERIFIED**
+
 - Same-date duplicate retention semantics corrected in `scripts/retain_candidate_snapshots.py`.
 - 2026-09-14 canonical Candidate snapshot: `run-34967947364`.
-- Three redundant same-date snapshots removed; cleanup workflows restored to manual/fail-closed mode after use.
-- **OPEN:** perform a fresh read-only whole-bucket R2 audit and confirm actual post-cleanup object count/bytes and absence of removed prefixes.
+- Three redundant same-date snapshots removed; total reclaimed bytes: `954,651,232`.
+- Fresh read-only whole-bucket audit: **1,737 objects / 1,254,563,268 bytes (~1.168 GiB)**; storage guard `OK`.
+- Cloudflare R2 live dashboard independently showed **1.168 GiB / 1,737 objects**.
+- Retention regression is permanently covered by `.github/workflows/candidate-retention-policy-regression.yml`.
+- GitHub Actions run `35035962081`: **PASS — 5 tests passed**.
+- Cleanup workflow restored to manual/fail-closed mode; no destructive recurring cleanup was left enabled.
 
 ## Forward / research boundaries
 

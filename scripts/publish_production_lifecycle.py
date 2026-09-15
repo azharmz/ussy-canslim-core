@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 import boto3
 
+from canslim_research.execution_entry_v1 import ExecutionState
 from canslim_research.position_lifecycle_v2 import LIFECYCLE_VERSION
 
 POINTER_KEY = "canslim/lifecycle/current.json"
@@ -45,6 +46,11 @@ def publication_status(entry_count: int) -> str:
     return "BLOCKED_ON_PRODUCTION_ENTRY_POPULATION" if entry_count == 0 else "REQUIRES_POPULATED_LIFECYCLE_ACCEPTANCE"
 
 
+def is_executable_entry(row: dict) -> bool:
+    """Match the frozen #36 execution contract exactly; do not invent aliases."""
+    return row.get("execution_state") == ExecutionState.EXECUTED_T1_OPEN.value
+
+
 def main() -> None:
     s3 = s3_client(); bucket = env("R2_BUCKET_NAME")
     eptr = js(s3, bucket, ENTRY_POINTER_KEY)
@@ -57,7 +63,7 @@ def main() -> None:
     if len(rows) != int(eptr["entry_decision_count"]):
         raise RuntimeError("entry count mismatch")
 
-    executable = [r for r in rows if r.get("execution_state") == "EXECUTED"]
+    executable = [r for r in rows if is_executable_entry(r)]
     # Governance guard: current Phase-8 plumbing is allowed to publish the truthful
     # empty production state, but must not pretend populated lifecycle acceptance.
     # When a real executable entry appears, fail closed so #37/#40/#42/#43 wiring

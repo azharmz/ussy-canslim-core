@@ -1,14 +1,8 @@
 # CAN SLIM v1 Historical Validation
 
-Status: **BT0 COMPLETE / BT1 COMPLETE / BT1-M BLOCKED ON HISTORICAL SEMANTIC EVIDENCE / BT2 OPEN**
+Status: **BT0–BT4 READINESS COMPLETE / BT1-M TERMINAL BLOCKED / BT5 HEAVY REPLAY ENGINEERING IN PROGRESS**
 
 Date opened: 2026-09-16
-BT1 evidence run: `35046760706` — **SUCCESS**
-BT1-M inventory run: `35047685677` — **SUCCESS**
-BT1-M original content run: `35048973755` — **SUCCESS**
-BT1-M long-history publisher run: `35052740492` — **SUCCESS**
-BT1-M post-publish verification run: `35052773417` — **SUCCESS**
-BT1-M causal replay run: `35053132268` — **SUCCESS MECHANICALLY / SEMANTICALLY BLOCKED**
 
 ## Purpose and boundary
 
@@ -16,86 +10,118 @@ The frozen CAN SLIM v1 production baseline remains unchanged and frozen.
 
 Historical empirical validation is deliberately split into two evidence tracks:
 
-1. **BT-PV — Price / Volume / Market historical validation**: replay historically tractable price-volume components, frozen O'Neil morphology, N/S/L/M, frozen T+1 Open execution, and frozen lifecycle/outcomes where the required upstream evidence is available.
+1. **BT-PV — Price / Volume / Market historical validation**: replay historically tractable price-volume components and frozen O'Neil morphology where required evidence is available.
 2. **BT-FAI — Fundamental / Institutional validation**: validate C/A fundamentals and I institutional sponsorship separately, with PIT/coverage limitations disclosed.
 
-BT-PV is **not** a full CAN SLIM v1 backtest and must never be labelled as one. Removing C/A/I from the retrospective gate is a research-design boundary only; production `CANSLIM_ELIGIBLE` remains unchanged and fail-closed.
+BT-PV is **not** a full CAN SLIM v1 backtest and must never be labelled as one. Production `CANSLIM_ELIGIBLE` remains unchanged and fail-closed.
 
-## BT0 — Governance / no-tuning lock
+## Frozen governance
 
-**COMPLETE.** Production semantics remain frozen; replay is causal; execution remains T+1 Open; O'Neil is pinned to `oneil-pattern-output-v2` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`; no validation result may tune frozen rules; missing evidence remains NOT_EVALUABLE; provenance and attrition precede performance reporting.
+Production semantics remain frozen; replay is causal; execution remains T+1 Open; O'Neil is pinned to `oneil-pattern-output-v2` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`; no validation result may tune frozen rules; missing evidence remains NOT_EVALUABLE; no strategy returns are authorized during replay-engine development.
 
-## BT1 — Historical input readiness
+## BT1-M — terminal evidence boundary
 
-**COMPLETE.** Historical stock OHLCV, the declared static/current Musaffa research-universe design, O'Neil OHLCV morphology, and causal N/S/L inputs are mechanically available. C/A and I remain separate BT-FAI overlays.
+Canonical actual-index history is mechanically available, but governed historical sources do not exist for the frozen M inputs `leadership_confirming`, `weakening_confirmed`, and `correction_reset`. The terminal verdict remains:
 
-## BT1-M — canonical market evidence
+`BLOCKED_ON_HISTORICAL_M_SEMANTIC_EVIDENCE`
 
-### Data remediation result
-
-The original 500-bar limitation was remediated without ETF substitution or M-rule changes. Official long-history run `35052740492` provides canonical actual-index identities:
-
-- `NASDAQ_COMPOSITE` / `^IXIC`: 14,019 rows, 1971-02-05..2026-09-15;
-- `SP500` / `^GSPC`: 24,793 rows, 1927-12-30..2026-09-15;
-- `DJIA` / `^DJI`: 8,737 rows, 1992-01-02..2026-09-15;
-- common causal coverage: **8,737 sessions, 1992-01-02..2026-09-15**.
-
-Post-publish verification `35052773417` passed required columns, null, duplicate-date, monotonic-date, and long-history coverage checks. Thus **canonical M price/volume data is mechanically READY**.
-
-### Causal replay finding
-
-Run `35053132268` replayed the exact frozen `46-market-state-classification-v1` with no future bars and no fabricated unsupported inputs. Historical governed sources do not exist for `leadership_confirming`, `weakening_confirmed`, or `correction_reset`, so replay correctly supplied `None`, `None`, and `False` respectively.
-
-Observed result: 4 `RALLY_ATTEMPT` sessions followed by 8,733 `FOLLOW_THROUGH_CONFIRMED` sessions; only one state transition occurred. This demonstrates that long index history alone is insufficient to reconstruct representative historical production M semantics. The previous mechanical authorization criterion based on session count was therefore rejected and corrected fail-closed in commit `7d623c4c5dfdebc46fc9019df218d2dbac2cc56c`.
-
-**Terminal BT1-M verdict:** `BLOCKED_ON_HISTORICAL_M_SEMANTIC_EVIDENCE`.
-
-This is an evidence boundary, not a classifier failure and not permission to invent historical leadership/weakening/correction thresholds. No strategy returns were inspected.
+No proxy M or invented historical thresholds are permitted.
 
 ## BT2 — frozen component-replay contract
 
-**OPEN.** BT1-M no longer blocks validation of components that do not require historical M. It **does block** calling a long-history result a complete N/S/L/M BT-PV strategy backtest and blocks M-gated Entry/Lifecycle performance claims.
+The component path replays frozen O'Neil and historically defensible components independently and causally. M remains NOT_EVALUABLE. Research outputs must use a distinct `BT_PV_COMPONENT_*` namespace and must never emit or imply `CANSLIM_ELIGIBLE`. Static/current Musaffa membership remains a research-universe design rather than historical membership reconstruction.
 
-The BT2 contract is:
+## BT3 / BT4 readiness evidence
 
-1. Replay frozen O'Neil four-core morphology, N, S, and L independently and causally from historical OHLCV.
-2. Preserve M as `NOT_EVALUABLE / BLOCKED_ON_HISTORICAL_M_SEMANTIC_EVIDENCE` for long-history component validation; never substitute a proxy M.
-3. Emit research-only labels under a distinct `BT_PV_COMPONENT_*` namespace. Never emit or imply `CANSLIM_ELIGIBLE`.
-4. Reconstruct candidate/event dates for component validation, but do not promote them to M-qualified strategy entries.
-5. T+1 Entry and Lifecycle code may be regression-tested mechanically against reconstructed events, but long-history performance is not authorized until its required gating evidence is defensible.
-6. No thresholds or morphology rules may be tuned from retrospective results.
-7. The static/current Musaffa research universe remains explicitly a research-universe design, not historical membership reconstruction.
-8. Every output must pin repository commit, O'Neil SHA, input manifests, decision date, and evidence availability.
+BT3 proved deterministic R2 component-runner wiring and provenance capture. BT4 wired the canonical SP500 benchmark for frozen L and then executed the exact frozen O'Neil dependency at SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`. The pinned O'Neil smoke completed successfully but demonstrated that naïve historical replay is computationally expensive because every as-of invocation recomputes the canonical morphology stack over its complete causal frame.
 
-## BT-FAI — separate C/A/I validation
+## BT5 — heavy historical replay engineering
 
-C/A immutable PIT evidence has 47,267 wide rows / 85,519 long rows with `accepted_at` evidence extending back to 2009. Historical C/A attachment was previously validated against 10,731 technical candidates with zero future `accepted_at` violations. C/A remains a separate empirical overlay and cannot retroactively alter BT-PV component events.
+### BT5A — runtime profiling
 
-I contains 14,529,166 historical state-event rows / 993 CUSIPs, while exact live EDGAR `accepted_at` coverage begins only in 2026. Historical `available_on` limitations must remain explicit and unsupported periods NOT_EVALUABLE.
+External-compute profiling confirmed that the frozen engine itself is executable and that repeated canonical morphology/candidate evaluation dominates the replay workload. This phase did not change detector semantics and did not authorize strategy performance.
 
-## Validation checklist
+### BT5B — bounded-history equivalence experiment
+
+Purpose: test whether a fixed trailing history can replace full causal history while preserving the exact frozen O'Neil output.
+
+Frozen reference semantics are always:
+
+`analyze_security(full causal frame through D, asof_date=D)`
+
+A bounded suffix is acceptable only if all material frozen output fields are exactly identical to that reference. Candidate IDs, statuses, structural dates/signatures, pivots, depths, semantics, detector faults, and production identities are not allowed to drift.
+
+#### Runner validation
+
+The standalone Kaggle runner was corrected only for API/output compatibility, without modifying the frozen engine:
+
+- `asof_date` is passed as `datetime.date`, matching the frozen engine's normalized frame-date comparison.
+- `ProductionAssessmentRecord.to_dict()` is used as the canonical serialization path.
+
+Two short-history oracle cases completed successfully, proving runner health, but were ineligible for the 500/750/1000 bounded test because their full histories were shorter than 500 bars.
+
+#### Substantive counterexample
+
+Security `BMG9460G1015`, decision date `2026-09-09`:
+
+- full causal history: **1,345 bars**, 2021-05-03..2026-09-09;
+- full-history frozen oracle: **29,465 assessments**;
+- elapsed: **28.01 s**;
+- canonical SHA256: `088b93508900edec854e07409456b6fb944fa8c4873502b6999fa9d549843f80`.
+
+Exact bounded comparisons:
+
+| History | Assessments | Missing vs full | Extra | Changed same candidate ID | Exact |
+|---|---:|---:|---:|---:|---|
+| 500 bars | 1,132 | 28,333 | 0 | 0 | NO |
+| 750 bars | 3,174 | 26,291 | 0 | 0 | NO |
+| 1,000 bars | 11,256 | 18,209 | 0 | 47 | NO |
+
+The 1,000-bar case is especially decisive: truncation not only removes historical candidates but changes material output for 47 candidate IDs that exist in both runs. Therefore older causal history can affect frozen outputs observed inside the retained suffix.
+
+**BT5B terminal verdict:**
+
+`BOUNDED_HORIZON_NOT_SUPPORTED_IN_TESTED_CASE`
+
+`bounded_replay_authorized = false`
+
+This counterexample falsifies the proposed universal replacement of full causal history by any of the tested 500/750/1000-bar suffixes. Further repetitions cannot authorize those fixed horizons as an exact general replacement. The frozen O'Neil engine remains unchanged.
+
+### BT5C — exact-computation acceleration
+
+**CURRENT / OPEN.** Optimization must preserve full-history semantics exactly. Simple input truncation is closed.
+
+Inspection of the pinned canonical adapter shows that each call sorts/copies the frame, extracts excursion and confirmed-window landmarks, fuses landmarks, builds atomic and multiturn segments, assembles double-bottom/cup/handle structures, evaluates open-right-edge observations, constructs predictions, and only then deduplicates by candidate ID. The production wrapper then converts every prediction to `ProductionAssessmentRecord` and deduplicates by assessment ID.
+
+The next engineering target is therefore **reuse of exact computation across successive as-of dates**, not a second detector and not a bounded approximation. Any cache/incremental implementation is research infrastructure only and must be validated against untouched calls to the pinned frozen engine before it can be used for replay.
+
+BT5C acceptance criteria:
+
+1. Full causal history remains the semantic reference; no `tail(N)` approximation.
+2. Frozen O'Neil repository/SHA and detector code remain untouched.
+3. Cached/incremental results must match untouched `analyze_security` output exactly across all material fields.
+4. Validation must cover multiple securities and multiple as-of dates, including a long-history case.
+5. Any mismatch fails closed; no post-validation tuning to make the oracle match.
+6. No production eligibility, M qualification, strategy returns, or performance optimization during this phase.
+7. Runtime and memory improvement must be measured separately from semantic equivalence.
+
+## Current checklist
 
 | Phase | Scope | Status |
 |---|---|---|
-| BT0 | Scope + no-tuning governance | **COMPLETE** |
-| BT1 | Historical input readiness discovery | **COMPLETE** |
-| BT1-M | Frozen #46 M reconstruction/readiness | **TERMINAL BLOCKED — historical semantic evidence unavailable** |
-| BT2 | Freeze component-replay contract and research labels | **COMPLETE — contract frozen here** |
-| BT3 | Reproducible component runner | **NEXT** |
-| BT4 | Historical N/S/L + O'Neil component event reconstruction | PENDING |
-| BT5 | T+1 Entry mechanical reconstruction/regression | PENDING; no M-qualified performance |
-| BT6 | Lifecycle mechanical reconstruction/regression | PENDING; no M-qualified performance |
-| BT7 | Complete BT-PV execution | **BLOCKED ON BT1-M semantic evidence** |
-| BT8 | Complete BT-PV performance + robustness | **BLOCKED ON BT7** |
-| BT-FAI-C/A | Separate frozen C/A empirical validation | PENDING |
-| BT-FAI-I | Separate institutional empirical validation | PENDING |
-| BT9 | Independent leakage/reproducibility audit | PENDING |
-| BT10 | Final empirical evidence freeze | PENDING |
-
-## Compute architecture
-
-GitHub remains source of truth for code, frozen contracts, governance, and reproducibility metadata. R2 supplies governed historical inputs. Google Colab remains the intended heavy-compute environment for large replay execution; the runner must pin repository code and frozen O'Neil dependency and must not become an alternate strategy implementation.
+| BT0 | Scope + no-tuning governance | COMPLETE |
+| BT1 | Historical input readiness | COMPLETE |
+| BT1-M | Frozen M reconstruction | TERMINAL BLOCKED — historical semantic evidence unavailable |
+| BT2 | Component-replay contract | COMPLETE / FROZEN |
+| BT3 | Reproducible component runner | COMPLETE |
+| BT4 | Canonical L wiring + exact pinned O'Neil execution smoke | COMPLETE |
+| BT5A | External runtime profiling | COMPLETE |
+| BT5B | Fixed bounded-history equivalence | TERMINAL — NOT SUPPORTED IN TESTED CASE / NOT AUTHORIZED |
+| BT5C | Exact-computation acceleration | CURRENT / OPEN |
+| BT6 | Execution/outcome mechanical reconstruction | PENDING; no M-qualified performance |
+| BT7+ | Complete BT-PV/performance | BLOCKED ON required semantic evidence |
+| BT-FAI | C/A and I validation overlays | SEPARATE |
 
 ## Immediate next step
 
-**BT3:** build a reproducible research-only component runner that inventories/pins inputs and reconstructs frozen O'Neil + N/S/L evidence without M qualification, strategy returns, or threshold tuning. First execution should be a bounded smoke/regression sample before scaling heavy compute.
+**BT5C:** build a research-only exact replay accelerator around the pinned frozen engine. Start with a cache/incremental prototype and an equivalence harness that compares its output against untouched full-history `analyze_security` calls. Do not alter the frozen detector or authorize replay acceleration until exact equivalence is demonstrated.

@@ -1,15 +1,22 @@
-# CAN SLIM v1 Historical Backtest Validation
+# CAN SLIM v1 Historical Validation
 
-Status: **BT0 COMPLETE / BT1 BLOCKED_ON_HISTORICAL_INPUT_COVERAGE**
+Status: **BT0 COMPLETE / BT1-M NEXT — PRICE/VOLUME BACKTEST PATH AUTHORIZED**
 
 Date opened: 2026-09-16
 BT1 evidence run: `35046760706` — **SUCCESS**
 
-## Purpose
+## Purpose and boundary
 
-Empirically evaluate the already-frozen CAN SLIM v1 production baseline by historical replay. This workstream is evidence/validation only. It does not reopen, tune, optimize, or redefine frozen CAN SLIM semantics.
+The frozen CAN SLIM v1 production baseline remains unchanged and frozen.
 
-Engineering/integration freeze remains valid independently of backtest outcome. Phase 8B natural populated Entry→Lifecycle production observation also remains a separate prospective acceptance boundary.
+Historical empirical validation is now deliberately split into two separate evidence tracks rather than forcing all production evidence into one retrospective replay:
+
+1. **BT-PV — Price / Volume / Market historical backtest**: replay the historically tractable price-volume components, frozen O'Neil morphology, N/S/L/M, frozen T+1 Open execution, and frozen lifecycle/outcomes.
+2. **BT-FAI — Fundamental / Institutional validation**: validate C/A fundamentals and I institutional sponsorship separately against the candidate/trade evidence produced by BT-PV, with their own PIT/coverage limitations disclosed.
+
+BT-PV is **not** a full CAN SLIM v1 backtest and must never be labelled as one. Removing C/A/I from the retrospective gate is a research-design boundary only; it does not change production `CANSLIM_ELIGIBLE`, where the frozen C/A/N/S/L/I/M requirements remain mandatory and fail-closed.
+
+This split avoids manufacturing historical timestamps, weakening production semantics, or expanding R2 merely to make a monolithic backtest possible.
 
 ## BT0 — Governance / no-tuning lock
 
@@ -17,77 +24,88 @@ Engineering/integration freeze remains valid independently of backtest outcome. 
 
 Rules:
 
-1. Replay the frozen CAN SLIM v1 contract as-is.
-2. Daily decision information is limited to information available by the governed decision cutoff; SEC evidence must obey `accepted_at` availability.
-3. Execution remains T+1 Open under the frozen Entry contract. No close-price execution substitution.
-4. Frozen N-v1 remains the governed price/new-high breakout evidence. Historical catalyst data must not be silently added and called CAN SLIM v1.
-5. Frozen S/L/I/M eligibility states remain mandatory and fail-closed exactly as production specifies.
-6. O'Neil morphology must consume the frozen `oneil-pattern-output-v2` four-core production contract pinned by the production baseline; do not rebuild or tune morphology in the backtest.
-7. Backtest results must not be used to alter thresholds/rules inside this validation cycle. Any later hypothesis or v2 development must be separately governed and tested on untouched evidence.
-8. Missing historical inputs remain missing/NOT_EVALUABLE; they must not be imputed from future/current information.
-9. Report data coverage and attrition before performance metrics.
-10. Preserve reproducibility: code ref, input object keys/versions, hashes where available, date window, and output artifacts.
+1. Production CAN SLIM v1 semantics remain frozen and untouched.
+2. BT-PV uses only historically causal information available through each decision date.
+3. Execution remains the frozen T+1 Open contract. No close-price execution substitution.
+4. Frozen N-v1 remains governed price/new-high breakout evidence. Historical catalyst data is not silently added.
+5. Frozen O'Neil morphology remains `oneil-pattern-output-v2`, four production-authorized core patterns, pinned to `ussy-oneil-patterns` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`.
+6. BT-PV does not use C/A/I as eligibility gates. Its outputs must use a distinct research label and must not emit or imply production `CANSLIM_ELIGIBLE`.
+7. C/A and I are evaluated only in BT-FAI, separately from BT-PV execution/performance generation.
+8. Backtest results must not be used to tune frozen thresholds/rules in this validation cycle.
+9. Missing evidence remains missing/NOT_EVALUABLE; no future/current information may be imputed backward.
+10. Report coverage and attrition before performance metrics and preserve code/input/output provenance.
 
-## BT1 — Historical / PIT data readiness audit
+## Why the validation was split
 
-**BLOCKED_ON_HISTORICAL_INPUT_COVERAGE — full historical performance backtest is NOT authorized yet.**
+Fresh Actions audit `35046760706` established that historical OHLCV and C/A evidence are substantial, but exact institutional availability compatible with the prospective production contract is not available over the same long window. Historical institutional state events use date-level `available_on`, while the exact live EDGAR `accepted_at` layer begins only in 2026. Forcing that older stream into the exact production-I contract would create an unjustified PIT assumption.
 
-A fresh read-only R2 audit was executed in Actions run `35046760706`. No strategy returns were inspected.
+C/A is therefore not discarded. It moves to a separate fundamental validation track. I likewise moves to a separate institutional validation track. This allows their empirical contribution to be studied without contaminating the causal price/volume backtest.
 
-| Input / layer | Fresh evidence | BT1 assessment |
+## BT-PV readiness
+
+| Input / layer | Evidence | Assessment |
 |---|---|---|
-| Historical OHLCV | 1,300 `backtest/ohlcv/*.parquet` objects | Long-history technical replay feasible |
-| Research universe | Frozen contemporary/current Musaffa research-universe design remains the declared historical research contract | Allowed for the declared research question; not historical eligibility reconstruction |
-| Historical membership alternative | only `universe/membership/2026-08-28.json` exists | True historical Musaffa-membership reconstruction unavailable before 2026-08-28 |
-| Fundamentals C/A | current immutable PIT snapshot has 47,267 wide rows / 85,519 long rows; accepted-at evidence spans 2009-04-15 through 2026-09-14; annual accepted-at begins 2009-10-27 | **PIT source coverage exists. Historical C/A attachment was already separately validated with zero future accepted-at violations.** |
-| Institutional I | 19,636 live rows with exact EDGAR `accepted_at`, but live accepted-at spans only 2026-07-01 through 2026-09-10. Historical state events: 14,529,166 rows / 993 CUSIPs, `available_on` spans 2013-05-21 through 2026-05-30 | **BLOCKER for frozen-fidelity long backtest.** Production resolver requires exact accepted-at live state for the latest period; old history exposes date-level `available_on`, not the same exact accepted-at contract. Do not silently substitute it. |
-| Market M | `market/state/` currently has only four JSON objects: canonical states for 2026-09-11 and 2026-09-14 plus official pointer | **BLOCKER for direct canonical-state historical replay.** Frozen classifier code exists and is causal, so a separately audited historical reconstruction may be possible, but current canonical R2 state history is not a long backtest dataset. |
-| O'Neil patterns | production code pins `ussy-oneil-patterns` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`; pattern engine is OHLCV-driven | Code-pinned historical replay mechanically feasible once full mandatory evidence intersection is valid |
-| T+1 Entry | frozen production execution code exists | Replayable once Candidate history is valid |
-| Lifecycle/outcomes | frozen production lifecycle semantics exist | Replayable once executable Entry history is valid |
+| Historical OHLCV | 1,300 `backtest/ohlcv/*.parquet` objects | **READY** for long-history price/volume replay |
+| Research universe | frozen contemporary/current Musaffa research-universe design | **READY** for declared static-universe research; not historical membership reconstruction |
+| O'Neil patterns | pinned frozen four-core production engine, OHLCV-driven | **MECHANICALLY READY**; historical replay must use pinned code |
+| N | frozen price/new-high breakout evidence | **READY** from causal price history |
+| S | frozen price/volume supply-demand evidence | **READY** from causal price/volume history |
+| L | frozen relative-strength/leadership evidence | **READY SUBJECT TO** exact production-compatible historical calculation |
+| M | frozen #46 causal market classifier exists, but R2 canonical-state history is only recent | **NEXT READINESS TASK:** reconstruct/audit historical M causally from governed major-index inputs |
+| T+1 Entry | frozen production execution code exists | **READY** after BT-PV Candidate/event reconstruction |
+| Lifecycle/outcomes | frozen production lifecycle semantics exist | **READY** after executable historical Entries exist |
 
-### C/A reconciliation
+### Historical M boundary
 
-BT1 initially listed C/A as TO VERIFY. Repository history shows this was already solved before the production remediation cycle: historical C/A attachment workflow run `34479060107` validated the 10,731 historical technical candidates using immutable SEC PIT evidence. It reported zero future `accepted_at` violations, explicit SEC FY identity, and fail-closed unresolved FY handling. Therefore C/A is not the current BT1 blocker.
+The frozen #46 classifier is causal and versioned (`46-market-state-classification-v1`). The #50 production consumer intentionally requires an exact same-session canonical state and rejects future/stale states. R2 retains only recent canonical market-state runs, so BT-PV must not use the current pointer retrospectively.
 
-### Institutional boundary
+The next task is therefore to build and audit a **causal historical replay of the frozen #46 classifier** from governed historical major-index OHLCV. This is reconstruction using frozen logic, not strategy tuning.
 
-The canonical production I resolver deliberately distinguishes exact live filing availability from historical state events. It filters the latest live state using timezone-aware `I_available_at <= decision_cutoff`; historical prior-period events are resolved from `available_on`. The fresh audit proves the exact-live layer begins only on 2026-07-01. A long historical backtest cannot relabel the older date-level event stream as exact accepted-at without a new evidence reconstruction/audit.
+## BT-FAI — separate C/A/I validation
 
-### Market boundary
+### C/A fundamentals
 
-The frozen #46 classifier is causal and versioned (`46-market-state-classification-v1`), while the #50 production consumer requires an exact same-session canonical state and rejects future or stale state. R2 currently retains only 2026-09-11 and 2026-09-14 canonical market-state runs. Therefore historical M needs a governed causal replay that reproduces #46 from historical major-index inputs; the current production pointer/history alone cannot supply long-history M.
+Existing repository evidence is already strong enough to make this a separate validation dataset rather than a blocker for BT-PV. The immutable PIT snapshot has 47,267 wide rows / 85,519 long rows with `accepted_at` evidence extending back to 2009. Historical C/A attachment was previously validated against the 10,731 technical candidates with zero future `accepted_at` violations.
 
-### Existing evidence that must not be mistaken for the final backtest
+BT-FAI will use C/A to ask questions such as whether candidate/trade outcome distributions differ across frozen C/A states. It will not retroactively change BT-PV entries.
 
-- E0 rolling baseline was explicitly `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST` and prohibited PF/CAGR/drawdown claims.
-- E0 static-history candidate study was explicitly `STATIC_2026_08_28_UNIVERSE_EXPLORATORY_NOT_PIT_UNIVERSE`; it generated 6,095,031 evaluable rows and 10,731 technical candidate rows but prohibited full strategy-performance claims.
-- Those artifacts remain useful readiness/mechanism evidence, not a substitute for frozen full C/A/N/S/L/I/M replay.
+### I institutional sponsorship
 
-## Backtest validation checklist
+Fresh audit evidence found 14,529,166 historical state-event rows / 993 CUSIPs, but exact live EDGAR `accepted_at` coverage begins only in 2026. Therefore long-history I validation must disclose its historical `available_on` evidence boundary rather than pretending it is identical to the production exact-timestamp contract.
+
+BT-FAI may evaluate I only within defensible coverage and must report NOT_EVALUABLE where the production-compatible evidence is unavailable.
+
+## Existing historical evidence
+
+- E0 rolling baseline remains `ROLLING_CURRENT_MEMBERSHIP_SMOKE_NOT_FULL_PIT_BACKTEST` and is not performance evidence for BT-PV.
+- E0 static-history study produced 6,095,031 evaluable rows and 10,731 technical candidate rows under the frozen 2026-08-28 research universe. It remains exploratory readiness evidence, not the final BT-PV execution backtest.
+- Fresh BT1 audit run `35046760706` inspected historical input coverage only; `strategy_returns_inspected=false`.
+
+## Validation checklist
 
 | Phase | Scope | Status |
 |---|---|---|
 | BT0 | Scope + no-tuning governance | **COMPLETE** |
-| BT1 | Historical/PIT data readiness audit | **BLOCKED_ON_HISTORICAL_INPUT_COVERAGE** |
-| BT1-I | Reconstruct/audit exact historical institutional availability compatible with frozen I | **NEXT BLOCKER** |
-| BT1-M | Reconstruct/audit causal historical #46 M state from governed index inputs | PENDING |
-| BT2 | Frozen historical replay contract | PENDING |
+| BT1 | Historical input readiness discovery | **COMPLETE — evidence boundary identified** |
+| BT1-M | Causal historical frozen-#46 M reconstruction/readiness | **NEXT** |
+| BT2 | Freeze BT-PV replay contract and distinct research output labels | PENDING |
 | BT3 | Reproducible Colab runner | PENDING |
-| BT4 | Historical Candidate reconstruction | PENDING |
-| BT5 | T+1 Entry reconstruction | PENDING |
-| BT6 | Lifecycle/outcome reconstruction | PENDING |
-| BT7 | Backtest execution | PENDING |
-| BT8 | Performance + robustness analysis | PENDING |
+| BT4 | Historical N/S/L/M + O'Neil event reconstruction | PENDING |
+| BT5 | Frozen T+1 Entry reconstruction | PENDING |
+| BT6 | Frozen Lifecycle/outcome reconstruction | PENDING |
+| BT7 | BT-PV execution | PENDING |
+| BT8 | BT-PV performance + robustness analysis | PENDING |
+| BT-FAI-C/A | Separate frozen C/A empirical validation | PENDING |
+| BT-FAI-I | Separate institutional empirical validation within defensible PIT coverage | PENDING |
 | BT9 | Independent leakage/reproducibility audit | PENDING |
 | BT10 | Final empirical evidence freeze | PENDING |
 
-## BT1 exit criteria
+## Compute architecture
 
-BT1 closes only after C/A, I, canonical M reconstruction, frozen #33 pattern replay, OHLCV and the declared research-universe design have a defensible common historical window with no future leakage.
+GitHub remains source of truth for code, frozen contracts, governance, and reproducibility metadata. R2 supplies the already-available historical market/evidence data required by each track. Google Colab is the intended heavy-compute runner for BT-PV once historical M readiness is closed.
 
-Current verdict is deliberately fail-closed: `BLOCKED_ON_HISTORICAL_INPUT_COVERAGE`. Eligibility rules will not be weakened merely to produce backtest metrics.
+The Colab runner must pin repository code and the frozen O'Neil dependency, consume governed inputs, and emit reproducible artifacts/results. It must not become an alternate implementation of the strategy.
 
-## Intended compute architecture after BT1
+## Immediate next step
 
-GitHub remains source of truth for frozen code/governance. R2 remains the data/evidence source. Google Colab is the intended compute runner for the heavy historical replay after BT1 clears. The notebook must pin repository code and input contracts and emit reproducible artifacts/results rather than becoming an alternate strategy implementation.
+**BT1-M:** identify the governed major-index historical OHLCV already available, then prove that the frozen #46 state machine can be replayed chronologically without future leakage. If the required index inputs are unavailable, stop with an explicit M data-coverage blocker rather than substituting a different market rule.

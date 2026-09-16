@@ -2,6 +2,10 @@ name: BT4 component event reconstruction smoke
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt4-component-event-reconstruction-smoke.yml'
 
 permissions:
   contents: read
@@ -21,11 +25,17 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install --disable-pip-version-check boto3 pandas pyarrow
+      - name: Install exact frozen O'Neil dependency
+        run: python -m pip install 'git+https://github.com/azharmz/ussy-oneil-patterns.git@c433cc1e35a5aa32a46f732cd8c5545935e36e40'
       - name: Rebuild deterministic BT3 input manifest
         run: python scripts/bt3_component_runner.py --sample-size 10
       - name: Run bounded BT4 reconstruction smoke
         run: python scripts/bt4_component_event_reconstruction_smoke.py
+      - name: Execute frozen O'Neil engine on causal sample
+        run: python scripts/bt4_oneil_pinned_smoke.py
       - uses: actions/upload-artifact@v4
         with:
           name: bt4-component-event-smoke
-          path: bt4-component-event-smoke.json
+          path: |
+            bt4-component-event-smoke.json
+            bt4-oneil-pinned-smoke.json

@@ -2,10 +2,6 @@ name: BT1-M long-history remediation
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/bt1-market-history-remediation.yml'
 
 permissions:
   contents: read

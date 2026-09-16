@@ -156,6 +156,17 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 - GitHub Actions run `35035962081`: **PASS — 5 tests passed**.
 - Cleanup workflow restored to manual/fail-closed mode; no destructive recurring cleanup was left enabled.
 
+## 2026-09-16 production freshness / I1 operational incident
+
+**ACTIVE REPAIR / FAIL-CLOSED**
+
+- `ussy-data` Production daily OHLCV run `35074062125` completed **SUCCESS** on commit `bca86d829f70cc1871143e345d5b8ebee4d63ec1`; canonical ready data reached as-of `2026-09-15`.
+- Scheduled CAN SLIM production orchestrator run `35070650271` correctly failed closed while publishing current-session candidates because canonical M state was stale for decision session `2026-09-15`. Entry and lifecycle consumption remained zero-population and lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`; no stale M state was converted to a signal.
+- Root cause: #49 Production market indexes and #50 Production market state workflows were live but manual/push-triggered only, so daily OHLCV freshness could advance beyond M freshness. Infrastructure repair commits in `ussy-data`: `cabb4162fc2b29081c1ce0669d3655d0e2bc20fe` schedules #49 weekdays at 04:20 UTC; `c13a1afd5cfc2ecf11fa83670783ec21d6f227d0` schedules #50 at 04:50 UTC, ahead of the production orchestrator. Repair validation runs `35076064173` (#49) and `35076083587` (#50) were started by the commits and must be green before this incident is closed.
+- R2 preflight during failed orchestrator remained healthy: **1,769 objects / 1,048,164,838 bytes (999.61 MiB)**, storage guard `OK`.
+- `ussy-fundamentals` 13F canonical publish run `35055117038` failed before publication because the newly added retention path outgrew the test `FakeClient` contract (`get_object` missing). This was a test/infrastructure regression, not sponsorship evidence and not an implicit I promotion. Repair commit `c097228faba365746cfbfa3bfdb918c97cdd9571` extends the fake client to exercise pointer/list/delete retention semantics; validation/publish run `35076053291` is in progress.
+- Frozen X3/PORT1/FWD1 semantics are unchanged. FWD1 remains `LIVE / ACCUMULATING`; EXH2 remains separate/prospective. No forward outcome was used to tune any historical rule.
+
 ## Forward / research boundaries
 
 FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Neither may silently alter the frozen CAN SLIM v1 production baseline.

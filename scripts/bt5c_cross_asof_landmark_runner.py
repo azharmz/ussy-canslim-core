@@ -6,10 +6,17 @@ import pandas as pd
 from bt5c_cross_asof_landmark_probe import run_probe
 
 ONEIL_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
+# Untouched validation set: broader history lengths and five independent replay
+# dates per security.  No detector parameters or frozen O'Neil code are changed.
 CASES={
- "BE6360403164":["2026-08-26","2026-09-02","2026-09-09"],
- "AU0000421851":["2026-08-26","2026-09-02","2026-09-09"],
- "BMG9460G1015":["2026-08-26","2026-09-02","2026-09-09"],
+ "BE6360403164":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "AU0000421851":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "BMG9460G1015":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "CA0022051027":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "CA09076J2074":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "BMG4690M1010":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "CA05156V1022":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
+ "CA03879J1003":["2026-08-12","2026-08-19","2026-08-26","2026-09-02","2026-09-09"],
 }
 
 def need(n):
@@ -41,9 +48,9 @@ def main():
   raw=pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket,Key=key)["Body"].read())); frame=normalize(raw)
   result=run_probe(frame,[date.fromisoformat(x) for x in ds]); result["security_id"]=sid; result["r2_key"]=key; results.append(result)
   print(sid,result["verdict"],"all_exact=",result["all_exact"])
- payload={"contract":"BT5C_CROSS_ASOF_LANDMARK_MULTI_SECURITY_V1","frozen_oneil_sha":ONEIL_SHA,"results":results,"all_exact":all(x["all_exact"] for x in results),"landmark_cross_asof_reuse_authorized":False,"morphology_cross_asof_reuse_authorized":False,"strategy_returns_computed":False}
- payload["verdict"]="LANDMARK_REUSE_EQUIVALENCE_OBSERVED_MORE_CASES_REQUIRED" if payload["all_exact"] else "LANDMARK_REUSE_NOT_EXACT_FAIL_CLOSED"
+ payload={"contract":"BT5C_CROSS_ASOF_LANDMARK_UNTOUCHED_VALIDATION_V2","frozen_oneil_sha":ONEIL_SHA,"security_count":len(results),"comparison_count":sum(len(x["cases"]) for x in results),"results":results,"all_exact":all(x["all_exact"] for x in results),"landmark_cross_asof_reuse_authorized":False,"morphology_cross_asof_reuse_authorized":False,"strategy_returns_computed":False}
+ payload["verdict"]="LANDMARK_REUSE_EQUIVALENCE_OBSERVED_UNTOUCHED_VALIDATION" if payload["all_exact"] else "LANDMARK_REUSE_NOT_EXACT_FAIL_CLOSED"
  open("bt5c-landmark-probe.json","w").write(json.dumps(payload,indent=2,sort_keys=True)+"\n")
- print(json.dumps({"verdict":payload["verdict"],"all_exact":payload["all_exact"]},indent=2))
+ print(json.dumps({"verdict":payload["verdict"],"all_exact":payload["all_exact"],"security_count":payload["security_count"],"comparison_count":payload["comparison_count"]},indent=2))
  if not payload["all_exact"]: raise SystemExit(2)
 if __name__=="__main__": main()

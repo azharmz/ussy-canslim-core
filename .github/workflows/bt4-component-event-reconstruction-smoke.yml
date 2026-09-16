@@ -2,6 +2,10 @@ name: BT4 component event reconstruction smoke
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bt4-component-event-reconstruction-smoke.yml'
 
 permissions:
   contents: read

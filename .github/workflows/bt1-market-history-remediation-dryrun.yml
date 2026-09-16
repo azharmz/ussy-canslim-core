@@ -1,10 +1,11 @@
 name: BT1-M full-history dry run
+
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/bt1-market-history-remediation-dryrun.yml']
+  workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-24.04

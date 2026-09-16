@@ -28,3 +28,5 @@ jobs:
       - run: python -m pip install --disable-pip-version-check boto3 pandas pyarrow yfinance
       - name: Publish validated long-history canonical indexes
         run: python scripts/remediate_bt1_market_history.py
+      - name: Publication marker
+        run: echo 'BT1-M canonical history publication workflow completed'

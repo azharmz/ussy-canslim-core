@@ -2,10 +2,6 @@ name: BT1-M causal replay audit
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/bt1-market-causal-replay.yml'
 
 permissions:
   contents: read

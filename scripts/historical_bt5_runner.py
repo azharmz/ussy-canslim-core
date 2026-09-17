@@ -86,15 +86,16 @@ def main():
     p.add_argument("--experiment-id",required=True); p.add_argument("--runner-commit",required=True)
     p.add_argument("--output-prefix",default=DEFAULT_OUTPUT_PREFIX); p.add_argument("--history-prefix",default=CANONICAL_HISTORY_PREFIX)
     p.add_argument("--max-securities",type=int,default=0,help="0=all; deterministic inventory prefix for validation only")
+    p.add_argument("--max-sessions",type=int,default=0,help="0=every available session; validation-only causal prefix bound")
     p.add_argument("--interrupt-after",type=int,default=0,help="test-only recovery injection; excluded from semantic lineage")
     args=p.parse_args()
     if args.history_prefix!=CANONICAL_HISTORY_PREFIX: raise RuntimeError("BT5_NONCANONICAL_HISTORY_PREFIX")
-    if args.max_securities<0 or args.interrupt_after<0: raise RuntimeError("BT5_INVALID_CONFIG")
+    if args.max_securities<0 or args.max_sessions<0 or args.interrupt_after<0: raise RuntimeError("BT5_INVALID_CONFIG")
 
     s3=s3_client(); bucket=need("R2_BUCKET_NAME"); inventory=list_inventory(s3,bucket,args.history_prefix)
     if not inventory: raise RuntimeError("BT5_EMPTY_CANONICAL_INVENTORY")
     if args.max_securities: inventory=inventory[:args.max_securities]
-    cfg={"history_prefix":args.history_prefix,"output_prefix":args.output_prefix,"max_securities":args.max_securities,"output_schema":OUTPUT_SCHEMA,"population":"CANONICAL_OHLCV_INVENTORY","asof_policy":"EVERY_AVAILABLE_SESSION","component_only":True}
+    cfg={"history_prefix":args.history_prefix,"output_prefix":args.output_prefix,"max_securities":args.max_securities,"max_sessions":args.max_sessions,"output_schema":OUTPUT_SCHEMA,"population":"CANONICAL_OHLCV_INVENTORY","asof_policy":"EVERY_AVAILABLE_SESSION" if not args.max_sessions else "VALIDATION_PREFIX_BOUND","component_only":True}
     lineage=ReplayLineage(args.experiment_id,args.runner_commit,inventory_sha256(inventory),config_sha256(cfg))
     cp_key=checkpoint_key(args.output_prefix,args.experiment_id); checkpoint=read_json_object(s3,bucket,cp_key)
     completed=[]; output_parts=[]
@@ -110,24 +111,26 @@ def main():
         raw=s3.get_object(Bucket=bucket,Key=source_key)["Body"].read(); source_hash=sha256_bytes(raw)
         frame=normalize_ohlcv(pd.read_parquet(io.BytesIO(raw)))
         state=precompute_raw_landmarks(frame,excursion_extractor=extract_excursion_landmarks,confirmed_extractor=extract_confirmed_window_landmarks)
+        replay_ends=range(1,len(frame)+1)
+        if args.max_sessions:
+            replay_ends=range(1,min(len(frame),args.max_sessions)+1)
         sessions=[]
-        for end in range(1,len(frame)+1):
+        for end in replay_ends:
             local=frame.iloc[:end].copy(); asof=pd.Timestamp(local.iloc[-1]["date"]).date()
             try:
                 result=analyze_with_authorized_reuse(analyze_security=analyze_security,canonical_module=canonical,state=state,security_id=security_id,ticker=security_id,frame=local,asof_date=asof,fallback_to_oracle=True)
                 sessions.append({"asof_date":asof.isoformat(),"engine_source":result["source"],"reuse_guard":result["reuse_guard"],"oneil_assessments":[serialize_record(x) for x in result["records"]]})
             except Exception as exc:
-                # Engine warm-up insufficiency is explicit data, never silently converted to PASS/FAIL.
                 sessions.append({"asof_date":asof.isoformat(),"status":"NOT_EVALUABLE","reason":"ONEIL_ENGINE_NOT_EVALUABLE_AT_PREFIX","error_type":type(exc).__name__,"error":str(exc)[:500]})
-        payload={"schema":OUTPUT_SCHEMA,"contract":BT5_CONTRACT,"lineage_sha256":lineage.sha256,"security_id":security_id,"ticker":security_id,"source_key":source_key,"source_sha256":source_hash,"oneil_sha":FROZEN_ONEIL_SHA,"sessions":sessions,"components":{"N":{"status":"NOT_EVALUABLE","reason":"HISTORICAL_RECONSTRUCTOR_UNAVAILABLE"},"S":{"status":"NOT_EVALUABLE","reason":"HISTORICAL_RECONSTRUCTOR_UNAVAILABLE"},"L":{"status":"NOT_EVALUATED_IN_BT5_RUNNER","reason":"SEPARATE_FROZEN_CAUSAL_INPUT_REQUIRED"},"M":{"status":"NOT_EVALUABLE","reason":"GOVERNED_HISTORICAL_MARKET_SEMANTIC_EVIDENCE_UNAVAILABLE"}},"production_eligibility_emitted":False,"strategy_returns_computed":False,"bt6_t1_open_computed":False}
+        payload={"schema":OUTPUT_SCHEMA,"contract":BT5_CONTRACT,"lineage_sha256":lineage.sha256,"security_id":security_id,"ticker":security_id,"source_key":source_key,"source_sha256":source_hash,"oneil_sha":FROZEN_ONEIL_SHA,"sessions":sessions,"replay_session_count":len(sessions),"source_session_count":len(frame),"validation_session_bound":args.max_sessions or None,"components":{"N":{"status":"NOT_EVALUABLE","reason":"HISTORICAL_RECONSTRUCTOR_UNAVAILABLE"},"S":{"status":"NOT_EVALUABLE","reason":"HISTORICAL_RECONSTRUCTOR_UNAVAILABLE"},"L":{"status":"NOT_EVALUATED_IN_BT5_RUNNER","reason":"SEPARATE_FROZEN_CAUSAL_INPUT_REQUIRED"},"M":{"status":"NOT_EVALUABLE","reason":"GOVERNED_HISTORICAL_MARKET_SEMANTIC_EVIDENCE_UNAVAILABLE"}},"production_eligibility_emitted":False,"strategy_returns_computed":False,"bt6_t1_open_computed":False}
         part=put_json_gzip(s3,bucket,part_key(args.output_prefix,args.experiment_id,security_id),payload)
         completed.append(security_id); done.add(security_id); output_parts.append(part); newly_completed+=1
         put_json(s3,bucket,cp_key,make_checkpoint(lineage=lineage,completed_work_units=completed,output_parts=output_parts))
-        print(f"[BT5 {index}/{len(inventory)}] {security_id} CHECKPOINT sessions={len(frame)}",flush=True)
+        print(f"[BT5 {index}/{len(inventory)}] {security_id} CHECKPOINT replay_sessions={len(sessions)} source_sessions={len(frame)}",flush=True)
         if args.interrupt_after and newly_completed>=args.interrupt_after:
             raise RuntimeError("BT5_TEST_INJECTED_INTERRUPTION_AFTER_DURABLE_CHECKPOINT")
 
-    manifest={"schema":"HISTORICAL_BT5_MANIFEST_V1","contract":BT5_CONTRACT,"experiment_id":args.experiment_id,"lineage":asdict(lineage),"lineage_sha256":lineage.sha256,"inventory_count":len(inventory),"completed_count":len(completed),"output_parts":output_parts,"production_eligibility_emitted":False,"strategy_returns_computed":False,"bt6_t1_open_computed":False,"status":"COMPLETE"}
+    manifest={"schema":"HISTORICAL_BT5_MANIFEST_V1","contract":BT5_CONTRACT,"experiment_id":args.experiment_id,"lineage":asdict(lineage),"lineage_sha256":lineage.sha256,"inventory_count":len(inventory),"completed_count":len(completed),"output_parts":output_parts,"validation_session_bound":args.max_sessions or None,"production_eligibility_emitted":False,"strategy_returns_computed":False,"bt6_t1_open_computed":False,"status":"COMPLETE"}
     manifest_key=f"{args.output_prefix.rstrip('/')}/manifests/{args.experiment_id}.json"; put_json(s3,bucket,manifest_key,manifest)
     print(f"BT5 COMPLETE experiment={args.experiment_id} securities={len(completed)} manifest={manifest_key}",flush=True)
 

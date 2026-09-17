@@ -7,6 +7,9 @@ on:
         description: Deterministic inventory-prefix securities (validation only)
         required: false
         default: '2'
+  push:
+    branches: [historical-bt5-replay]
+    paths: [.github/workflows/historical-bt5-validation.yml]
 
 permissions:
   contents: read
@@ -44,33 +47,27 @@ jobs:
         run: |
           EXP="bt5-validation-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           echo "experiment=$EXP" >> "$GITHUB_OUTPUT"
-          python scripts/historical_bt5_runner.py \
-            --experiment-id "$EXP" --runner-commit "$GITHUB_SHA" \
-            --max-securities '${{ inputs.sample_securities }}' --interrupt-after 1
+          SAMPLE='${{ inputs.sample_securities }}'; SAMPLE="${SAMPLE:-2}"
+          python scripts/historical_bt5_runner.py --experiment-id "$EXP" --runner-commit "$GITHUB_SHA" --max-securities "$SAMPLE" --interrupt-after 1
       - name: Require injected interruption
         if: steps.crash.outcome != 'failure'
-        run: |
-          echo 'Expected injected interruption did not occur' >&2
-          exit 1
+        run: exit 1
       - name: Resume exact lineage to completion
         run: |
-          python scripts/historical_bt5_runner.py \
-            --experiment-id '${{ steps.crash.outputs.experiment }}' --runner-commit "$GITHUB_SHA" \
-            --max-securities '${{ inputs.sample_securities }}'
+          SAMPLE='${{ inputs.sample_securities }}'; SAMPLE="${SAMPLE:-2}"
+          python scripts/historical_bt5_runner.py --experiment-id '${{ steps.crash.outputs.experiment }}' --runner-commit "$GITHUB_SHA" --max-securities "$SAMPLE"
       - name: Verify resume evidence and immutable outputs
         run: |
           python - <<'PY'
           import boto3, hashlib, json, os
-          exp='${{ steps.crash.outputs.experiment }}'; prefix='research/canslim/historical_bt5/v1'
+          exp='${{ steps.crash.outputs.experiment }}'; prefix='research/canslim/historical_bt5/v1'; sample='${{ inputs.sample_securities }}' or '2'
           s3=boto3.client('s3',endpoint_url=os.environ['R2_ENDPOINT'],region_name='auto',aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); b=os.environ['R2_BUCKET_NAME']
-          cp=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/checkpoints/{exp}.json')['Body'].read())
-          mf=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/manifests/{exp}.json')['Body'].read())
-          assert mf['status']=='COMPLETE'; assert mf['completed_count']==int('${{ inputs.sample_securities }}')
+          cp=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/checkpoints/{exp}.json')['Body'].read()); mf=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/manifests/{exp}.json')['Body'].read())
+          assert mf['status']=='COMPLETE' and mf['completed_count']==int(sample)
           assert cp['completed_work_units']==sorted(cp['completed_work_units'])
           assert mf['production_eligibility_emitted'] is False and mf['strategy_returns_computed'] is False and mf['bt6_t1_open_computed'] is False
           assert len(mf['output_parts'])==mf['completed_count']
           for part in mf['output_parts']:
-              raw=s3.get_object(Bucket=b,Key=part['key'])['Body'].read()
-              assert hashlib.sha256(raw).hexdigest()==part['stored_sha256']
+              raw=s3.get_object(Bucket=b,Key=part['key'])['Body'].read(); assert hashlib.sha256(raw).hexdigest()==part['stored_sha256']
           print(json.dumps({'verdict':'PASS','experiment_id':exp,'completed':mf['completed_count'],'lineage_sha256':mf['lineage_sha256']},sort_keys=True))
           PY

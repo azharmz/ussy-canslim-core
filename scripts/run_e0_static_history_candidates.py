@@ -28,6 +28,8 @@ from canslim_research.technical import (  # noqa: E402
 OUT = ROOT / "results" / "e0-static-history-candidates-v1"
 MEMBERSHIP_KEY = "universe/membership/2026-08-28.json"
 SPY_POINTER = "benchmarks/SPY/current.json"
+# Canonical namespace after the verified R2 historical OHLCV migration.
+OHLCV_PREFIX = "history/ohlcv/"
 
 
 def env(name: str) -> str:
@@ -130,8 +132,12 @@ def build_spy_market_state(spy: pd.DataFrame) -> pd.DataFrame:
     return x[["date", "distribution_count_25", "spy_ftd_event", "spy_ftd_active", "spy_rally_day", "M_pass_spy_only"]]
 
 
+def ohlcv_key(security_id: str) -> str:
+    return f"{OHLCV_PREFIX}{security_id}.parquet"
+
+
 def load_security(s3, bucket: str, security_id: str, ticker: str) -> pd.DataFrame:
-    key = f"backtest/ohlcv/{security_id}.parquet"
+    key = ohlcv_key(security_id)
     payload = read_bytes(s3, bucket, key)
     g = pd.read_parquet(io.BytesIO(payload))
     required = {"date", "open", "high", "low", "close", "adj_close", "volume"}
@@ -178,9 +184,11 @@ def main() -> None:
     if not eligible:
         raise RuntimeError("No COMPLIANT records in pinned membership snapshot")
 
-    available_keys = list_keys(s3, bucket, "backtest/ohlcv/")
-    selected = [(sid, ticker) for sid, ticker in eligible.items() if f"backtest/ohlcv/{sid}.parquet" in available_keys]
+    print(f"[historical-ohlcv] canonical_prefix={OHLCV_PREFIX} eligible={len(eligible)}", flush=True)
+    available_keys = list_keys(s3, bucket, OHLCV_PREFIX)
+    selected = [(sid, ticker) for sid, ticker in eligible.items() if ohlcv_key(sid) in available_keys]
     missing_ids = sorted(set(eligible) - {sid for sid, _ in selected})
+    print(f"[historical-ohlcv] objects={len(available_keys)} selected={len(selected)} missing={len(missing_ids)}", flush=True)
 
     frames: list[pd.DataFrame] = []
     failures: list[dict] = []
@@ -197,7 +205,7 @@ def main() -> None:
     if failures:
         raise RuntimeError(f"Failed to load {len(failures)} histories: {failures[:5]}")
     if not frames:
-        raise RuntimeError("No feature-evaluable historical frames")
+        raise RuntimeError(f"No feature-evaluable historical frames under canonical prefix {OHLCV_PREFIX}; selected={len(selected)} missing={len(missing_ids)}")
 
     x = pd.concat(frames, ignore_index=True)
     x["rs_percentile"] = x.groupby("date")["rs_proxy_raw"].rank(pct=True, method="average") * 100.0
@@ -234,6 +242,7 @@ def main() -> None:
         "experiment": "E0-HIST-STATIC-CANDIDATES-V1",
         "evidence_class": "STATIC_2026_08_28_UNIVERSE_EXPLORATORY_NOT_PIT_UNIVERSE",
         "membership_key": MEMBERSHIP_KEY,
+        "ohlcv_prefix": OHLCV_PREFIX,
         "membership_records": len(records),
         "eligible_compliant": len(eligible),
         "full_history_objects_available": len(selected),
@@ -256,7 +265,7 @@ def main() -> None:
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
     (OUT / "membership_snapshot.json").write_text(json.dumps(membership, indent=2, sort_keys=True))
     (OUT / "spy_pointer.json").write_text(json.dumps(spy_pointer, indent=2, sort_keys=True))
-    print(json.dumps(summary, indent=2, sort_keys=True))
+    print(json.dumps(summary, indent=2, sort_keys=True), flush=True)
 
 
 if __name__ == "__main__":

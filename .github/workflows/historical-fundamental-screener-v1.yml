@@ -2,12 +2,6 @@ name: Historical fundamental screener v1
 
 on:
   workflow_dispatch:
-  push:
-    branches: [historical-fundamental-screener]
-    paths:
-      - '.github/workflows/historical-fundamental-screener-v1.yml'
-      - 'scripts/run_historical_fundamental_screener.py'
-      - 'scripts/validate_historical_fundamental_screener.py'
 
 permissions:
   contents: read

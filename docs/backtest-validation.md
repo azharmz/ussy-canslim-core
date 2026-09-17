@@ -1,109 +1,83 @@
 # CAN SLIM v1 Historical Validation
 
-Status: **BT0–BT4 READINESS COMPLETE / BT1-M TERMINAL BLOCKED / BT5 HEAVY REPLAY ENGINEERING IN PROGRESS**
+Status: **BT0–BT4 READINESS COMPLETE / BT1-M TERMINAL BLOCKED / BT5C CLOSED / HISTORICAL COMPONENT REPLAY NEXT**
 
 Date opened: 2026-09-16
+BT5C exit gate closed: 2026-09-17
 
 ## Purpose and boundary
 
-The frozen CAN SLIM v1 production baseline remains unchanged and frozen.
-
-Historical empirical validation is deliberately split into two evidence tracks:
-
-1. **BT-PV — Price / Volume / Market historical validation**: replay historically tractable price-volume components and frozen O'Neil morphology where required evidence is available.
-2. **BT-FAI — Fundamental / Institutional validation**: validate C/A fundamentals and I institutional sponsorship separately, with PIT/coverage limitations disclosed.
-
-BT-PV is **not** a full CAN SLIM v1 backtest and must never be labelled as one. Production `CANSLIM_ELIGIBLE` remains unchanged and fail-closed.
+The frozen CAN SLIM v1 production baseline remains unchanged and frozen. Historical empirical validation is split into evidence tracks. Technical historical replay is component/research evidence unless and until every required historical semantic input is available. It must never silently become production `CANSLIM_ELIGIBLE`.
 
 ## Frozen governance
 
-Production semantics remain frozen; replay is causal; execution remains T+1 Open; O'Neil is pinned to `oneil-pattern-output-v2` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`; no validation result may tune frozen rules; missing evidence remains NOT_EVALUABLE; no strategy returns are authorized during replay-engine development.
+Production semantics remain frozen; replay is causal; execution remains T+1 Open; O'Neil is pinned to `oneil-pattern-output-v2` SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`; no validation result may tune frozen rules; missing evidence remains NOT_EVALUABLE. Canonical OHLCV source is `ussy-data` prefix `history/ohlcv/`.
 
 ## BT1-M — terminal evidence boundary
 
-Canonical actual-index history is mechanically available, but governed historical sources do not exist for the frozen M inputs `leadership_confirming`, `weakening_confirmed`, and `correction_reset`. The terminal verdict remains:
+Canonical actual-index history is mechanically available, but governed historical sources do not exist for the frozen M inputs `leadership_confirming`, `weakening_confirmed`, and `correction_reset`. Terminal verdict:
 
 `BLOCKED_ON_HISTORICAL_M_SEMANTIC_EVIDENCE`
 
 No proxy M or invented historical thresholds are permitted.
 
-## BT2 — frozen component-replay contract
+## BT2–BT4 — component replay readiness
 
-The component path replays frozen O'Neil and historically defensible components independently and causally. M remains NOT_EVALUABLE. Research outputs must use a distinct `BT_PV_COMPONENT_*` namespace and must never emit or imply `CANSLIM_ELIGIBLE`. Static/current Musaffa membership remains a research-universe design rather than historical membership reconstruction.
+BT2 froze the component-replay contract. BT3 proved deterministic R2 runner wiring and provenance capture. BT4 wired canonical SP500 benchmark evidence for frozen L and executed the exact frozen O'Neil dependency. Naive cross-asof O'Neil replay was computationally expensive because every as-of invocation recomputed the complete causal morphology stack.
 
-## BT3 / BT4 readiness evidence
+## BT5A — runtime profiling
 
-BT3 proved deterministic R2 component-runner wiring and provenance capture. BT4 wired the canonical SP500 benchmark for frozen L and then executed the exact frozen O'Neil dependency at SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`. The pinned O'Neil smoke completed successfully but demonstrated that naïve historical replay is computationally expensive because every as-of invocation recomputes the canonical morphology stack over its complete causal frame.
+Profiling confirmed repeated canonical morphology/candidate evaluation dominates replay workload. This did not change detector semantics or authorize strategy performance.
 
-## BT5 — heavy historical replay engineering
-
-### BT5A — runtime profiling
-
-External-compute profiling confirmed that the frozen engine itself is executable and that repeated canonical morphology/candidate evaluation dominates the replay workload. This phase did not change detector semantics and did not authorize strategy performance.
-
-### BT5B — bounded-history equivalence experiment
-
-Purpose: test whether a fixed trailing history can replace full causal history while preserving the exact frozen O'Neil output.
+## BT5B — bounded-history experiment — TERMINAL NOT AUTHORIZED
 
 Frozen reference semantics are always:
 
 `analyze_security(full causal frame through D, asof_date=D)`
 
-A bounded suffix is acceptable only if all material frozen output fields are exactly identical to that reference. Candidate IDs, statuses, structural dates/signatures, pivots, depths, semantics, detector faults, and production identities are not allowed to drift.
+A fixed trailing suffix was tested as a possible replacement. Security `BMG9460G1015`, decision date `2026-09-09`, full causal history 1,345 bars produced 29,465 assessments. H=500 produced 1,132; H=750 produced 3,174; H=1000 produced 11,256, with 47 materially changed same-candidate outputs at H=1000.
 
-#### Runner validation
-
-The standalone Kaggle runner was corrected only for API/output compatibility, without modifying the frozen engine:
-
-- `asof_date` is passed as `datetime.date`, matching the frozen engine's normalized frame-date comparison.
-- `ProductionAssessmentRecord.to_dict()` is used as the canonical serialization path.
-
-Two short-history oracle cases completed successfully, proving runner health, but were ineligible for the 500/750/1000 bounded test because their full histories were shorter than 500 bars.
-
-#### Substantive counterexample
-
-Security `BMG9460G1015`, decision date `2026-09-09`:
-
-- full causal history: **1,345 bars**, 2021-05-03..2026-09-09;
-- full-history frozen oracle: **29,465 assessments**;
-- elapsed: **28.01 s**;
-- canonical SHA256: `088b93508900edec854e07409456b6fb944fa8c4873502b6999fa9d549843f80`.
-
-Exact bounded comparisons:
-
-| History | Assessments | Missing vs full | Extra | Changed same candidate ID | Exact |
-|---|---:|---:|---:|---:|---|
-| 500 bars | 1,132 | 28,333 | 0 | 0 | NO |
-| 750 bars | 3,174 | 26,291 | 0 | 0 | NO |
-| 1,000 bars | 11,256 | 18,209 | 0 | 47 | NO |
-
-The 1,000-bar case is especially decisive: truncation not only removes historical candidates but changes material output for 47 candidate IDs that exist in both runs. Therefore older causal history can affect frozen outputs observed inside the retained suffix.
-
-**BT5B terminal verdict:**
+Terminal verdict:
 
 `BOUNDED_HORIZON_NOT_SUPPORTED_IN_TESTED_CASE`
 
 `bounded_replay_authorized = false`
 
-This counterexample falsifies the proposed universal replacement of full causal history by any of the tested 500/750/1000-bar suffixes. Further repetitions cannot authorize those fixed horizons as an exact general replacement. The frozen O'Neil engine remains unchanged.
+Fixed 500/750/1000-bar suffixes are not exact replacements for full causal history.
 
-### BT5C — exact-computation acceleration
+## BT5C — exact-computation acceleration — CLOSED
 
-**CURRENT / OPEN.** Optimization must preserve full-history semantics exactly. Simple input truncation is closed.
+BT5C pursued reuse of exact computation across successive as-of dates while leaving the frozen O'Neil detector untouched.
 
-Inspection of the pinned canonical adapter shows that each call sorts/copies the frame, extracts excursion and confirmed-window landmarks, fuses landmarks, builds atomic and multiturn segments, assembles double-bottom/cup/handle structures, evaluates open-right-edge observations, constructs predictions, and only then deduplicates by candidate ID. The production wrapper then converts every prediction to `ProductionAssessmentRecord` and deduplicates by assessment ID.
+### Evidence sequence
 
-The next engineering target is therefore **reuse of exact computation across successive as-of dates**, not a second detector and not a bounded approximation. Any cache/incremental implementation is research infrastructure only and must be validated against untouched calls to the pinned frozen engine before it can be used for replay.
+- **BT5C-1:** standard raw excursion and confirmed-window landmark reuse matched earlier-frame raw extraction in tested cases.
+- **BT5C-2:** latest-frame fused landmarks were shown to be frame-relative and therefore cannot simply be filtered backward. Fusion must be recomputed per as-of. With raw reuse + frame-relative fusion/segmentation recomputation, tested cases were exact.
+- **BT5C-3:** local-turn raw landmark reuse isolated; run #13 produced 32/32 exact comparisons across 8 deterministic securities × 4 earlier as-of offsets. Structural geometry was intentionally excluded.
+- **BT5C-4:** frame-relative boundary evidence and downstream local-turn DB structural assembly were recomputed. Run #14 produced 8/8 exact comparisons. Structural reuse performance was modest/near-neutral, so this path is not relied upon for operational acceleration.
+- **BT5C-5:** an initial final-output run was exact but did not exercise the local-turn fallback, so it was not accepted as substantive accelerator evidence. Run #17 instead integrated standard raw excursion + confirmed-window reuse into full frozen `analyze_security`; 8/8 final `ProductionAssessmentRecord` comparisons were exact and both accelerated paths were exercised in every comparison. Observed speedup was approximately 1.04x–1.22x.
+- **BT5C-6:** run #18 repeated final-output exactness while measuring runtime, Python peak allocation, and fail-closed behavior. All 8 comparisons were exact; both accelerated paths were exercised; deliberately corrupted prefixes were rejected for all four securities with `BT5C_REUSE_GUARD_NOT_PREFIX`. Observed speedup was approximately 1.045x–1.186x. Peak memory was approximately neutral with small case-level increases/decreases; no material memory-improvement claim is made.
 
-BT5C acceptance criteria:
+### BT5C exit decision
 
-1. Full causal history remains the semantic reference; no `tail(N)` approximation.
-2. Frozen O'Neil repository/SHA and detector code remain untouched.
-3. Cached/incremental results must match untouched `analyze_security` output exactly across all material fields.
-4. Validation must cover multiple securities and multiple as-of dates, including a long-history case.
-5. Any mismatch fails closed; no post-validation tuning to make the oracle match.
-6. No production eligibility, M qualification, strategy returns, or performance optimization during this phase.
-7. Runtime and memory improvement must be measured separately from semantic equivalence.
+`BT5C_EXIT_GATE = CLOSED`
+
+Authorized research scope is deliberately narrow:
+
+1. Precompute exact raw **excursion** and **confirmed-window** landmarks from one complete canonical security history.
+2. Reuse those raw landmarks only for an earlier frame proven to be an exact causal prefix of that same source history.
+3. Filter reusable raw landmarks causally by frame membership and `confirmed_date <= asof`.
+4. Recompute **fusion and every downstream frozen O'Neil operation per as-of**.
+5. If source/prefix identity or any accelerator invariant fails, fail closed to the untouched frozen oracle; never approximate.
+6. Frozen O'Neil source/SHA remains untouched.
+
+This is empirical tested-case equivalence, **not mathematical/global proof**. `global_reuse_authorized = false` remains appropriate. Fixed suffixes remain unauthorized. Local-turn structural reuse is not required for the operational accelerator.
+
+The speedup is consistent but modest. BT5C is closed because further optimization is not justified before actual historical workload evidence. Correctness remains more important than acceleration.
+
+## Historical fundamental track
+
+Historical C/A fundamental screening is a separate frozen workstream. Its output may later be joined by historical decision date to technical qualification, but technical logic must not be mixed into or used to retune the frozen C/A screener.
 
 ## Current checklist
 
@@ -115,13 +89,13 @@ BT5C acceptance criteria:
 | BT2 | Component-replay contract | COMPLETE / FROZEN |
 | BT3 | Reproducible component runner | COMPLETE |
 | BT4 | Canonical L wiring + exact pinned O'Neil execution smoke | COMPLETE |
-| BT5A | External runtime profiling | COMPLETE |
-| BT5B | Fixed bounded-history equivalence | TERMINAL — NOT SUPPORTED IN TESTED CASE / NOT AUTHORIZED |
-| BT5C | Exact-computation acceleration | CURRENT / OPEN |
-| BT6 | Execution/outcome mechanical reconstruction | PENDING; no M-qualified performance |
-| BT7+ | Complete BT-PV/performance | BLOCKED ON required semantic evidence |
-| BT-FAI | C/A and I validation overlays | SEPARATE |
+| BT5A | Runtime profiling | COMPLETE |
+| BT5B | Fixed bounded-history equivalence | TERMINAL — NOT AUTHORIZED |
+| BT5C | Exact-computation acceleration | COMPLETE / EXIT GATE CLOSED |
+| Historical BT5 | Actual causal technical/component replay | NEXT |
+| BT6 | Mechanical T+1 Open execution/outcome | PENDING after replay output |
+| Full M-qualified historical performance | Required M semantics | BLOCKED on historical M semantic evidence |
 
 ## Immediate next step
 
-**BT5C:** build a research-only exact replay accelerator around the pinned frozen engine. Start with a cache/incremental prototype and an equivalence harness that compares its output against untouched full-history `analyze_security` calls. Do not alter the frozen detector or authorize replay acceleration until exact equivalence is demonstrated.
+Build/run the **actual historical component replay** with checkpoint/resume and sparse progress logging. Use canonical `history/ohlcv/`, exact frozen O'Neil SHA, and only the narrowly authorized BT5C raw-landmark reuse boundary. Preserve research/component namespace and provenance. Do not emit full production CAN SLIM eligibility where required historical semantic evidence is unavailable. After replay output exists, proceed to mechanical T+1 Open execution/outcome reconstruction under the frozen execution rules.

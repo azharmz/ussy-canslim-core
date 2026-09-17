@@ -54,10 +54,14 @@ R2 is **not** to be treated as the assumed historical-data source or default des
 
 ## Execution checklist
 
-- [ ] **FUND-01 — Audit current implementation and handoff**
-  - Identify the current historical-fundamental preparation workflow, scripts, inputs, outputs and current run state.
-  - Map existing validated/frozen fundamental work before changing code.
-  - Confirm which CAN SLIM fundamental components are already implemented and frozen.
+- [x] **FUND-01 — Audit current implementation and handoff**
+  - Existing frozen PIT C/A methodology: `docs/methodology/historical-ca-asof-v1.md`.
+  - Existing implementation: `scripts/run_historical_ca_attachment.py` + `src/canslim_research/labels.py`.
+  - Existing workflow: `.github/workflows/historical-ca-attachment-v1.yml`.
+  - Existing validated implementation already enforces the 16:00 America/New_York decision cutoff, `accepted_at <= cutoff`, amendment causality, explicit annual FY identity/consecutiveness, and PASS/FAIL/NOT_EVALUABLE semantics.
+  - **Important mismatch:** the existing runner obtains evaluation dates/securities from `generate_candidates(...)`, so its output is attached to technical candidate rows. That population source is OUT OF SCOPE for the active screener and must be replaced, not extended.
+  - Historical C/A workflow currently has a narrow `push` trigger on `main`; therefore edits to its workflow/runner/labels are potential compute executions and must follow the repository Actions execution governance.
+  - The BT5C landmark/pattern workstream and its R2 OHLCV inputs are unrelated to this task and are excluded.
 
 - [ ] **FUND-02 — Establish historical evidence source path**
   - Identify how historical SEC evidence is obtained without assuming historical snapshots exist in R2.

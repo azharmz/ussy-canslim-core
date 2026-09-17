@@ -1,6 +1,6 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-16
+Last updated: 2026-09-17
 
 ## Current project state
 
@@ -158,14 +158,25 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 
 ## 2026-09-16 production freshness / I1 operational incident
 
-**ACTIVE REPAIR / FAIL-CLOSED**
+**CLOSED / VERIFIED — 2026-09-17**
 
 - `ussy-data` Production daily OHLCV run `35074062125` completed **SUCCESS** on commit `bca86d829f70cc1871143e345d5b8ebee4d63ec1`; canonical ready data reached as-of `2026-09-15`.
 - Scheduled CAN SLIM production orchestrator run `35070650271` correctly failed closed while publishing current-session candidates because canonical M state was stale for decision session `2026-09-15`. Entry and lifecycle consumption remained zero-population and lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`; no stale M state was converted to a signal.
-- Root cause: #49 Production market indexes and #50 Production market state workflows were live but manual/push-triggered only, so daily OHLCV freshness could advance beyond M freshness. Infrastructure repair commits in `ussy-data`: `cabb4162fc2b29081c1ce0669d3655d0e2bc20fe` schedules #49 weekdays at 04:20 UTC; `c13a1afd5cfc2ecf11fa83670783ec21d6f227d0` schedules #50 at 04:50 UTC, ahead of the production orchestrator. Repair validation runs `35076064173` (#49) and `35076083587` (#50) were started by the commits and must be green before this incident is closed.
-- R2 preflight during failed orchestrator remained healthy: **1,769 objects / 1,048,164,838 bytes (999.61 MiB)**, storage guard `OK`.
-- `ussy-fundamentals` 13F canonical publish run `35055117038` failed before publication because the newly added retention path outgrew the test `FakeClient` contract (`get_object` missing). This was a test/infrastructure regression, not sponsorship evidence and not an implicit I promotion. Repair commit `c097228faba365746cfbfa3bfdb918c97cdd9571` extends the fake client to exercise pointer/list/delete retention semantics; validation/publish run `35076053291` is in progress.
-- Frozen X3/PORT1/FWD1 semantics are unchanged. FWD1 remains `LIVE / ACCUMULATING`; EXH2 remains separate/prospective. No forward outcome was used to tune any historical rule.
+- Root cause was #49/#50 lacking daily schedules. Repair commits `cabb4162fc2b29081c1ce0669d3655d0e2bc20fe` (#49 weekday schedule) and `c13a1afd5cfc2ecf11fa83670783ec21d6f227d0` (#50 weekday schedule) are now validated by green runs `35076064173` and `35076083587` respectively. The stale-M scheduling blocker is therefore closed.
+- `ussy-fundamentals` 13F canonical publish regression is also closed: repair commit `c097228faba365746cfbfa3bfdb918c97cdd9571` passed canonical sponsorship publish run `35076053291`. This remains infrastructure evidence only and does **not** promote I.
+- Subsequent 13F retention/canonical publication validation remained green: canonical sponsorship publish run `35161251835` and retention regression run `35161378270` both completed successfully.
+- Production OHLCV received an additional correctness hardening on 2026-09-17: run `35184919545` passed on commit `d5f73a2a0c515ed9942a406ae7d678953e0fd95d`, enforcing one canonical READY snapshot per trading day. This is an infrastructure invariant; it does not change strategy semantics.
+- Frozen X3/PORT1/FWD1 semantics are unchanged. No forward outcome was used to tune any historical rule.
+
+## 2026-09-17 forward benchmark freshness audit
+
+**OPEN OPERATIONAL DEBT / FAIL-CLOSED INTERPRETATION**
+
+- Latest persisted FWD1 evidence was collected at `2026-09-17T01:33:34Z` under run `35171004048` and remains `ACCUMULATING` with `data_gate_pass=true`, **0 forward candidates**, **0 X3 candidate trades**, **0 X3 portfolio entries**, **0 closed X3 portfolio trades**, and **0 completed calendar months**.
+- That evidence still reports `market_data_asof=2026-09-11` even though production stock OHLCV has advanced beyond that date. Therefore the zero-candidate observation is interpretable under the frozen FWD1 minimum gate (`>=2026-09-10`) but is **not evidence of current-session freshness** and must not be extrapolated as a fresh zero signal for later sessions.
+- The repository no longer contains an active SPY/QQQ benchmark updater workflow even though the legacy benchmark documentation describes scheduled updates. This leaves the legacy FWD1 benchmark path operationally stale. Do not alter frozen FWD1 semantics to hide this discrepancy; restore/validate the benchmark publication path separately before claiming fresh forward coverage beyond the persisted benchmark as-of date.
+- Production CAN SLIM M is not dependent on this legacy SPY/QQQ FWD1 path: canonical production M uses the frozen major-index publisher/consumer architecture. The stale legacy benchmark therefore does not invalidate the frozen production M state, but it does limit FWD1 freshness.
+- EXH2 remains separate/prospective; no evidence reviewed in this audit authorizes a semantic change or promotion.
 
 ## Forward / research boundaries
 

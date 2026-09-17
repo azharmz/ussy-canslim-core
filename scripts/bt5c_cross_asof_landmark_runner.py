@@ -10,7 +10,7 @@ ONEIL_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 # capped so the Actions probe stays cheap; each invocation uses the untouched
 # frozen O'Neil implementation on a complete causal prefix.
 CASES={
- "BMG9460G1010":[250,500,750,1000,1250],
+ "BMG9460G1015":[250,500,750,1000,1250],
  "BMG4690M1010":[250,500,750,1000,1250,1500],
  "CA05156V1022":[250,500,750,1000,1250,1500,2000],
 }
@@ -45,7 +45,6 @@ def main():
    prefix=frame.iloc[:n].copy().reset_index(drop=True); asof=pd.Timestamp(prefix.iloc[-1]["date"]).date(); started=time.perf_counter(); out=assemble_local_turn_double_bottoms(prefix,asof_date=asof); elapsed=time.perf_counter()-started
    rec={"security_id":sid,"bars":n,"asof_date":asof.isoformat(),"geometry_count":len(out),"elapsed_sec":round(elapsed,6),"sec_per_100_bars":round(elapsed/n*100,6)}; rows.append(rec); log(f"[{i}/{len(CASES)}] {sid} bars={n} geometries={len(out)} elapsed_sec={elapsed:.3f}")
   log(f"[{i}/{len(CASES)}] {sid} DONE")
- # Simple empirical growth ratios only; no complexity-class claim from this probe.
  by_security={}
  for sid in CASES:
   vals=[r for r in rows if r["security_id"]==sid]; ratios=[]

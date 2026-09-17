@@ -1,0 +1,76 @@
+name: Historical BT5 checkpoint-resume validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      sample_securities:
+        description: Deterministic inventory-prefix securities (validation only)
+        required: false
+        default: '2'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: historical-bt5-validation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONPATH: scripts
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --disable-pip-version-check boto3 pandas pyarrow pytest
+          python -m pip install 'git+https://github.com/azharmz/ussy-oneil-patterns.git@c433cc1e35a5aa32a46f732cd8c5545935e36e40'
+      - name: Recovery primitive tests
+        run: pytest -q tests/test_historical_bt5_recovery.py
+      - name: Compile runner
+        run: python -m py_compile scripts/bt5c_authorized_reuse.py scripts/historical_bt5_checkpoint.py scripts/historical_bt5_runner.py
+      - name: Inject interruption after first durable checkpoint
+        id: crash
+        continue-on-error: true
+        run: |
+          EXP="bt5-validation-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "experiment=$EXP" >> "$GITHUB_OUTPUT"
+          python scripts/historical_bt5_runner.py \
+            --experiment-id "$EXP" --runner-commit "$GITHUB_SHA" \
+            --max-securities '${{ inputs.sample_securities }}' --interrupt-after 1
+      - name: Require injected interruption
+        if: steps.crash.outcome != 'failure'
+        run: |
+          echo 'Expected injected interruption did not occur' >&2
+          exit 1
+      - name: Resume exact lineage to completion
+        run: |
+          python scripts/historical_bt5_runner.py \
+            --experiment-id '${{ steps.crash.outputs.experiment }}' --runner-commit "$GITHUB_SHA" \
+            --max-securities '${{ inputs.sample_securities }}'
+      - name: Verify resume evidence and immutable outputs
+        run: |
+          python - <<'PY'
+          import boto3, hashlib, json, os
+          exp='${{ steps.crash.outputs.experiment }}'; prefix='research/canslim/historical_bt5/v1'
+          s3=boto3.client('s3',endpoint_url=os.environ['R2_ENDPOINT'],region_name='auto',aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); b=os.environ['R2_BUCKET_NAME']
+          cp=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/checkpoints/{exp}.json')['Body'].read())
+          mf=json.loads(s3.get_object(Bucket=b,Key=f'{prefix}/manifests/{exp}.json')['Body'].read())
+          assert mf['status']=='COMPLETE'; assert mf['completed_count']==int('${{ inputs.sample_securities }}')
+          assert cp['completed_work_units']==sorted(cp['completed_work_units'])
+          assert mf['production_eligibility_emitted'] is False and mf['strategy_returns_computed'] is False and mf['bt6_t1_open_computed'] is False
+          assert len(mf['output_parts'])==mf['completed_count']
+          for part in mf['output_parts']:
+              raw=s3.get_object(Bucket=b,Key=part['key'])['Body'].read()
+              assert hashlib.sha256(raw).hexdigest()==part['stored_sha256']
+          print(json.dumps({'verdict':'PASS','experiment_id':exp,'completed':mf['completed_count'],'lineage_sha256':mf['lineage_sha256']},sort_keys=True))
+          PY

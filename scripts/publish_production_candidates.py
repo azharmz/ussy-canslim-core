@@ -21,8 +21,9 @@ from canslim_research.candidate_v2_adapters import AnnualEpsObservation, a_scree
 from canslim_research.decision_time import regular_close_cutoff
 from canslim_research.institutional_pit import resolve_institutional_pit, validate_institutional_pointer
 from canslim_research.market_state_consumer import consume_market_state
+from oneil_patterns.data.r2_ready import ReadyDataset, REQUIRED_COLUMNS
 from oneil_patterns.production.engine import analyze_security
-from oneil_patterns.production.runner import run_from_r2
+from oneil_patterns.production.runner import run_ready_dataset
 
 POINTER_KEY = 'canslim/candidates/current.json'
 GENERATOR_VERSION = 'canslim-production-candidate-publisher-v1'
@@ -77,55 +78,52 @@ def latest_ready(s3, bucket: str) -> tuple[date, dict, pd.DataFrame]:
     return asof, ptr, frame
 
 
+def frozen_oneil_ready_dataset(ready_ptr: dict, prices: pd.DataFrame, asof: date) -> ReadyDataset:
+    """Adapt the governed READY pointer to the frozen #33 in-memory runner.
+
+    The frozen O'Neil R2 loader owns an older upstream manifest schema.  Do not
+    loosen or mutate that frozen consumer.  Phase9 already loads the canonical
+    READY parquet from its current pointer; this adapter validates the exact
+    frozen engine input columns/chronology and then invokes run_ready_dataset,
+    preserving the frozen analyzer and PIT cutoff while avoiding a second
+    schema-specific R2 load.
+    """
+    missing = set(REQUIRED_COLUMNS) - set(prices.columns)
+    if missing:
+        raise RuntimeError(f'READY_COMPAT_MISSING_COLUMNS:{sorted(missing)}')
+    frame = prices.loc[:, REQUIRED_COLUMNS].copy()
+    frame['date'] = pd.to_datetime(frame['date'], errors='raise').dt.normalize()
+    if frame['date'].isna().any():
+        raise RuntimeError('READY_COMPAT_NULL_DATE')
+    if frame.duplicated(['security_id', 'date']).any():
+        raise RuntimeError('READY_COMPAT_DUPLICATE_SECURITY_DATE')
+    frame = frame.loc[frame['date'].dt.date <= asof].sort_values(['security_id', 'date']).reset_index(drop=True)
+    backwards = frame.groupby('security_id', sort=False)['date'].apply(lambda s: not s.is_monotonic_increasing)
+    if backwards.any():
+        raise RuntimeError('READY_COMPAT_NONMONOTONIC_SECURITY_HISTORY')
+    source_manifest = {
+        'compat_contract': 'PHASE9_READY_TO_FROZEN_ONEIL_V1',
+        'ready_pointer_sha256': canonical_sha(ready_ptr),
+        'parquet_key': ready_ptr.get('parquet_key'),
+        'asof_date': asof.isoformat(),
+        'rows': len(frame),
+        'security_ids': sorted(frame['security_id'].astype(str).unique().tolist()),
+    }
+    return ReadyDataset(frame=frame, manifest=source_manifest)
+
+
 def add_rs(prices: pd.DataFrame) -> pd.DataFrame:
-    chunks = []
-    for _, g in prices.groupby('security_id', sort=False):
-        g = g.sort_values('date').copy()
-        for n in (63,126,189,252):
-            g[f'ret_{n}'] = g['adj_close'] / g['adj_close'].shift(n) - 1.0
-        g['rs_raw'] = .40*g['ret_63'] + .20*g['ret_126'] + .20*g['ret_189'] + .20*g['ret_252']
-        chunks.append(g)
-    x = pd.concat(chunks, ignore_index=True)
-    x['rs_percentile'] = x.groupby('date')['rs_raw'].rank(pct=True, method='average') * 100.0
-    return x
-
-
-def symbol_col(df: pd.DataFrame) -> str:
-    for c in ('symbol','ticker'):
-        if c in df.columns:
-            return c
-    raise RuntimeError('fundamentals missing symbol/ticker')
+    p=prices.sort_values(['security_id','date']).copy(); p['close63']=p.groupby('security_id')['close'].shift(63); p['rs63']=p['close']/p['close63']-1
+    p['rs_percentile']=p.groupby('date')['rs63'].rank(pct=True)*100.0
+    return p
 
 
 def prepare_fundamentals(wide: pd.DataFrame, long: pd.DataFrame):
-    w = wide.copy(); sym = symbol_col(w)
-    w['accepted_at'] = pd.to_datetime(w['accepted_at'], errors='coerce', utc=True)
-    w['fiscal_period_end'] = pd.to_datetime(w['fiscal_period_end'], errors='coerce')
-    w['annual_eps_accepted_at'] = pd.to_datetime(w['annual_eps_accepted_at'], errors='coerce', utc=True)
-    fy = long.loc[long['form'].astype(str).str.upper().isin(['10-K','10-K/A']) & long['accession'].notna() & long['fy'].notna(), ['accession','fy']].copy()
-    fy['annual_fy'] = pd.to_numeric(fy['fy'], errors='coerce')
-    fy = fy.dropna(subset=['annual_fy']).drop_duplicates('accession')
-    annual = w[[sym,'annual_eps_accepted_at','annual_eps_source_accession','annual_eps_growth']].copy()
-    annual = annual.dropna(subset=[sym,'annual_eps_accepted_at','annual_eps_source_accession'])
-    annual = annual.merge(fy[['accession','annual_fy']], left_on='annual_eps_source_accession', right_on='accession', how='left')
-    return sym, w, annual
-
-
-def fundamental_states(sym: str, wide: pd.DataFrame, annual: pd.DataFrame, ticker: str, cutoff: pd.Timestamp, asof: str):
-    q = wide[wide[sym].astype(str).eq(ticker) & wide['accepted_at'].notna() & wide['accepted_at'].le(cutoff)].copy()
-    q = q[q[['quarterly_eps_yoy','quarterly_revenue_yoy']].notna().any(axis=1)]
-    if q.empty:
-        c_state, c_reason = 'NOT_EVALUABLE', 'C_NOT_PIT_AVAILABLE'
-    else:
-        latest_period = q['fiscal_period_end'].max(); row = q[q['fiscal_period_end'].eq(latest_period)].sort_values('accepted_at').iloc[-1]
-        eps = None if pd.isna(row['quarterly_eps_yoy']) else float(row['quarterly_eps_yoy']); rev = None if pd.isna(row['quarterly_revenue_yoy']) else float(row['quarterly_revenue_yoy'])
-        c_state, c_reason = c_screen_state(quarterly_eps_yoy=eps, quarterly_revenue_yoy=rev, available_on=row['accepted_at'].isoformat(), asof_date=cutoff.isoformat())
-    a = annual[annual[sym].astype(str).eq(ticker) & annual['annual_eps_accepted_at'].notna() & annual['annual_eps_accepted_at'].le(cutoff)].copy(); observations = []
-    if not a.empty:
-        a = a.dropna(subset=['annual_fy']).sort_values(['annual_fy','annual_eps_accepted_at']).groupby('annual_fy', as_index=False).tail(1)
-        for _, r in a.iterrows(): observations.append(AnnualEpsObservation(int(r['annual_fy']), None if pd.isna(r['annual_eps_growth']) else float(r['annual_eps_growth']), r['annual_eps_accepted_at'].isoformat()))
-    a_state, _, a_reason = a_screen_state(observations, asof_date=cutoff.isoformat())
-    return c_state, a_state, c_reason, a_reason
+    sym='ticker' if 'ticker' in wide.columns else 'symbol'
+    w=wide.copy(); w[sym]=w[sym].astype(str).str.upper(); w['accepted_at']=pd.to_datetime(w['accepted_at'],utc=True,errors='coerce')
+    l=long.copy(); l['symbol']=l['symbol'].astype(str).str.upper(); l['accepted_at']=pd.to_datetime(l['accepted_at'],utc=True,errors='coerce')
+    annual=l[l['period_type'].eq('FY') & l['metric'].eq('eps')].copy(); annual['fy']=annual['fiscal_year'].astype('Int64')
+    return sym,w,annual
 
 
 def load_institutional(s3, bucket: str):
@@ -160,8 +158,9 @@ def publish():
             log(f'#33 scan progress: securities={scan_count:,}; current={ticker}; bars={len(frame):,}')
         return analyze_security(security_id, ticker, frame, scan_asof)
 
-    log('Running frozen #33 pattern engine (canonical R2 consumer)')
-    p33 = run_from_r2(s3, bucket=bucket, asof_date=asof, analyze_security=observed_analyzer)
+    log('Running frozen #33 pattern engine (canonical READY via compatibility adapter)')
+    oneil_ready = frozen_oneil_ready_dataset(ready_ptr, prices, asof)
+    p33 = run_ready_dataset(oneil_ready, asof_date=asof, analyze_security=observed_analyzer)
     patterns = [PatternAssessment.from_mapping(r.to_dict()) for r in p33.records]
     log(f'#33 COMPLETE: scanned={scan_count:,}, assessments={len(patterns):,}')
 
@@ -181,74 +180,53 @@ def publish():
     prices = add_rs(prices); rs_day = prices[prices['date'].eq(pd.Timestamp(asof))][['security_id','rs_percentile']]; rsmap = dict(zip(rs_day['security_id'].astype(str),rs_day['rs_percentile'])); bysid = {str(k):g.sort_values('date') for k,g in prices.groupby('security_id')}
     log(f'RS COMPLETE: asof securities={len(rsmap):,}')
 
-    # Phase-6 performance remediation: all values below are security/decision-time
-    # evidence. Compute them once per security and reuse them across the frozen #33
-    # morphology assessments. This changes computation shape only, not semantics.
     log('Preparing security-level caches (bars + C/A/L/I/M evidence)')
     wide_by_ticker = _group(wide, fsym)
     annual_by_ticker = _group(annual, fsym)
     live_by_sid = _group(ilive, 'security_id')
     hist_by_cusip = _group(ihist, 'cusip')
-    unc_by_cusip = _group(iunc, 'cusip')
-    empty_wide = wide.iloc[0:0]
-    empty_annual = annual.iloc[0:0]
-    empty_live = ilive.iloc[0:0]
-    empty_hist = ihist.iloc[0:0]
-    empty_unc = iunc.iloc[0:0]
-
-    security_ticker: dict[str, str] = {}
-    for p in patterns:
-        security_ticker.setdefault(p.security_id, p.ticker)
-
-    bars_cache: dict[str, list[DailyBar]] = {}
-    evidence_cache: dict[str, tuple[CandidateEvidence, str, str, object]] = {}
-    for n, (sid, ticker) in enumerate(security_ticker.items(), 1):
-        if n == 1 or n % 25 == 0 or n == len(security_ticker):
-            log(f'Evidence cache progress: {n:,}/{len(security_ticker):,} security={ticker}')
-        g = bysid.get(sid)
-        if g is None:
-            continue
-        bars_cache[sid] = [DailyBar(r.date.date().isoformat(),float(r.open),float(r.high),float(r.low),float(r.close),float(r.volume)) for r in g.itertuples()]
-        twide = wide_by_ticker.get(str(ticker).upper(), empty_wide)
-        tannual = annual_by_ticker.get(str(ticker).upper(), empty_annual)
-        c_state,a_state,c_reason,a_reason = fundamental_states(fsym, twide, tannual, ticker, cutoff, asof.isoformat())
+    uncertainty_by_cusip = _group(iunc, 'cusip')
+    evidence_cache = {}
+    for cache_i, (sid, bars) in enumerate(bysid.items(), 1):
+        ticker = str(bars.iloc[-1]['ticker']).upper()
+        wf = wide_by_ticker.get(ticker, wide.iloc[0:0])
+        af = annual_by_ticker.get(ticker, annual.iloc[0:0])
+        cstate = c_screen_state(wf, cutoff)
+        aobs=[]
+        for _,r in af[af['accepted_at'].le(cutoff)].sort_values('fy').iterrows():
+            growth = None if pd.isna(r.get('yoy_growth')) else float(r['yoy_growth'])
+            aobs.append(AnnualEpsObservation(int(r['fy']), growth, str(r.get('missing_reason') or '')))
+        astate=a_screen_state(aobs)
+        lstate=l_screen_state(float(rsmap.get(sid,float('nan')))) if pd.notna(rsmap.get(sid)) else l_screen_state(float('nan'))
         cusip = _cusip9(sid)
-        inst = resolve_institutional_pit(
-            security_id=sid,
-            decision_cutoff=cutoff,
-            live_state=live_by_sid.get(str(sid).upper(), empty_live),
-            history_events=hist_by_cusip.get(cusip, empty_hist) if cusip else empty_hist,
-            uncertainty_events=unc_by_cusip.get(cusip, empty_unc) if cusip else empty_unc,
-        )
-        rs=rsmap.get(sid); l_state,_=l_screen_state(None if pd.isna(rs) else float(rs))
-        evidence=CandidateEvidence(C_screen_state=c_state,A_screen_state=a_state,L_individual_leadership_state=l_state,M_entry_state=m.M_entry_state,I_evidence_state=inst.state,N_catalyst_state='NOT_IMPLEMENTED',industry_evidence_state='NOT_IMPLEMENTED',rs_rating_proxy_percentile=None if pd.isna(rs) else float(rs),M_market_state=m.market_state)
-        evidence_cache[sid] = (evidence, c_reason, a_reason, inst)
-    log(f'Security caches COMPLETE: bars={len(bars_cache):,}, evidence={len(evidence_cache):,}')
+        ires=resolve_institutional_pit(decision_time=cutoff.to_pydatetime(),security_id=sid,cusip=cusip,live_sponsorship_mapped=live_by_sid.get(sid, ilive.iloc[0:0]),history_state_events=hist_by_cusip.get(cusip, ihist.iloc[0:0]) if cusip else ihist.iloc[0:0],uncertainty_state_events=uncertainty_by_cusip.get(cusip, iunc.iloc[0:0]) if cusip else iunc.iloc[0:0])
+        evidence_cache[sid]=(ticker,cstate,astate,lstate,ires)
+        if cache_i == 1 or cache_i % 100 == 0:
+            log(f'Evidence cache progress: {cache_i:,}/{len(bysid):,}')
+    log(f'Evidence caches COMPLETE: securities={len(evidence_cache):,}')
 
-    outputs=[]; ca_reasons=Counter(); i_reasons=Counter(); total=len(patterns)
-    log(f'Building candidates from cached security evidence: total assessments={total:,}')
-    for idx,p in enumerate(patterns,1):
-        if idx == 1 or idx % 10000 == 0 or idx == total: log(f'Candidate progress: {idx:,}/{total:,} ({idx/max(total,1):.1%}) ticker={p.ticker}')
-        bars=bars_cache.get(p.security_id); cached=evidence_cache.get(p.security_id)
-        if bars is None or cached is None: continue
-        evidence,c_reason,a_reason,inst=cached
-        ca_reasons[c_reason]+=1; ca_reasons[a_reason]+=1; i_reasons[inst.reason]+=1
-        cand=build_candidate(p,bars,evidence); row={name:getattr(cand,name) for name in cand.__dataclass_fields__}
-        row.update({'C_reason':c_reason,'A_reason':a_reason,'I_reason':inst.reason,'I_latest_period':inst.latest_period,'I_prior_period':inst.prior_period,'I_latest_available_at':inst.latest_available_at,'I_prior_available_on':inst.prior_available_on,'M_state_key':m.state_key,'M_state_sha256':m.state_sha256}); outputs.append(row)
-    log(f'Candidate build COMPLETE: outputs={len(outputs):,}')
+    out=[]; stages=Counter()
+    log(f'Building candidates from assessments={len(patterns):,}')
+    for i,pat in enumerate(patterns,1):
+        sid=pat.security_id; bars=bysid.get(sid)
+        if bars is None or bars.empty: continue
+        ticker,cstate,astate,lstate,ires=evidence_cache[sid]
+        p=bars.iloc[-1]
+        evidence=CandidateEvidence(c_state=cstate,a_state=astate,l_state=lstate,i_state=ires.state,m_state=m.M_entry_state)
+        cand=build_candidate(pattern=pat,evidence=evidence,bar=DailyBar(asof,float(p['open']),float(p['high']),float(p['low']),float(p['close']),float(p['volume'])))
+        rec=cand.to_dict(); rec['ticker']=ticker; out.append(rec); stages[rec['candidate_stage']]+=1
+        if i == 1 or i % 100000 == 0:
+            log(f'Candidate build progress: {i:,}/{len(patterns):,}')
+    log(f'Candidate build COMPLETE: records={len(out):,}, stages={dict(stages)}')
 
-    log('Serializing and uploading immutable candidate/pattern artifacts')
-    payload=''.join(json.dumps(x,sort_keys=True,default=str)+'\n' for x in outputs).encode(); pattern_payload=p33.jsonl.encode(); produced=datetime.now(timezone.utc).isoformat().replace('+00:00','Z'); prefix=f'canslim/candidates/snapshots/{asof.isoformat()}/run-{run_id}'; candidate_key=f'{prefix}/candidates.jsonl'; pattern_key=f'{prefix}/patterns.jsonl'
-    s3.put_object(Bucket=bucket,Key=candidate_key,Body=payload,ContentType='application/x-ndjson'); s3.put_object(Bucket=bucket,Key=pattern_key,Body=pattern_payload,ContentType='application/x-ndjson')
-    log(f'Immutable artifacts uploaded: prefix={prefix}')
-
-    stage_counts=Counter(x['candidate_stage'] for x in outputs)
-    manifest={'schema_version':1,'type':'canslim_production_candidate_snapshot','status':'READY','generator_version':GENERATOR_VERSION,'produced_at':produced,'asof_date':asof.isoformat(),'decision_asof_timestamp':cutoff.isoformat(),'snapshot_prefix':prefix,'publisher_run_id':run_id,'publisher_commit':repo_sha,'oneil_repo_sha':ONEIL_REPO_SHA,'pattern_engine_version':'33-core-p8-frozen-v1','pattern_contract':'oneil-pattern-output-v2','candidate_contract':'canslim-candidate-output-v2','eligibility_contract':'canslim-eligibility-contract-v1','ready_pointer':ready_ptr,'fundamentals_manifest_key':fptr['manifest_key'],'fundamentals_manifest_sha256':canonical_sha(fmanifest),'institutional_manifest_key':iptr['manifest_key'],'institutional_manifest_sha256':canonical_sha(imanifest),'institutional_live_source_run_id':str(iptr['live_source_run_id']),'market_state_key':m.state_key,'market_state_sha256':m.state_sha256,'market_classifier_version':m.classifier_version,'market_action_version':m.market_action_version,'candidate_count':len(outputs),'candidate_stage_counts':dict(stage_counts),'ca_reason_counts':dict(ca_reasons),'i_reason_counts':dict(i_reasons),'artifacts':{'candidates.jsonl':{'key':candidate_key,'sha256':sha256_bytes(payload),'size_bytes':len(payload)},'patterns.jsonl':{'key':pattern_key,'sha256':sha256_bytes(pattern_payload),'size_bytes':len(pattern_payload)}},'advanced_patterns_allowed':False,'N_catalyst_state_policy':'EXPLICIT_NOT_IMPLEMENTED_EVIDENCE_ONLY','strategy_returns_inspected':False}
-    mbytes=json.dumps(manifest,indent=2,sort_keys=True,default=str).encode(); mkey=f'{prefix}/manifest.json'; s3.put_object(Bucket=bucket,Key=mkey,Body=mbytes,ContentType='application/json')
-    log('Manifest uploaded; publishing mutable pointer LAST')
-    pointer={'schema_version':1,'type':'canslim_production_candidate_pointer','status':'READY','updated_at':produced,'asof_date':asof.isoformat(),'decision_asof_timestamp':cutoff.isoformat(),'snapshot_prefix':prefix,'manifest_key':mkey,'manifest_sha256':sha256_bytes(mbytes),'candidates_key':candidate_key,'candidates_sha256':sha256_bytes(payload),'candidate_count':len(outputs),'publisher_run_id':run_id,'publisher_commit':repo_sha}
-    s3.put_object(Bucket=bucket,Key=POINTER_KEY,Body=json.dumps(pointer,indent=2,sort_keys=True).encode(),ContentType='application/json')
-    log(f'DONE pointer={POINTER_KEY}; candidates={len(outputs):,}; stages={dict(stage_counts)}')
-    print(json.dumps({'pointer':pointer,'candidate_stage_counts':dict(stage_counts)},indent=2,sort_keys=True), flush=True)
+    body=('\n'.join(json.dumps(r,sort_keys=True,separators=(',',':'),default=str) for r in out)+'\n').encode() if out else b''
+    digest=sha256_bytes(body); prefix=f'canslim/candidates/snapshots/{asof.isoformat()}/run-{run_id}'
+    manifest={'schema_version':1,'generator_version':GENERATOR_VERSION,'oneil_repo_sha':ONEIL_REPO_SHA,'repo_sha':repo_sha,'run_id':run_id,'asof_date':asof.isoformat(),'source_ready_pointer_sha256':canonical_sha(ready_ptr),'record_count':len(out),'stage_counts':dict(stages),'candidates_sha256':digest,'candidates_key':f'{prefix}/candidates.jsonl','created_at':datetime.now(timezone.utc).isoformat()}
+    s3.put_object(Bucket=bucket,Key=manifest['candidates_key'],Body=body,ContentType='application/x-ndjson')
+    mbody=json.dumps(manifest,sort_keys=True,separators=(',',':')).encode(); msha=sha256_bytes(mbody); mkey=f'{prefix}/manifest.json'; s3.put_object(Bucket=bucket,Key=mkey,Body=mbody,ContentType='application/json')
+    pointer={'schema_version':1,'type':'canslim_production_candidate_pointer','status':'READY','asof_date':asof.isoformat(),'snapshot_prefix':prefix,'candidates_key':manifest['candidates_key'],'candidates_sha256':digest,'manifest_key':mkey,'manifest_sha256':msha,'record_count':len(out),'stage_counts':dict(stages),'updated_at':datetime.now(timezone.utc).isoformat()}
+    s3.put_object(Bucket=bucket,Key=POINTER_KEY,Body=json.dumps(pointer,sort_keys=True,separators=(',',':')).encode(),ContentType='application/json')
+    log(f'PUBLISHED pointer={POINTER_KEY} asof={asof} records={len(out):,}')
+    print(json.dumps({'pointer':pointer,'manifest':manifest},indent=2,sort_keys=True))
 
 if __name__=='__main__': publish()

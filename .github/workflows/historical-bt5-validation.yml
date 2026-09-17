@@ -11,9 +11,6 @@ on:
         description: Causal prefix sessions per security for recovery validation only
         required: false
         default: '250'
-  push:
-    branches: [historical-bt5-replay]
-    paths: [.github/workflows/historical-bt5-validation.yml]
 
 permissions:
   contents: read
@@ -45,18 +42,28 @@ jobs:
         run: pytest -q tests/test_historical_bt5_recovery.py
       - name: Compile runner
         run: python -m py_compile scripts/bt5c_authorized_reuse.py scripts/historical_bt5_checkpoint.py scripts/historical_bt5_runner.py
-      - name: Inject interruption after first durable checkpoint
+      - name: Prove expected crash after first durable checkpoint
         id: crash
-        continue-on-error: true
+        shell: bash
         run: |
           EXP="bt5-validation-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           echo "experiment=$EXP" >> "$GITHUB_OUTPUT"
           SAMPLE='${{ inputs.sample_securities }}'; SAMPLE="${SAMPLE:-2}"
           SESSIONS='${{ inputs.max_sessions }}'; SESSIONS="${SESSIONS:-250}"
-          python scripts/historical_bt5_runner.py --experiment-id "$EXP" --runner-commit "$GITHUB_SHA" --max-securities "$SAMPLE" --max-sessions "$SESSIONS" --interrupt-after 1
-      - name: Require injected interruption
-        if: steps.crash.outcome != 'failure'
-        run: exit 1
+          set +e
+          python scripts/historical_bt5_runner.py --experiment-id "$EXP" --runner-commit "$GITHUB_SHA" --max-securities "$SAMPLE" --max-sessions "$SESSIONS" --interrupt-after 1 > /tmp/bt5-expected-crash.log 2>&1
+          rc=$?
+          set -e
+          cat /tmp/bt5-expected-crash.log
+          if [ "$rc" -eq 0 ]; then
+            echo 'ERROR: runner completed instead of injecting the expected interruption'
+            exit 1
+          fi
+          if ! grep -q 'BT5_TEST_INJECTED_INTERRUPTION_AFTER_DURABLE_CHECKPOINT' /tmp/bt5-expected-crash.log; then
+            echo "ERROR: runner failed for an unexpected reason (exit=$rc)"
+            exit "$rc"
+          fi
+          echo "EXPECTED_CRASH_CONFIRMED exit=$rc"
       - name: Resume exact lineage to completion
         run: |
           SAMPLE='${{ inputs.sample_securities }}'; SAMPLE="${SAMPLE:-2}"

@@ -1,0 +1,57 @@
+name: Historical fundamental screener v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [historical-fundamental-screener]
+    paths:
+      - '.github/workflows/historical-fundamental-screener-v1.yml'
+      - 'scripts/run_historical_fundamental_screener.py'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          echo '[setup] installing pandas/pyarrow/boto3'
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+          echo '[setup] dependencies ready'
+      - name: Build historical fundamental screener
+        run: |
+          echo '[screen] START historical PIT fundamental screening'
+          python scripts/run_historical_fundamental_screener.py
+          echo '[screen] COMPLETE historical PIT fundamental screening'
+      - name: Show validation summary
+        run: |
+          echo '[summary] START'
+          cat results/historical-fundamental-screener-v1/summary.json
+          echo '[summary] COMPLETE'
+      - name: Upload bounded evidence artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: historical-fundamental-screener-v1-${{ github.run_id }}
+          path: |
+            results/historical-fundamental-screener-v1/summary.json
+            results/historical-fundamental-screener-v1/fundamental_state_transitions.csv
+            results/historical-fundamental-screener-v1/ca_pass_intervals.csv
+            results/historical-fundamental-screener-v1/latest_ca_pass.csv
+            results/historical-fundamental-screener-v1/fundamentals_current_pointer.json
+            results/historical-fundamental-screener-v1/fundamentals_snapshot_manifest.json
+          retention-days: 30

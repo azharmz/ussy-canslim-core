@@ -1,11 +1,5 @@
 name: BT5C cross-asof landmark equivalence probe
 on:
-  push:
-    branches: [bt5c-cross-asof-prototype]
-    paths:
-      - 'scripts/bt5c_cross_asof_landmark_probe.py'
-      - 'scripts/bt5c_cross_asof_landmark_runner.py'
-      - '.github/workflows/bt5c-landmark-probe.yml'
   workflow_dispatch:
 permissions:
   contents: read

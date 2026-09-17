@@ -1,14 +1,17 @@
 name: remediation-phase9-e2e-orchestrator
 
 # Frozen CAN SLIM production publisher.
-# Production R2 mutation is permitted only on the scheduled production cadence
-# or an explicit operator dispatch. Implementation pushes must not publish a new
-# immutable production snapshot for the same market session.
+# Production mutation is driven by a NEW finalized ussy-data READY session,
+# not by the wall-clock date. The cron is only a reconciliation opportunity.
+# Same-session reruns/weekends/holidays are idempotent no-ops.
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 2 * * 2-6'
+    # Tue-Sat UTC corresponds to the preceding Mon-Fri US session.
+    # ussy-data production starts at 05:07 UTC and can run for >2h; this
+    # reconciliation runs later and still refuses to publish until READY advances.
+    - cron: '30 8 * * 2-6'
 
 permissions:
   contents: read
@@ -47,19 +50,79 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
           python -m pip install --disable-pip-version-check -e ./oneil-patterns
+
+      - name: Gate on new finalized READY session
+        id: cadence
+        shell: bash
+        run: |
+          python - <<'PY'
+          import io, json, os
+          import boto3, pandas as pd
+          from botocore.exceptions import ClientError
+
+          s3 = boto3.client(
+              's3', endpoint_url=os.environ['R2_ENDPOINT'], region_name='auto',
+              aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          bucket = os.environ['R2_BUCKET_NAME']
+
+          def get_json(key):
+              return json.loads(s3.get_object(Bucket=bucket, Key=key)['Body'].read())
+
+          ready = get_json('production/ready/current.json')
+          parquet_key = ready.get('parquet_key')
+          if not parquet_key:
+              raise RuntimeError('READY pointer missing parquet_key; fail closed')
+          frame = pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket, Key=parquet_key)['Body'].read()), columns=['date'])
+          if frame.empty:
+              raise RuntimeError('READY parquet empty; fail closed')
+          ready_asof = pd.to_datetime(frame['date'], errors='raise').dt.date.max().isoformat()
+
+          current_asof = None
+          try:
+              current = get_json('canslim/candidates/current.json')
+              current_asof = current.get('asof_date')
+          except ClientError as exc:
+              code = exc.response.get('Error', {}).get('Code')
+              if code not in ('NoSuchKey', '404', 'NotFound'):
+                  raise
+
+          if current_asof and current_asof > ready_asof:
+              raise RuntimeError(f'candidate current {current_asof} is ahead of READY {ready_asof}; fail closed')
+
+          proceed = current_asof != ready_asof
+          print(f'CADENCE READY={ready_asof} candidate_current={current_asof} proceed={proceed}', flush=True)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+              fh.write(f'proceed={str(proceed).lower()}\n')
+              fh.write(f'ready_asof={ready_asof}\n')
+              fh.write(f'candidate_asof={current_asof or "NONE"}\n')
+          PY
+
+      - name: No new finalized trading session
+        if: steps.cadence.outputs.proceed != 'true'
+        run: echo "No-op; authoritative candidate already covers READY ${{ steps.cadence.outputs.ready_asof }}"
+
       - name: Production-boundary integration regressions
+        if: steps.cadence.outputs.proceed == 'true'
         run: python -m pytest -q tests/test_execution_entry_v1.py tests/test_phase7_entry_publisher_contract.py tests/test_phase8_lifecycle_publisher_contract.py tests/test_phase9_cross_session_handoff.py
       - name: Preflight R2 storage hard guard
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/audit_r2_storage.py
       - name: Consume prior candidate after T+1 becomes available
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/publish_production_entries.py
       - name: Advance lifecycle from resulting entry snapshot
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/publish_production_candidates.py
       - name: Losslessly compact candidate snapshot with immutable manifest
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/compact_candidate_snapshot.py
       - name: Apply protected rolling 7-day retention
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/retain_candidate_snapshots.py
       - name: Verify post-retention R2 storage
+        if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/audit_r2_storage.py

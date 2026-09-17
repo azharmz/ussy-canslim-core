@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/historical-fundamental-screener-v1.yml'
       - 'scripts/run_historical_fundamental_screener.py'
+      - 'scripts/validate_historical_fundamental_screener.py'
 
 permissions:
   contents: read
@@ -30,18 +31,24 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: |
-          echo '[setup] installing pandas/pyarrow/boto3'
-          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+          echo '[setup] installing pandas/pyarrow/boto3/exchange-calendars'
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy exchange-calendars
           echo '[setup] dependencies ready'
       - name: Build historical fundamental screener
         run: |
           echo '[screen] START historical PIT fundamental screening'
           python scripts/run_historical_fundamental_screener.py
           echo '[screen] COMPLETE historical PIT fundamental screening'
+      - name: Validate and materialize decision-date PASS list
+        run: |
+          echo '[validate] START structural/PIT/threshold/decision-date validation'
+          python scripts/validate_historical_fundamental_screener.py
+          echo '[validate] COMPLETE'
       - name: Show validation summary
         run: |
           echo '[summary] START'
           cat results/historical-fundamental-screener-v1/summary.json
+          cat results/historical-fundamental-screener-v1/validation.json
           echo '[summary] COMPLETE'
       - name: Upload bounded evidence artifact
         uses: actions/upload-artifact@v7
@@ -49,8 +56,10 @@ jobs:
           name: historical-fundamental-screener-v1-${{ github.run_id }}
           path: |
             results/historical-fundamental-screener-v1/summary.json
+            results/historical-fundamental-screener-v1/validation.json
             results/historical-fundamental-screener-v1/fundamental_state_transitions.csv
             results/historical-fundamental-screener-v1/ca_pass_intervals.csv
+            results/historical-fundamental-screener-v1/ca_pass_by_decision_date.csv
             results/historical-fundamental-screener-v1/latest_ca_pass.csv
             results/historical-fundamental-screener-v1/fundamentals_current_pointer.json
             results/historical-fundamental-screener-v1/fundamentals_snapshot_manifest.json

@@ -1,14 +1,17 @@
 from __future__ import annotations
 import io,json,os,time
-from dataclasses import asdict
+from dataclasses import asdict,replace
 import boto3
 import pandas as pd
-from oneil_patterns.landmarks.confirmed_window import ConfirmedWindowParams, extract_confirmed_window_landmarks
+from oneil_patterns.landmarks.candidate import LandmarkCandidate
+from oneil_patterns.landmarks.confirmed_window import ConfirmedWindowParams,extract_confirmed_window_landmarks
+from oneil_patterns.landmarks.boundary import to_candidate_with_boundary
+from oneil_patterns.landmarks.model import LandmarkType
+from oneil_patterns.validation.structural_assembly import assemble_local_turn_double_bottoms,assemble_multiturn_double_bottoms,DB_LOCAL_TURN_ASSEMBLY_VERSION
 
 ONEIL_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 DEFAULT_PREFIX="history/ohlcv/"
 UPSTREAM_CONTRACT="azharmz/ussy-data:HISTORY_PREFIX=history/ohlcv/"
-# Frozen local-turn extractor parameters from assemble_local_turn_double_bottoms.
 PARAMS=ConfirmedWindowParams(confirm_sessions=3,min_excursion_pct=0.0)
 
 def log(x): print(x,flush=True)
@@ -19,26 +22,25 @@ def need(n):
 
 def config():
  prefix=os.getenv("BT5C_HISTORY_PREFIX",DEFAULT_PREFIX)
- if not prefix.endswith("/"): prefix += "/"
- sample_size=int(os.getenv("BT5C_SAMPLE_SIZE","8"))
- offsets=tuple(int(x) for x in os.getenv("BT5C_EARLIER_OFFSETS","5,10,20,40").split(",") if x.strip())
- if sample_size < 1 or not offsets or any(x <= 0 for x in offsets): raise RuntimeError("invalid BT5C probe configuration")
- return prefix,sample_size,offsets
+ if not prefix.endswith("/"): prefix+="/"
+ discovery=int(os.getenv("BT5C_DISCOVERY_SAMPLE","16")); target=int(os.getenv("BT5C_STRUCTURAL_SAMPLE","4")); max_bars=int(os.getenv("BT5C_STRUCTURAL_MAX_BARS","2000"))
+ offsets=tuple(int(x) for x in os.getenv("BT5C_EARLIER_OFFSETS","10,40").split(",") if x.strip())
+ if min(discovery,target,max_bars)<1 or target>discovery or not offsets or any(x<=0 for x in offsets): raise RuntimeError("invalid BT5C structural probe configuration")
+ return prefix,discovery,target,max_bars,offsets
 
 def list_parquet_keys(s3,bucket,prefix):
  out=[]; token=None
  while True:
   kw={"Bucket":bucket,"Prefix":prefix}
   if token: kw["ContinuationToken"]=token
-  r=s3.list_objects_v2(**kw)
-  out.extend(x["Key"] for x in r.get("Contents",[]) if x["Key"].endswith(".parquet"))
+  r=s3.list_objects_v2(**kw); out.extend(x["Key"] for x in r.get("Contents",[]) if x["Key"].endswith(".parquet"))
   if not r.get("IsTruncated"): return sorted(out)
   token=r["NextContinuationToken"]
 
 def deterministic_spread(keys,n):
- if not keys: return []
+ if not keys:return []
  n=min(n,len(keys))
- if n==1: return [keys[len(keys)//2]]
+ if n==1:return [keys[len(keys)//2]]
  idx=[round(i*(len(keys)-1)/(n-1)) for i in range(n)]
  return [keys[i] for i in dict.fromkeys(idx)]
 
@@ -57,45 +59,52 @@ def normalize(raw):
  return f.dropna().sort_values("date").drop_duplicates("date",keep="last").reset_index(drop=True)
 
 def sig(x): return json.dumps(asdict(x),sort_keys=True,default=str,separators=(",",":"))
-def extract(frame): return extract_confirmed_window_landmarks(frame,PARAMS)
+def raw_extract(frame): return extract_confirmed_window_landmarks(frame,PARAMS)
+
+def reuse_structural(frame,latest_raw,asof):
+ raw=[m for m in latest_raw if m.confirmed_date<=asof and m.price_date<=asof]
+ candidates=[]
+ for mark in raw:
+  prominence=mark.evidence.get("prominence_pct")
+  c=to_candidate_with_boundary(frame,mark,prominence_pct=float(prominence) if prominence is not None else None)
+  candidates.append(LandmarkCandidate.from_landmark(mark,amplitude_pct=c.amplitude_pct,prominence_pct=c.prominence_pct,separation_sessions=c.separation_sessions,boundary=c.boundary,extra_evidence={**c.evidence,"p8_auxiliary_role":"DOUBLE_BOTTOM_LOCAL_TURN","p8_auxiliary_version":DB_LOCAL_TURN_ASSEMBLY_VERSION}))
+ geometries=assemble_multiturn_double_bottoms(frame,candidates,asof_date=asof)
+ highs=[x for x in candidates if x.type==LandmarkType.SWING_HIGH and x.confirmed_date<=asof]
+ return [replace(g,evidence={**dict(g.evidence),"p8_auxiliary_version":DB_LOCAL_TURN_ASSEMBLY_VERSION,"p8_local_right_edge_open":not any(x.price_date>g.trough_2.price_date for x in highs)}) for g in geometries]
+
+def write(payload): open("bt5c-landmark-probe.json","w").write(json.dumps(payload,indent=2,sort_keys=True)+"\n")
 
 def main():
- prefix,sample_size,offsets=config()
- log("BT5C local-turn RAW landmark reuse exactness probe START")
- log("scope=raw confirmed-window landmarks only; structural geometry intentionally excluded")
+ prefix,discovery,target,max_bars,offsets=config(); log("BT5C-4 local-turn STRUCTURAL exactness probe START")
+ log("oracle=untouched assemble_local_turn_double_bottoms; reuse=reused raw marks + frame-relative boundary recomputation + frozen downstream assembly")
  s3=boto3.client("s3",endpoint_url=need("R2_ENDPOINT"),region_name="auto",aws_access_key_id=need("R2_ACCESS_KEY_ID"),aws_secret_access_key=need("R2_SECRET_ACCESS_KEY")); bucket=need("R2_BUCKET_NAME")
- inventory=list_parquet_keys(s3,bucket,prefix); selected=deterministic_spread(inventory,sample_size)
- if not selected: raise RuntimeError(f"no parquet under {prefix}")
- log(f"inventory={len(inventory)} selection=deterministic_spread sample={len(selected)} selected={json.dumps(selected)}")
+ inventory=list_parquet_keys(s3,bucket,prefix); discovery_keys=deterministic_spread(inventory,discovery)
+ if not discovery_keys: raise RuntimeError(f"no parquet under {prefix}")
+ selected=[]; frames={}; discovery_rows=[]
+ for i,key in enumerate(discovery_keys,1):
+  sid=key.rsplit("/",1)[-1].removesuffix(".parquet"); log(f"[discover {i}/{len(discovery_keys)}] {sid} download START")
+  frame=normalize(pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket,Key=key)["Body"].read())))
+  eligible=len(frame)<=max_bars and len(frame)>max(offsets)+10; discovery_rows.append({"security_id":sid,"source_key":key,"bars":len(frame),"eligible":eligible})
+  log(f"[discover {i}/{len(discovery_keys)}] {sid} bars={len(frame)} eligible={eligible}")
+  if eligible and len(selected)<target: selected.append(key); frames[key]=frame
+ if len(selected)<target: raise RuntimeError(f"insufficient deterministic structural corpus: need={target} got={len(selected)}; increase discovery sample or max bars deliberately")
+ log(f"inventory={len(inventory)} selected={json.dumps(selected)}")
  results=[]
  for si,key in enumerate(selected,1):
-  sid=key.rsplit("/",1)[-1].removesuffix(".parquet")
-  log(f"[{si}/{len(selected)}] {sid} download START")
-  frame=normalize(pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket,Key=key)["Body"].read())))
-  latest_asof=pd.Timestamp(frame.iloc[-1].date).date(); t=time.perf_counter(); latest=extract(frame); latest_sec=time.perf_counter()-t
-  log(f"[{si}/{len(selected)}] {sid} bars={len(frame)} latest_raw={len(latest)} latest_extract_sec={latest_sec:.3f}")
-  comparisons=0
+  sid=key.rsplit("/",1)[-1].removesuffix(".parquet"); frame=frames[key]; t=time.perf_counter(); latest_raw=raw_extract(frame); latest_raw_sec=time.perf_counter()-t
+  log(f"[{si}/{len(selected)}] {sid} bars={len(frame)} latest_raw={len(latest_raw)} raw_sec={latest_raw_sec:.3f}")
   for oi,off in enumerate(offsets,1):
-   if len(frame)<=off+10: continue
    earlier=frame.iloc[:-off].copy().reset_index(drop=True); asof=pd.Timestamp(earlier.iloc[-1].date).date()
-   t=time.perf_counter(); oracle=extract(earlier); oracle_sec=time.perf_counter()-t
-   reused=[m for m in latest if m.confirmed_date<=asof and m.price_date<=asof]
-   oracle_sig=[sig(x) for x in oracle]; reuse_sig=[sig(x) for x in reused]
-   exact=oracle_sig==reuse_sig
-   first_difference=None
+   t=time.perf_counter(); oracle=assemble_local_turn_double_bottoms(earlier,asof_date=asof); oracle_sec=time.perf_counter()-t
+   t=time.perf_counter(); reused=reuse_structural(earlier,latest_raw,asof); reuse_sec=time.perf_counter()-t
+   a=[sig(x) for x in oracle]; b=[sig(x) for x in reused]; exact=a==b
+   first=None
    if not exact:
-    limit=min(len(oracle_sig),len(reuse_sig))
-    first_difference=next((i for i in range(limit) if oracle_sig[i]!=reuse_sig[i]),limit if len(oracle_sig)!=len(reuse_sig) else None)
-   row={"security_id":sid,"source_key":key,"latest_asof":latest_asof.isoformat(),"earlier_asof":asof.isoformat(),"offset_sessions":off,"bars":len(earlier),"latest_raw_count":len(latest),"oracle_raw_count":len(oracle),"reused_raw_count":len(reused),"exact":exact,"first_difference_index":first_difference,"latest_extract_sec":round(latest_sec,6),"oracle_extract_sec":round(oracle_sec,6)}
-   results.append(row); comparisons+=1
-   log(f"[{si}.{oi}] {sid} off={off} bars={len(earlier)} oracle={len(oracle)} reused={len(reused)} exact={exact} oracle_sec={oracle_sec:.3f}")
+    lim=min(len(a),len(b)); first=next((j for j in range(lim) if a[j]!=b[j]),lim if len(a)!=len(b) else None)
+   row={"security_id":sid,"source_key":key,"earlier_asof":asof.isoformat(),"offset_sessions":off,"bars":len(earlier),"oracle_geometry_count":len(oracle),"reuse_geometry_count":len(reused),"exact":exact,"first_difference_index":first,"oracle_sec":round(oracle_sec,6),"reuse_sec":round(reuse_sec,6),"latest_raw_extract_sec":round(latest_raw_sec,6)}; results.append(row)
+   log(f"[{si}.{oi}] {sid} off={off} bars={len(earlier)} oracle={len(oracle)} reuse={len(reused)} exact={exact} oracle_sec={oracle_sec:.3f} reuse_sec={reuse_sec:.3f}")
    if not exact:
-    payload={"contract":"BT5C_LOCAL_TURN_RAW_REUSE_EQUIVALENCE_PROBE_V3","frozen_oneil_sha":ONEIL_SHA,"upstream_history_contract":UPSTREAM_CONTRACT,"history_prefix":prefix,"inventory_count":len(inventory),"selection":{"method":"deterministic_even_spread_over_sorted_canonical_inventory_v1","requested_sample_size":sample_size,"selected_keys":selected},"params":{"confirm_sessions":3,"min_excursion_pct":0.0,"earlier_offsets":list(offsets)},"comparison_count":len(results),"all_exact":False,"results":results,"structural_geometry_tested":False,"global_reuse_authorized":False,"production_eligibility_emitted":False,"strategy_returns_computed":False,"verdict":"LOCAL_TURN_RAW_REUSE_COUNTEREXAMPLE_OBSERVED"}
-    open("bt5c-landmark-probe.json","w").write(json.dumps(payload,indent=2,sort_keys=True)+"\n")
-    raise RuntimeError(f"raw exactness mismatch {sid} offset={off} first_difference_index={first_difference}")
-  log(f"[{si}/{len(selected)}] {sid} DONE comparisons={comparisons}")
- all_exact=bool(results) and all(r["exact"] for r in results)
- payload={"contract":"BT5C_LOCAL_TURN_RAW_REUSE_EQUIVALENCE_PROBE_V3","frozen_oneil_sha":ONEIL_SHA,"upstream_history_contract":UPSTREAM_CONTRACT,"history_prefix":prefix,"inventory_count":len(inventory),"selection":{"method":"deterministic_even_spread_over_sorted_canonical_inventory_v1","requested_sample_size":sample_size,"selected_keys":selected},"params":{"confirm_sessions":3,"min_excursion_pct":0.0,"earlier_offsets":list(offsets)},"reuse_rule":"extract latest local-turn confirmed-window landmarks once; earlier reuse iff confirmed_date<=earlier_asof and price_date<=earlier_asof","comparison_count":len(results),"all_exact":all_exact,"results":results,"structural_geometry_tested":False,"global_reuse_authorized":False,"production_eligibility_emitted":False,"strategy_returns_computed":False,"verdict":"LOCAL_TURN_RAW_REUSE_EXACT_OBSERVED_IN_TESTED_CASES" if all_exact else "LOCAL_TURN_RAW_REUSE_COUNTEREXAMPLE_OBSERVED"}
- open("bt5c-landmark-probe.json","w").write(json.dumps(payload,indent=2,sort_keys=True)+"\n")
- log(f"BT5C local-turn RAW landmark reuse exactness probe COMPLETE comparisons={len(results)} all_exact={all_exact}")
+    write({"contract":"BT5C_LOCAL_TURN_STRUCTURAL_REUSE_EQUIVALENCE_V1","frozen_oneil_sha":ONEIL_SHA,"all_exact":False,"results":results,"verdict":"LOCAL_TURN_STRUCTURAL_REUSE_COUNTEREXAMPLE_OBSERVED","global_reuse_authorized":False}); raise RuntimeError(f"structural mismatch {sid} offset={off} first={first}")
+ payload={"contract":"BT5C_LOCAL_TURN_STRUCTURAL_REUSE_EQUIVALENCE_V1","frozen_oneil_sha":ONEIL_SHA,"upstream_history_contract":UPSTREAM_CONTRACT,"history_prefix":prefix,"inventory_count":len(inventory),"selection":{"method":"deterministic_even_spread_then_complete-history-size-gate_v1","discovery_sample":discovery,"target_sample":target,"max_complete_history_bars":max_bars,"selected_keys":selected,"discovery":discovery_rows},"earlier_offsets":list(offsets),"comparison_count":len(results),"all_exact":bool(results) and all(x["exact"] for x in results),"results":results,"boundary_recomputed_per_earlier_frame":True,"history_truncated_for_selection":False,"final_production_output_tested":False,"global_reuse_authorized":False,"production_eligibility_emitted":False,"strategy_returns_computed":False,"verdict":"LOCAL_TURN_STRUCTURAL_REUSE_EXACT_OBSERVED_IN_TESTED_CASES"}
+ write(payload); log(f"BT5C-4 COMPLETE comparisons={len(results)} all_exact={payload['all_exact']}")
 if __name__=="__main__": main()

@@ -1,16 +1,10 @@
 name: remediation-phase6-production-candidates
 
+# Operator-only low-level publisher. Normal production cadence is owned by
+# remediation-phase9-e2e-orchestrator and gated on a new finalized READY session.
+# Code pushes must never create immutable production candidate snapshots.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/remediation-phase6-production-candidates.yml'
-      - 'scripts/publish_production_candidates.py'
-      - 'src/canslim_research/candidate_v2.py'
-      - 'src/canslim_research/candidate_v2_adapters.py'
-      - 'src/canslim_research/institutional_pit.py'
-      - 'src/canslim_research/market_state_consumer.py'
 
 permissions:
   contents: read

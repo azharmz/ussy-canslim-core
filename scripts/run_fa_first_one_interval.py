@@ -80,7 +80,7 @@ def market_replay(s3, bucket: str):
     manifest = js(s3, bucket, ptr["manifest_key"])
     series = {}
     for index_id in ("NASDAQ_COMPOSITE", "SP500", "DJIA"):
-        df = pq(s3, bucket, manifest["indexes"][index_id]["key"])
+        df = pq(s3, bucket, manifest["indexes"][index_id]["object_key"])
         df["date"] = pd.to_datetime(df["date"], errors="raise").dt.date.astype(str)
         series[index_id] = tuple(
             IndexBar(str(r.date), float(r.low), float(r.close), None if pd.isna(r.volume) else float(r.volume))

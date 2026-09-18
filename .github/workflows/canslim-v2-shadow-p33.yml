@@ -1,6 +1,9 @@
 name: CAN SLIM v2 shadow qualified p33
 on:
   workflow_dispatch:
+  push:
+    branches: [feat/canslim-v2-shadow]
+    paths: ['.github/trigger/canslim-v2-shadow-p33.once']
 permissions:
   contents: read
 concurrency:

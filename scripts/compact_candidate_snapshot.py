@@ -130,6 +130,10 @@ def main():
     if raw(s3, bucket, mkey) != mbytes:
         raise RuntimeError("compacted manifest verification failed")
 
+    # Preserve the publisher's original publication timestamp. Entry timing must
+    # never depend on this later storage-maintenance rewrite.
+    if not ptr.get("first_published_at"):
+        ptr["first_published_at"] = ptr.get("updated_at")
     ptr.update({
         "manifest_key": mkey,
         "manifest_sha256": sha_bytes(mbytes),

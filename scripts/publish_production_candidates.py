@@ -72,10 +72,18 @@ def canonical_sha(obj: dict) -> str:
 
 def latest_ready(s3, bucket: str) -> tuple[date, dict, pd.DataFrame]:
     ptr = js(s3, bucket, 'production/ready/current.json')
-    frame = pq(s3, bucket, ptr['parquet_key'])
+    target_key = os.getenv('CANSLIM_READY_PARQUET_KEY') or ptr['parquet_key']
+    frame = pq(s3, bucket, target_key)
     asof = pd.to_datetime(frame['date'], errors='raise').dt.date.max()
+    expected_asof = os.getenv('CANSLIM_READY_ASOF_DATE')
+    if expected_asof and asof.isoformat() != expected_asof:
+        raise RuntimeError(f'READY_TARGET_DATE_MISMATCH: expected={expected_asof} actual={asof}')
     frame['date'] = pd.to_datetime(frame['date'], errors='raise').dt.normalize()
-    return asof, ptr, frame
+    source_ptr = dict(ptr)
+    source_ptr['parquet_key'] = target_key
+    source_ptr['as_of_date'] = asof.isoformat()
+    source_ptr['recovery_target'] = target_key != ptr.get('parquet_key')
+    return asof, source_ptr, frame
 
 
 def frozen_oneil_ready_dataset(ready_ptr: dict, prices: pd.DataFrame, asof: date) -> ReadyDataset:

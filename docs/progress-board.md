@@ -309,3 +309,16 @@ Remaining before cutover:
 4. natural executable entry remains the required evidence for populated Entry->Lifecycle observation.
 
 Engineering completion estimate: **97%**. This percentage describes system implementation readiness, not trading performance or strategy validity.
+
+
+### v2 causal execution audit closure — 2026-09-18
+
+Status: **CLOSED / VERIFIED IN CONTRACT CI**
+
+- Signal-date READY and T+1 observation READY are separate pinned identities.
+- Candidate carries `produced_at`; late recovery cannot create a retroactive T+1 fill.
+- Observation READY key/SHA is recorded independently from source READY key/SHA.
+- Contract CI run `35340738500`: **SUCCESS** after the causal handoff correction.
+- No strategy semantics, frozen O'Neil morphology, C/A thresholds, or frozen exit contracts changed.
+
+Engineering completion estimate: **99%**. Remaining boundary is final merge/default-branch scheduling and explicit production-cutover authorization; natural populated Entry->Lifecycle evidence remains observational rather than synthetic.

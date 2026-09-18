@@ -137,7 +137,7 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 
 ## Phase 9 READY compatibility follow-up — 2026-09-18
 
-**LIGHTWEIGHT CONTRACT VALIDATION PASS / CONTROLLED E2E STILL PENDING**
+**CLOSED / VERIFIED — CONTROLLED R2-BACKED E2E PASS**
 
 - Scheduled Phase 9 run `35228601748` failed on the pre-remediation state.
 - Commit `905df69875f7952f8f4883b4a9b22b00dde7f865` introduced the READY→frozen-#33 compatibility direction, but follow-up audit found that the patch also drifted from existing frozen Candidate/evidence APIs and therefore was not accepted as sufficient production validation.
@@ -146,7 +146,21 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 - GitHub Actions run `35298025951`: **PASS**. It compiles the production publisher and runs the frozen Entry / Phase 7 / Phase 8 / Phase 9 boundary regression suite.
 - This PASS validates local contract/API compatibility only. It does **not** prove the R2-backed production path because the validation deliberately performs no production mutation.
 
-**Disposition:** Phase 9 code-level READY compatibility is **VALIDATED LOCALLY**; one controlled R2-backed E2E execution remains the required boundary before declaring the operational remediation **CLOSED / VERIFIED**. Do not infer closure from the lightweight PASS alone.
+Controlled R2-backed E2E run `35298373473`: **PASS** on 2026-09-18.
+
+- cadence: READY `2026-09-16` vs prior Candidate `2026-09-14` → `proceed=True`;
+- preflight R2 audit: ~1.22 GiB, below warning/hard-stop thresholds;
+- prior Candidate consumption / Entry publication: PASS, eligible candidates 0 and entry decisions 0;
+- Lifecycle publication: PASS with the legitimate existing boundary `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` / zero executable entries;
+- frozen #33 scan: 1,227 securities → 929,220 assessments;
+- Candidate publication: 929,220 outputs;
+- stages: `NOT_ELIGIBLE=842,508`, `PIVOT_DEFINED=85,311`, `PIVOT_CROSSED=981`, `BREAKOUT_CONFIRMED=420`;
+- Candidate pointer publication: PASS;
+- lossless compaction: PASS;
+- protected rolling retention: `RETENTION_OK`;
+- post-retention R2 audit: ~1.51 GiB, storage guard OK.
+
+**Disposition:** Phase 9 READY compatibility remediation is **CLOSED / VERIFIED**. This closes the compatibility failure only; it does not close Phase 8B / Entry→Lifecycle natural-population observation, which remains legitimately blocked until a natural executable production entry exists.
 
 ## Architecture ordering observation — 2026-09-18
 

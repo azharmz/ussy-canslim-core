@@ -3,6 +3,7 @@ name: CAN SLIM v2 shadow contract tests
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - 'src/canslim_research/watchlist_v2.py'
       - 'src/canslim_research/eligibility_v2.py'

@@ -141,7 +141,10 @@ jobs:
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
         if: steps.cadence.outputs.proceed == 'true'
-        env:\n          CANSLIM_READY_PARQUET_KEY: ${{ steps.cadence.outputs.target_key }}\n          CANSLIM_READY_ASOF_DATE: ${{ steps.cadence.outputs.target_asof }}\n        run: python scripts/publish_production_candidates.py
+        env:
+          CANSLIM_READY_PARQUET_KEY: ${{ steps.cadence.outputs.target_key }}
+          CANSLIM_READY_ASOF_DATE: ${{ steps.cadence.outputs.target_asof }}
+        run: python scripts/publish_production_candidates.py
       - name: Losslessly compact candidate snapshot with immutable manifest
         if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/compact_candidate_snapshot.py

@@ -88,3 +88,77 @@ def test_nonqualified_watchlist_cannot_bypass_fundamentals():
     ok, reasons = eligible(watchlist_state="C_FAIL")
     assert ok is False
     assert reasons[0] == "WATCHLIST_NOT_QUALIFIED"
+
+
+def test_checkpoint_is_deterministic_and_pins_lineage():
+    from canslim_research.shadow_v2_pipeline import watchlist_checkpoint_payload
+
+    assessments = {"two": wl(c="FAIL", sid="two"), "one": wl(sid="one")}
+    a = watchlist_checkpoint_payload(assessments, LINEAGE, producer_commit="sha", producer_run="run")
+    b = watchlist_checkpoint_payload(dict(reversed(list(assessments.items()))), LINEAGE, producer_commit="sha", producer_run="run")
+    assert a["content_sha256"] == b["content_sha256"]
+    assert a["qualified_count"] == 1
+    assert a["lineage"]["ready_sha256"] == "abc"
+
+
+def test_checkpoint_lineage_mismatch_fails_closed():
+    import pytest
+    from canslim_research.shadow_v2_pipeline import validate_checkpoint_lineage, watchlist_checkpoint_payload
+
+    checkpoint = watchlist_checkpoint_payload({"one": wl(sid="one")}, LINEAGE, producer_commit="sha", producer_run="run")
+    wrong = WatchlistLineage(
+        decision_date=LINEAGE.decision_date,
+        ready_key=LINEAGE.ready_key,
+        ready_sha256="different",
+        fundamental_source_identity=LINEAGE.fundamental_source_identity,
+    )
+    with pytest.raises(RuntimeError, match="LINEAGE_MISMATCH"):
+        validate_checkpoint_lineage(checkpoint, wrong)
+
+
+def test_frozen_p33_runner_receives_only_qualified_rows():
+    import pandas as pd
+    from canslim_research.shadow_v2_pipeline import run_frozen_p33_for_qualified
+
+    ready = pd.DataFrame({
+        "security_id": ["one", "one", "two", "two"],
+        "date": ["2026-09-16", "2026-09-17"] * 2,
+    })
+    assessments = {"one": wl(sid="one"), "two": wl(c="FAIL", sid="two")}
+    observed = {}
+
+    def fake_frozen_runner(frame):
+        observed["ids"] = set(frame["security_id"])
+        return "p33-result"
+
+    assert run_frozen_p33_for_qualified(ready, assessments, runner=fake_frozen_runner) == "p33-result"
+    assert observed["ids"] == {"one"}
+
+
+def test_watchlist_builder_is_identity_deterministic_and_duplicate_safe():
+    import pytest
+    from canslim_research.watchlist_v2 import build_watchlist
+
+    rows = [
+        {"security_id": "two", "ticker": "TWO", "c": "FAIL", "a": "PASS"},
+        {"security_id": "one", "ticker": "ONE", "c": "PASS", "a": "PASS"},
+    ]
+    resolver = lambda row: (row["c"], row["a"])
+    built = build_watchlist(rows, lineage=LINEAGE, state_resolver=resolver)
+    assert list(built) == ["one", "two"]
+    assert built["one"].qualified
+    assert not built["two"].qualified
+
+    with pytest.raises(RuntimeError, match="DUPLICATE_WATCHLIST_SECURITY_ID"):
+        build_watchlist([rows[0], dict(rows[0])], lineage=LINEAGE, state_resolver=resolver)
+
+
+def test_watchlist_preserves_exact_not_evaluable_state():
+    assert wl(c="NOT_EVALUABLE").watchlist_state == "C_NOT_EVALUABLE"
+    assert wl(a="NOT_EVALUABLE").watchlist_state == "A_NOT_EVALUABLE"
+
+
+def test_stale_m_fails_closed_explicitly():
+    ok, reasons = eligible(M_entry_state="STALE")
+    assert ok is False
+    assert reasons == ("M_STALE",)

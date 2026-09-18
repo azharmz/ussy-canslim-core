@@ -58,8 +58,10 @@ def assess_watchlist(
 
     if not reasons:
         state = QUALIFIED
-    elif any(r.endswith("NOT_EVALUABLE") for r in reasons):
-        state = "INPUT_NOT_EVALUABLE"
+    elif "C_NOT_EVALUABLE" in reasons:
+        state = "C_NOT_EVALUABLE"
+    elif "A_NOT_EVALUABLE" in reasons:
+        state = "A_NOT_EVALUABLE"
     elif "C_FAIL" in reasons:
         state = "C_FAIL"
     else:
@@ -84,3 +86,22 @@ def qualified_security_ids(
         for security_id, assessment in assessments.items()
         if assessment.qualified
     )
+
+
+def build_watchlist(rows, *, lineage: WatchlistLineage, state_resolver) -> dict[str, WatchlistAssessment]:
+    """Build one deterministic assessment per canonical security identity."""
+    out: dict[str, WatchlistAssessment] = {}
+    ordered = sorted(rows, key=lambda row: str(row["security_id"]))
+    for row in ordered:
+        security_id = str(row["security_id"])
+        if security_id in out:
+            raise RuntimeError(f"DUPLICATE_WATCHLIST_SECURITY_ID:{security_id}")
+        c_state, a_state = state_resolver(row)
+        out[security_id] = assess_watchlist(
+            security_id=security_id,
+            symbol_asof=str(row.get("symbol_asof") or row.get("ticker") or row.get("symbol") or ""),
+            lineage=lineage,
+            C_state=c_state,
+            A_state=a_state,
+        )
+    return out

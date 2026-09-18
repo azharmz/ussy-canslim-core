@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping, Sequence
 
-from canslim_research.eligibility_contract import evaluate_letter_states
+from canslim_research.eligibility_v2 import EligibilityV2Input, evaluate_v2
 
 PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
 EXPECTED_PATTERN_ENGINE_VERSION = "33-core-p8-frozen-v1"
@@ -302,17 +302,20 @@ def build_candidate(
     elif volume_state != "CONFIRMED_ON_BREAKOUT":
         stage = "PIVOT_CROSSED"
     else:
-        eligible, gate_reasons = evaluate_letter_states({
-            "C": evidence.C_screen_state,
-            "A": evidence.A_screen_state,
-            "N": n_price_state,
-            "S": s_evidence_state,
-            "L": evidence.L_individual_leadership_state,
-            "I": evidence.I_evidence_state,
-            "M": evidence.M_entry_state,
-        })
+        eligible, gate_reasons = evaluate_v2(EligibilityV2Input(
+            watchlist_state="QUALIFIED" if evidence.C_screen_state == "PASS" and evidence.A_screen_state == "PASS" else "NOT_QUALIFIED",
+            pattern_state=pattern.normalized_status,
+            pivot_defined=pivot_defined,
+            pivot_crossed=first_cross,
+            breakout_volume_state=volume_state,
+            L_individual_state=evidence.L_individual_leadership_state,
+            M_entry_state=evidence.M_entry_state,
+            N_catalyst_state=evidence.N_catalyst_state,
+            I_evidence_state=evidence.I_evidence_state,
+            broader_S_evidence_state=s_evidence_state,
+        ))
         reasons.extend(gate_reasons)
-        stage = "CANSLIM_ELIGIBLE" if eligible else "BREAKOUT_CONFIRMED"
+        stage = "CANSLIM_V2_ELIGIBLE" if eligible else "BREAKOUT_CONFIRMED"
 
     return CandidateRecord(
         assessment_id=pattern.assessment_id,

@@ -1,0 +1,83 @@
+name: CAN SLIM v2 shadow qualified p33
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 23 * * 1-5'
+permissions:
+  contents: read
+concurrency:
+  group: canslim-v2-shadow-p33
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: src
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Checkout frozen O'Neil pattern repo
+        uses: actions/checkout@v7
+        with:
+          repository: azharmz/ussy-oneil-patterns
+          path: oneil-patterns
+          ref: c433cc1e35a5aa32a46f732cd8c5545935e36e40
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+          python -m pip install --disable-pip-version-check -e ./oneil-patterns
+      - name: Build fresh read-only v2 watchlist
+        env:
+          CANSLIM_V2_WATCHLIST_OUTPUT: shadow-v2-watchlist.json
+        run: python scripts/build_shadow_v2_watchlist.py
+      - name: Run frozen p33 for qualified identities only
+        env:
+          CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
+          CANSLIM_V2_P33_OUTPUT: shadow-v2-p33.json
+        run: python scripts/run_shadow_v2_p33.py
+      - name: Build role-aware v2 shadow candidates
+        env:
+          CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
+          CANSLIM_V2_P33_INPUT: shadow-v2-p33.json
+          CANSLIM_V2_CANDIDATE_OUTPUT: shadow-v2-candidates.json
+        run: python scripts/run_shadow_v2_candidate.py
+      - name: Build causal v2 T+1 shadow execution
+        env:
+          CANSLIM_V2_CANDIDATE_INPUT: shadow-v2-candidates.json
+          CANSLIM_V2_EXECUTION_OUTPUT: shadow-v2-execution.json
+        run: python scripts/run_shadow_v2_execution.py
+      - name: Build v2 shadow lifecycle boundary
+        env:
+          CANSLIM_V2_EXECUTION_INPUT: shadow-v2-execution.json
+          CANSLIM_V2_LIFECYCLE_OUTPUT: shadow-v2-lifecycle.json
+        run: python scripts/run_shadow_v2_lifecycle.py
+      - name: Summarize v2 shadow observation
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open("shadow-v2-candidates.json"))
+          stages=x.get("stage_counts",{})
+          print(json.dumps({
+            "decision_date":x.get("decision_date"),
+            "qualified_security_ids":x.get("qualified_security_ids",[]),
+            "candidate_stage_counts":stages,
+            "eligible_count":stages.get("CANSLIM_V2_ELIGIBLE",0),
+            "production_cutover":False,
+            "entry_lifecycle_write":False
+          },sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v6
+        with:
+          name: canslim-v2-shadow-qualified-p33-${{ github.run_id }}
+          path: |
+            shadow-v2-watchlist.json
+            shadow-v2-p33.json
+            shadow-v2-candidates.json
+            shadow-v2-execution.json
+            shadow-v2-lifecycle.json
+          retention-days: 7

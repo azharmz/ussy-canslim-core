@@ -264,3 +264,18 @@ Production v1 remains **FROZEN**.
 FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Neither may silently alter the frozen CAN SLIM v1 production baseline.
 
 Future semantic changes require separately governed evidence/research. Integration/correctness fixes require regression evidence and must preserve frozen strategy meaning.
+
+## 2026-09-18 — Original-faithful production v2 architecture
+
+**ACTIVE / CONTRACT DESIGN COMPLETE — SHADOW IMPLEMENTATION NEXT**
+
+- v1 remains frozen and unchanged.
+- Architecture decision: `docs/decisions/2026-09-18-original-canslim-production-v2-contract.md`.
+- C/A source lock: `docs/decisions/2026-09-18-canslim-v2-ca-source-lock.md`.
+- Fundamental-first watchlist contract: `docs/contracts/canslim-watchlist-contract-v2.md`.
+- Role-aware eligibility contract: `docs/contracts/canslim-eligibility-contract-v2.md`.
+- v2 critical path is now contractually: canonical READY/PIT -> C/A screen -> qualified watchlist -> frozen #33 -> breakout demand + L -> M permission -> v2 Candidate -> T+1 Open boundary.
+- N non-price catalyst, broader S, I, RS-line and industry evidence remain explicit evidence layers rather than being silently converted into identical mandatory Boolean gates.
+- Full-universe #33 is separated conceptually as periodic Pattern Intelligence; the daily v2 CAN SLIM critical path evaluates #33 only for qualified identities.
+- Heavy-work recovery boundary is watchlist checkpoint before #33, with immutable READY/PIT lineage.
+- Next action: implement a shadow-only v2 watchlist + eligibility path and tests. No live Entry/Lifecycle cutover is authorized.

@@ -6,7 +6,7 @@
   "data_gate_pass": true,
   "forward_boundary_exclusive": "2026-09-09",
   "forward_start": "2026-09-10",
-  "market_data_asof": "2026-09-11",
+  "market_data_asof": "2026-09-17",
   "minimum_calendar_months": 12,
   "minimum_closed_x3_portfolio_trades": 50,
   "minimum_market_data_asof": "2026-09-10",

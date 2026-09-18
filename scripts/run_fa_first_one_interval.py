@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import io
 import json
 import os
@@ -164,7 +165,7 @@ def main() -> None:
                 "adj_close": float(stock.loc[pd.to_datetime(stock["date"]).dt.date.astype(str).eq(b.session_date), "adj_close"].iloc[-1]),
                 "volume": b.volume,
             } for b in prefix])
-            return [r.to_dict() for r in analyze_security(security_id, interval.ticker, frame, decision_date)]
+            return [r.to_dict() for r in analyze_security(security_id, interval.ticker, frame, date.fromisoformat(decision_date))]
 
         def evidence_provider(_interval, decision_date):
             m = decision_on(m_decisions, decision_date)

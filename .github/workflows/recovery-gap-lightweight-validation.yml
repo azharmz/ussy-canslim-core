@@ -1,7 +1,7 @@
 name: recovery-gap-lightweight-validation
 
 on:
-  push:
+  pull_request:
     paths:
       - '.github/recovery-gap-validation-trigger'
 

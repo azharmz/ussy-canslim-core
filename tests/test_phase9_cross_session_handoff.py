@@ -1,6 +1,6 @@
 from datetime import date
 
-from scripts.publish_production_entries import resolve_candidate_source
+from scripts.publish_production_entries import candidate_was_timely, resolve_candidate_source
 
 
 class FakeS3:
@@ -25,3 +25,19 @@ def test_prior_session_candidate_is_mature_after_ready_advances():
     p, state = resolve_candidate_source(FakeS3(ptr()), "b", date(2026,9,15))
     assert p["asof_date"] == "2026-09-14"
     assert state == "MATURE"
+
+
+def test_candidate_published_before_t1_open_is_timely():
+    p = ptr()
+    p["updated_at"] = "2026-09-15T12:00:00Z"
+    assert candidate_was_timely(p, date(2026,9,15))
+
+
+def test_late_recovered_candidate_cannot_authorize_retroactive_entry():
+    p = ptr()
+    p["updated_at"] = "2026-09-16T12:00:00Z"
+    assert not candidate_was_timely(p, date(2026,9,15))
+
+
+def test_missing_publication_timestamp_fails_closed():
+    assert not candidate_was_timely(ptr(), date(2026,9,15))

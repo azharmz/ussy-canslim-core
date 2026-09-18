@@ -1,6 +1,8 @@
 name: CAN SLIM v2 shadow qualified p33
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '30 23 * * 1-5'
 permissions:
   contents: read
 concurrency:
@@ -44,6 +46,21 @@ jobs:
           CANSLIM_V2_P33_INPUT: shadow-v2-p33.json
           CANSLIM_V2_CANDIDATE_OUTPUT: shadow-v2-candidates.json
         run: python scripts/run_shadow_v2_candidate.py
+      - name: Summarize v2 shadow observation
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open("shadow-v2-candidates.json"))
+          stages=x.get("stage_counts",{})
+          print(json.dumps({
+            "decision_date":x.get("decision_date"),
+            "qualified_security_ids":x.get("qualified_security_ids",[]),
+            "candidate_stage_counts":stages,
+            "eligible_count":stages.get("CANSLIM_V2_ELIGIBLE",0),
+            "production_cutover":False,
+            "entry_lifecycle_write":False
+          },sort_keys=True))
+          PY
       - uses: actions/upload-artifact@v6
         with:
           name: canslim-v2-shadow-qualified-p33-${{ github.run_id }}

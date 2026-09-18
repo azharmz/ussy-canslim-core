@@ -51,12 +51,12 @@ jobs:
           python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
           python -m pip install --disable-pip-version-check -e ./oneil-patterns
 
-      - name: Gate on new finalized READY session
+      - name: Gate on earliest unresolved finalized READY session
         id: cadence
         shell: bash
         run: |
           python - <<'PY'
-          import io, json, os
+          import io, json, os, re
           import boto3, pandas as pd
           from botocore.exceptions import ClientError
 
@@ -70,10 +70,10 @@ jobs:
               return json.loads(s3.get_object(Bucket=bucket, Key=key)['Body'].read())
 
           ready = get_json('production/ready/current.json')
-          parquet_key = ready.get('parquet_key')
-          if not parquet_key:
+          latest_key = ready.get('parquet_key')
+          if not latest_key:
               raise RuntimeError('READY pointer missing parquet_key; fail closed')
-          frame = pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket, Key=parquet_key)['Body'].read()), columns=['date'])
+          frame = pd.read_parquet(io.BytesIO(s3.get_object(Bucket=bucket, Key=latest_key)['Body'].read()), columns=['date'])
           if frame.empty:
               raise RuntimeError('READY parquet empty; fail closed')
           ready_asof = pd.to_datetime(frame['date'], errors='raise').dt.date.max().isoformat()
@@ -83,19 +83,44 @@ jobs:
               current = get_json('canslim/candidates/current.json')
               current_asof = current.get('asof_date')
           except ClientError as exc:
-              code = exc.response.get('Error', {}).get('Code')
-              if code not in ('NoSuchKey', '404', 'NotFound'):
+              if exc.response.get('Error', {}).get('Code') not in ('NoSuchKey','404','NotFound'):
                   raise
 
           if current_asof and current_asof > ready_asof:
               raise RuntimeError(f'candidate current {current_asof} is ahead of READY {ready_asof}; fail closed')
 
-          proceed = current_asof != ready_asof
-          print(f'CADENCE READY={ready_asof} candidate_current={current_asof} proceed={proceed}', flush=True)
+          # READY immutable snapshots are the recovery ledger. Select the earliest
+          # unresolved finalized date, never merely whatever current.json points to.
+          keys = []
+          token = None
+          while True:
+              kw = dict(Bucket=bucket, Prefix='production/ready/runs/')
+              if token: kw['ContinuationToken'] = token
+              page = s3.list_objects_v2(**kw)
+              keys.extend(x['Key'] for x in page.get('Contents', []))
+              if not page.get('IsTruncated'): break
+              token = page['NextContinuationToken']
+          dated = []
+          for key in keys:
+              m = re.fullmatch(r'production/ready/runs/(\d{4}-\d{2}-\d{2})\.parquet', key)
+              if m and m.group(1) <= ready_asof and (not current_asof or m.group(1) > current_asof):
+                  dated.append((m.group(1), key))
+          dated.sort()
+          if dated:
+              target_asof, target_key = dated[0]
+              proceed = True
+          else:
+              target_asof, target_key, proceed = ready_asof, latest_key, False
+
+          catchup = proceed and target_asof != ready_asof
+          print(f'CADENCE READY={ready_asof} candidate_current={current_asof} target={target_asof} catchup={catchup} proceed={proceed}', flush=True)
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
               fh.write(f'proceed={str(proceed).lower()}\n')
               fh.write(f'ready_asof={ready_asof}\n')
               fh.write(f'candidate_asof={current_asof or "NONE"}\n')
+              fh.write(f'target_asof={target_asof}\n')
+              fh.write(f'target_key={target_key}\n')
+              fh.write(f'catchup={str(catchup).lower()}\n')
           PY
 
       - name: No new finalized trading session
@@ -116,7 +141,7 @@ jobs:
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
         if: steps.cadence.outputs.proceed == 'true'
-        run: python scripts/publish_production_candidates.py
+        env:\n          CANSLIM_READY_PARQUET_KEY: ${{ steps.cadence.outputs.target_key }}\n          CANSLIM_READY_ASOF_DATE: ${{ steps.cadence.outputs.target_asof }}\n        run: python scripts/publish_production_candidates.py
       - name: Losslessly compact candidate snapshot with immutable manifest
         if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/compact_candidate_snapshot.py

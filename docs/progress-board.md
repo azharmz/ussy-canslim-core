@@ -204,6 +204,18 @@ Governance decision:
 
 **Current disposition:** `ARCHITECTURE_ORDERING_ISSUE = IDENTIFIED / NOT_YET_REMEDIATED`.
 
+## Original O'Neil workflow vs production v1 audit — 2026-09-18
+
+**HQ AUDIT COMPLETE / NO PRODUCTION CHANGE AUTHORIZED**
+
+Canonical audit: `docs/audits/original-oneil-vs-production-v1-2026-09-18.md`.
+
+The frozen production system is a deterministic, fail-closed CAN SLIM v1 implementation; it must not be described as a literal reconstruction of discretionary O'Neil/IBD practice. The repository's own #30 theory audit distinguishes heterogeneous component roles (C/A screening, S/I evidence, M market context), while `canslim-eligibility-contract-v1` deliberately makes C/A/N/S/L/I/M all mandatory for full production eligibility.
+
+The largest fidelity boundary is therefore the all-mandatory eligibility compression plus the causal T+1 Open execution contract, not merely pattern morphology. Zero eligible production candidates does **not** authorize threshold/gate relaxation. Any more literal Original-CAN-SLIM interpretation belongs in a separately governed v2 theory-fidelity workstream and must start from methodology evidence rather than performance.
+
+Production v1 remains **FROZEN**.
+
 ## Controlled debt / observation boundaries
 
 - `PRODUCTION ENTRY→LIFECYCLE OBSERVATION: BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` until a natural executable production entry exists.

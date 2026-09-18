@@ -135,6 +135,19 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 - R2 retention remains rolling 7 days with protected snapshots and at least the two newest **distinct session dates** retained for cross-session handoff/recovery safety.
 - Within an as-of/session date, exactly one canonical Candidate snapshot is retained: the current-pointer snapshot when applicable, otherwise the newest run. Non-canonical same-date rerun/remediation snapshots are operational duplicates and may be removed immediately unless explicitly protected.
 
+## Phase 9 READY compatibility follow-up — 2026-09-18
+
+**LIGHTWEIGHT CONTRACT VALIDATION PASS / CONTROLLED E2E STILL PENDING**
+
+- Scheduled Phase 9 run `35228601748` failed on the pre-remediation state.
+- Commit `905df69875f7952f8f4883b4a9b22b00dde7f865` introduced the READY→frozen-#33 compatibility direction, but follow-up audit found that the patch also drifted from existing frozen Candidate/evidence APIs and therefore was not accepted as sufficient production validation.
+- Commit `cea9fb51b3782e0d7ea54a2734dd314ff52b2f4f` restored the pre-existing Candidate/evidence semantics while retaining only the READY→`ReadyDataset` compatibility adapter and frozen `run_ready_dataset` invocation.
+- Commit `1971a93f3b44f2474dd752fb2f216b6ecdab682b` added a non-R2-mutating publisher contract workflow.
+- GitHub Actions run `35298025951`: **PASS**. It compiles the production publisher and runs the frozen Entry / Phase 7 / Phase 8 / Phase 9 boundary regression suite.
+- This PASS validates local contract/API compatibility only. It does **not** prove the R2-backed production path because the validation deliberately performs no production mutation.
+
+**Disposition:** Phase 9 code-level READY compatibility is **VALIDATED LOCALLY**; one controlled R2-backed E2E execution remains the required boundary before declaring the operational remediation **CLOSED / VERIFIED**. Do not infer closure from the lightweight PASS alone.
+
 ## Architecture ordering observation — 2026-09-18
 
 **IDENTIFIED / NOT REMEDIATED — production baseline remains frozen**

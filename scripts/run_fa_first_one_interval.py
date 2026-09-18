@@ -77,11 +77,15 @@ def daily_bars(df: pd.DataFrame) -> list[DailyBar]:
 
 
 def market_replay(s3, bucket: str):
-    ptr = js(s3, bucket, "market/indexes/official.json")
-    manifest = js(s3, bucket, ptr["manifest_key"])
+    # Frozen BT1-M long-history checkpoint validated by causal replay run 35053132268.
+    # Do not follow the mutable production pointer here: later publishers may be rolling-only.
+    manifest_key = "market/indexes/runs/35052740492/manifest.json"
+    manifest = js(s3, bucket, manifest_key)
+    if str(manifest.get("run_id")) != "35052740492":
+        raise ValueError("historical M checkpoint lineage mismatch")
     series = {}
     for index_id in ("NASDAQ_COMPOSITE", "SP500", "DJIA"):
-        df = pq(s3, bucket, manifest["indexes"][index_id]["object_key"])
+        df = pq(s3, bucket, manifest["indexes"][index_id]["key"])
         df["date"] = pd.to_datetime(df["date"], errors="raise").dt.date.astype(str)
         series[index_id] = tuple(
             IndexBar(str(r.date), float(r.low), float(r.close), None if pd.isna(r.volume) else float(r.volume))
@@ -187,6 +191,7 @@ def main() -> None:
 
     out = {
         "runner": "fa-first-medp-2021-one-interval-v0.1",
+        "historical_m_checkpoint": {"run_id": "35052740492", "manifest_key": "market/indexes/runs/35052740492/manifest.json", "validated_by_run": "35053132268"},
         "oneil_sha": PINNED_ONEIL_SHA,
         "interval": interval.__dict__ if hasattr(interval, "__dict__") else {
             k: getattr(interval, k) for k in interval.__dataclass_fields__

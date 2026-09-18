@@ -73,14 +73,19 @@ def canonical_sha(obj: dict) -> str:
 def latest_ready(s3, bucket: str) -> tuple[date, dict, pd.DataFrame]:
     ptr = js(s3, bucket, 'production/ready/current.json')
     target_key = os.getenv('CANSLIM_READY_PARQUET_KEY') or ptr['parquet_key']
-    frame = pq(s3, bucket, target_key)
+    target_payload = raw(s3, bucket, target_key)
+    target_sha256 = sha256_bytes(target_payload)
+    frame = pd.read_parquet(io.BytesIO(target_payload))
     asof = pd.to_datetime(frame['date'], errors='raise').dt.date.max()
     expected_asof = os.getenv('CANSLIM_READY_ASOF_DATE')
     if expected_asof and asof.isoformat() != expected_asof:
         raise RuntimeError(f'READY_TARGET_DATE_MISMATCH: expected={expected_asof} actual={asof}')
     frame['date'] = pd.to_datetime(frame['date'], errors='raise').dt.normalize()
     source_ptr = dict(ptr)
+    source_ptr['source_current_pointer_parquet_key'] = ptr.get('parquet_key')
+    source_ptr['source_current_pointer_sha256'] = ptr.get('sha256')
     source_ptr['parquet_key'] = target_key
+    source_ptr['sha256'] = target_sha256
     source_ptr['as_of_date'] = asof.isoformat()
     source_ptr['recovery_target'] = target_key != ptr.get('parquet_key')
     return asof, source_ptr, frame

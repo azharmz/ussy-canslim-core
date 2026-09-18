@@ -34,6 +34,7 @@ TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or 
 - #35 Candidate Validation: **COMPLETE / FROZEN — CONDITIONAL PASS**.
 - Production Candidate → eligibility → T+1 Open Entry → Lifecycle contracts are implemented/frozen; the remaining lifecycle observation boundary is **`BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`** and must close only from natural production evidence.
 - Production compute ordering is currently pattern-first before full CAN SLIM evidence assembly. The conceptual decision ordering is quality/watchlist-first then pattern/timing. This is formally tracked in `docs/progress-board.md` as **`IDENTIFIED / NOT_YET_REMEDIATED`** and does not authorize a production refactor.
+- Successor architecture is now governed by `docs/decisions/2026-09-18-original-canslim-production-v2-contract.md`: **v1 remains frozen**, while v2 is a separate methodology-first path using C/A fundamental screening before expensive stock-level #33 work, role-aware evidence semantics, separate periodic full-universe Pattern Intelligence, and explicit `ORIGINAL / OPERATIONALIZATION / DATA_ADAPTATION / PROXY / UNAVAILABLE` labels. Exact v2 C/A machine formulas remain source-lock blockers before implementation.
 - FWD1 and EXH2 remain separate frozen/prospective tracks and must not alter frozen production semantics.
 
 ## Research-universe definition

@@ -134,10 +134,10 @@ jobs:
         if: steps.cadence.outputs.proceed == 'true'
         run: python scripts/audit_r2_storage.py
       - name: Consume prior candidate after T+1 becomes available
-        if: steps.cadence.outputs.proceed == 'true'
+        if: steps.cadence.outputs.proceed == 'true' && steps.cadence.outputs.catchup != 'true'
         run: python scripts/publish_production_entries.py
       - name: Advance lifecycle from resulting entry snapshot
-        if: steps.cadence.outputs.proceed == 'true'
+        if: steps.cadence.outputs.proceed == 'true' && steps.cadence.outputs.catchup != 'true'
         run: python scripts/publish_production_lifecycle.py
       - name: Publish current-session candidates last
         if: steps.cadence.outputs.proceed == 'true'

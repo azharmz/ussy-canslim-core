@@ -109,35 +109,34 @@ def historical_i_events(s3, bucket: str, security_id: str) -> list[HistoricalIEv
     ]
 
 
-def rs_percentile_for_day(s3, bucket: str, asof: str) -> float | None:
-    # Production L ranks the full governed cross-section, not the PASS subset.
-    # Read each frozen full-history object only through as-of and reproduce
-    # production add_rs() semantics.
+def rs_percentiles_for_dates(s3, bucket: str, dates: list[str]) -> dict[str, float | None]:
+    """Load each governed security once and reproduce production L ranks for target dates."""
+    target_dates = sorted(set(dates))
     ready = js(s3, bucket, "production/ready/current.json")
     universe = pq(s3, bucket, ready["parquet_key"])[["security_id"]].drop_duplicates()
-    values = []
-    target_raw = None
+    rows: list[tuple[str, str, float]] = []
     for sid in universe["security_id"].astype(str):
         try:
             df = pq(s3, bucket, f"history/ohlcv/{sid}.parquet")
         except Exception:
             continue
         df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date.astype(str)
-        g = df[df["date"].le(asof)].sort_values("date")
-        if len(g) <= 252:
-            continue
-        a = g["adj_close"].astype(float)
-        raw_value = .40*(a.iloc[-1]/a.iloc[-64]-1)+.20*(a.iloc[-1]/a.iloc[-127]-1)+.20*(a.iloc[-1]/a.iloc[-190]-1)+.20*(a.iloc[-1]/a.iloc[-253]-1)
-        values.append((sid, raw_value))
-        if sid == DEFAULT_INTERVAL.security_id:
-            target_raw = raw_value
-    if target_raw is None or not values:
-        return None
-    s = pd.Series([v for _, v in values])
-    # exact pandas production rank(pct=True, method='average')
-    pct = float(s.rank(pct=True, method="average").iloc[[v for _,v in values].index(target_raw)] * 100.0)
-    return pct
-
+        g = df.sort_values("date").drop_duplicates("date", keep="last")
+        for asof in target_dates:
+            h = g[g["date"].le(asof)]
+            if len(h) <= 252:
+                continue
+            p = h["adj_close"].astype(float)
+            raw_value = .40*(p.iloc[-1]/p.iloc[-64]-1)+.20*(p.iloc[-1]/p.iloc[-127]-1)+.20*(p.iloc[-1]/p.iloc[-190]-1)+.20*(p.iloc[-1]/p.iloc[-253]-1)
+            rows.append((asof, sid, raw_value))
+    out = {d: None for d in target_dates}
+    frame = pd.DataFrame(rows, columns=["date", "security_id", "rs_raw"])
+    for asof, g in frame.groupby("date", sort=False):
+        ranked = g.assign(rs_pct=g["rs_raw"].rank(pct=True, method="average") * 100.0)
+        hit = ranked[ranked["security_id"].eq(DEFAULT_INTERVAL.security_id)]
+        if len(hit) == 1:
+            out[str(asof)] = float(hit["rs_pct"].iloc[0])
+    return out
 
 def main() -> None:
     p = argparse.ArgumentParser()

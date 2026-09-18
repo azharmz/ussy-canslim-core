@@ -133,3 +133,21 @@ def test_frozen_p33_runner_receives_only_qualified_rows():
 
     assert run_frozen_p33_for_qualified(ready, assessments, runner=fake_frozen_runner) == "p33-result"
     assert observed["ids"] == {"one"}
+
+
+def test_watchlist_builder_is_identity_deterministic_and_duplicate_safe():
+    import pytest
+    from canslim_research.watchlist_v2 import build_watchlist
+
+    rows = [
+        {"security_id": "two", "ticker": "TWO", "c": "FAIL", "a": "PASS"},
+        {"security_id": "one", "ticker": "ONE", "c": "PASS", "a": "PASS"},
+    ]
+    resolver = lambda row: (row["c"], row["a"])
+    built = build_watchlist(rows, lineage=LINEAGE, state_resolver=resolver)
+    assert list(built) == ["one", "two"]
+    assert built["one"].qualified
+    assert not built["two"].qualified
+
+    with pytest.raises(RuntimeError, match="DUPLICATE_WATCHLIST_SECURITY_ID"):
+        build_watchlist([rows[0], dict(rows[0])], lineage=LINEAGE, state_resolver=resolver)

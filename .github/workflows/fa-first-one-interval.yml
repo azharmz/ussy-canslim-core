@@ -2,9 +2,18 @@ name: FA-first one-interval validation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - run/fa-first-medp-2021
+    paths:
+      - ".github/workflows/fa-first-one-interval.yml"
 
 permissions:
   contents: read
+
+concurrency:
+  group: fa-first-medp-2021
+  cancel-in-progress: false
 
 jobs:
   medp-2021:

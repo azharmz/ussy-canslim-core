@@ -136,9 +136,10 @@ jobs:
       - name: Consume prior candidate after T+1 becomes available
         if: steps.cadence.outputs.proceed == 'true' && steps.cadence.outputs.catchup != 'true'
         run: python scripts/publish_production_entries.py
-      - name: Advance lifecycle from resulting entry snapshot
-        if: steps.cadence.outputs.proceed == 'true' && steps.cadence.outputs.catchup != 'true'
-        run: python scripts/publish_production_lifecycle.py
+      # Lifecycle is intentionally not advanced by this recovery orchestrator.
+      # Entry may truthfully no-op for a late recovered prior Candidate; advancing
+      # Lifecycle afterward would consume a stale entries/current.json snapshot.
+      # Lifecycle remains a separately validated production boundary.
       - name: Publish current-session candidates last
         if: steps.cadence.outputs.proceed == 'true'
         env:

@@ -10,7 +10,7 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 >
 > Workstream **#33 — O'Neil Pattern Recognition Engine** is canonical in `azharmz/ussy-oneil-patterns` and is now closed at the defensible production boundary. The frozen production contract is `oneil-pattern-output-v2` and emits only `FLAT_BASE`, `DOUBLE_BOTTOM`, `CUP_WITHOUT_HANDLE`, and `CUP_WITH_HANDLE` while preserving `RECOGNIZED / AMBIGUOUS / REJECTED`, identities, faults, semantics, and provenance.
 >
-> Local #33/P8 implementation history in this repository is retained only as research/migration evidence and is superseded as implementation source of truth. **#34 is active and must consume the frozen #33 contract rather than rebuilding morphology here.**
+> Local #33/P8 implementation history in this repository is retained only as research/migration evidence and is superseded as implementation source of truth. **#34 is complete/frozen and production integration must consume the frozen #33 contract rather than rebuilding morphology here.**
 
 ## Project boundaries
 
@@ -24,16 +24,17 @@ This repository is **not** an upgrade branch of `ussy-trendfoll` and is not a pr
 
 TrendFoll is a comparator/reference source only. CAN SLIM may adopt, modify, or reject any TrendFoll rule without changing TrendFoll production.
 
-## Current theory-fidelity boundary — 13 Sep 2026
+## Current production/research boundary — 18 Sep 2026
 
-- #25–#31 Theory Fidelity Audit: **COMPLETE**
-- #32 Theory-Faithful Candidate Specification v1: **COMPLETE / FROZEN**
-- #33 O'Neil Pattern Recognition Engine: **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS**
-- #33 production contract: **`oneil-pattern-output-v2`**, four core families only
-- P6 `ASCENDING_BASE` / `BASE_ON_BASE`: **DEFERRED / NOT PRODUCTION-VALIDATED**, outside production contract
-- #34 Theory-Faithful Candidate Generator: **IN PROGRESS**
-- current #34 implementation consumes frozen #33 output, evaluates pivot crossing and breakout volume from R2, and attaches PIT C/A plus L/M evidence adapters
-- FWD1 and EXH2 remain separate frozen/prospective tracks and must not influence #33 morphology or #34 theory semantics
+- CAN SLIM v1 production baseline: **FROZEN**.
+- #32 Theory-Faithful Candidate Specification v1: **COMPLETE / FROZEN**.
+- #33 O'Neil Pattern Recognition Engine: **CORE COMPLETE / FROZEN — P8 CONDITIONAL PASS**; production contract remains `oneil-pattern-output-v2` with four core families only.
+- P6 `ASCENDING_BASE` / `BASE_ON_BASE`: **DEFERRED / NOT PRODUCTION-VALIDATED**, outside production.
+- #34 Theory-Faithful Candidate Generator: **COMPLETE / FROZEN v1**.
+- #35 Candidate Validation: **COMPLETE / FROZEN — CONDITIONAL PASS**.
+- Production Candidate → eligibility → T+1 Open Entry → Lifecycle contracts are implemented/frozen; the remaining lifecycle observation boundary is **`BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`** and must close only from natural production evidence.
+- Production compute ordering is currently pattern-first before full CAN SLIM evidence assembly. The conceptual decision ordering is quality/watchlist-first then pattern/timing. This is formally tracked in `docs/progress-board.md` as **`IDENTIFIED / NOT_YET_REMEDIATED`** and does not authorize a production refactor.
+- FWD1 and EXH2 remain separate frozen/prospective tracks and must not alter frozen production semantics.
 
 ## Research-universe definition
 
@@ -61,8 +62,8 @@ Point-in-time discipline remains mandatory for information actually used to make
 
 ## Active path
 
-1. Complete #34 as a consumer of frozen `oneil-pattern-output-v2` only.
-2. Verify end-to-end R2 smoke: canonical #33 production output -> pivot/breakout/volume -> PIT C/A -> L/M -> candidate stage.
-3. Preserve I, broader S, RS-line and industry context as evidence states until defensible PIT sources/contracts are attached.
-4. Only after #34 is technically frozen, begin #35 candidate validation.
-5. Keep FWD1/EXH2 accumulating unchanged and keep #36 execution/entry research parked.
+1. Preserve the frozen CAN SLIM v1 production baseline and fail-closed PIT contracts.
+2. Accumulate natural Candidate → T+1 Entry → Lifecycle production evidence; do not synthesize an entry merely to close the observation boundary.
+3. Keep the production-ordering observation documented but **HOLD** any watchlist-first refactor until there is a concrete operational/research requirement and a semantic-equivalence validation plan.
+4. Keep backtest architecture independent: FA-first/event-driven historical research does not require full-universe pattern replay and does not dictate production compute order.
+5. Keep FWD1/EXH2 separate; resolve their operational freshness/evidence debt without changing frozen production strategy semantics.

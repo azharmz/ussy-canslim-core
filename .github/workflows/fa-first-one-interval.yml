@@ -7,6 +7,7 @@ on:
       - run/fa-first-medp-2021
     paths:
       - ".github/workflows/fa-first-one-interval.yml"
+      - "scripts/run_fa_first_one_interval.py"
 
 permissions:
   contents: read

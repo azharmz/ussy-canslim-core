@@ -151,3 +151,8 @@ def test_watchlist_builder_is_identity_deterministic_and_duplicate_safe():
 
     with pytest.raises(RuntimeError, match="DUPLICATE_WATCHLIST_SECURITY_ID"):
         build_watchlist([rows[0], dict(rows[0])], lineage=LINEAGE, state_resolver=resolver)
+
+
+def test_watchlist_preserves_exact_not_evaluable_state():
+    assert wl(c="NOT_EVALUABLE").watchlist_state == "C_NOT_EVALUABLE"
+    assert wl(a="NOT_EVALUABLE").watchlist_state == "A_NOT_EVALUABLE"

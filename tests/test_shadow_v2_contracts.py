@@ -156,3 +156,9 @@ def test_watchlist_builder_is_identity_deterministic_and_duplicate_safe():
 def test_watchlist_preserves_exact_not_evaluable_state():
     assert wl(c="NOT_EVALUABLE").watchlist_state == "C_NOT_EVALUABLE"
     assert wl(a="NOT_EVALUABLE").watchlist_state == "A_NOT_EVALUABLE"
+
+
+def test_stale_m_fails_closed_explicitly():
+    ok, reasons = eligible(M_entry_state="STALE")
+    assert ok is False
+    assert reasons == ("M_STALE",)

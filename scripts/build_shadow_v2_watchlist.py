@@ -61,7 +61,7 @@ def main():
     fidentity=hashlib.sha256(json.dumps(fp,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     lineage=WatchlistLineage(decision.isoformat(),rkey,hashlib.sha256(rbytes).hexdigest(),fidentity)
     rows=latest.to_dict("records"); assessments=build_watchlist(rows,lineage=lineage,state_resolver=resolve)
-    out=watchlist_checkpoint_payload(assessments,lineage,producer_commit=os.getenv("GITHUB_SHA","local"),producer_run=os.getenv("GITHUB_RUN_ID","local"))
+    out=watchlist_checkpoint_payload(assessments,lineage,producer_commit=os.getenv("GITHUB_SHA","local"),producer_run=os.getenv("GITHUB_RUN_ID","local"))\n    out["qualified_security_ids"]=sorted([sid for sid,a in assessments.items() if a.qualified])
     target=Path(os.getenv("CANSLIM_V2_WATCHLIST_OUTPUT","shadow-v2-watchlist.json")); target.write_text(json.dumps(out,sort_keys=True,indent=2))
     print(json.dumps({"decision_date":decision.isoformat(),"ready_securities":len(assessments),"qualified":out["qualified_count"],"checkpoint":str(target),"sha256":out["content_sha256"]}))
 

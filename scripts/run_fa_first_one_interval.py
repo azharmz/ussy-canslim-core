@@ -112,7 +112,14 @@ def market_replay(s3, bucket: str):
             IndexBar(str(r.date), float(r.low), float(r.close), None if pd.isna(r.volume) else float(r.volume))
             for r in df.sort_values("date").itertuples(index=False)
         )
-    return replay_historical_market(index_series=series)
+    decisions = replay_historical_market(index_series=series)
+    if decisions:
+        print(json.dumps({
+            "historical_m_first": decisions[0].asof_date,
+            "historical_m_last": decisions[-1].asof_date,
+            "historical_m_count": len(decisions),
+        }, sort_keys=True))
+    return decisions
 
 
 def historical_i_events(s3, bucket: str, security_id: str) -> list[HistoricalIEvent]:
@@ -194,7 +201,14 @@ def main() -> None:
             return [r.to_dict() for r in analyze_security(security_id, interval.ticker, frame, decision_day)]
 
         def evidence_provider(_interval, decision_date):
-            m = decision_on(m_decisions, decision_date)
+            try:
+                m = decision_on(m_decisions, decision_date)
+            except ValueError as exc:
+                first = m_decisions[0].asof_date if m_decisions else None
+                last = m_decisions[-1].asof_date if m_decisions else None
+                raise RuntimeError(
+                    f"HISTORICAL_M_DATE_UNAVAILABLE:{decision_date}:range={first}..{last}:count={len(m_decisions)}"
+                ) from exc
             inst = resolve_historical_i(security_id=interval.security_id, asof_date=decision_date, events=i_events)
             if decision_date not in l_cache:
                 l_cache[decision_date] = rs_percentile_for_day(s3, bucket, decision_date)

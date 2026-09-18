@@ -1,6 +1,6 @@
 # CAN SLIM Production Date-Gap / Catch-Up Audit — 2026-09-18
 
-Status: **IMPLEMENTED / LIGHTWEIGHT VALIDATION TRIGGERED / CONTROLLED R2 E2E PENDING**
+Status: **CLOSED / VERIFIED**
 
 ## Incident and root cause
 
@@ -36,3 +36,19 @@ A missing physical institutional 2026-09-17 directory is therefore not, by itsel
 A narrow temporary push-path workflow `recovery-gap-lightweight-validation.yml` was added and triggered for compile + Entry/Phase7/Phase8/Phase9 regressions. The available GitHub connector cannot enumerate push-triggered workflow runs, so terminal evidence is still required before closure. No heavy #33 R2-backed rerun has been started by this remediation.
 
 Do not mark CLOSED until lightweight validation is PASS, storage preflight is safe, one controlled reconciliation restores Candidate 2026-09-17, actual R2 object/manifest/pointer state is verified, no retroactive Entry/Lifecycle mutation occurred, retention/storage post-state is verified, and the temporary validation trigger/workflow is removed.
+
+
+## Closure evidence — 2026-09-18
+
+- Controlled production recovery run `35334136085`: **SUCCESS**.
+- Cadence resolved `candidate_current=2026-09-16` -> immutable READY target `2026-09-17`; `proceed=true`.
+- Prior Candidate was late for the 2026-09-17 T+1 open and Entry correctly returned `LATE_RECOVERY_NO_RETROACTIVE_ENTRY`; no retroactive Entry was published.
+- Candidate publication completed with 933,098 records: NOT_ELIGIBLE 845,763; PIVOT_DEFINED 85,729; PIVOT_CROSSED 1,123; BREAKOUT_CONFIRMED 483.
+- Candidate current pointer is `2026-09-17`; retained canonical snapshot is exactly one run: `run-35334136085`.
+- Compaction and retention succeeded; post-run R2 audit reported 1.82 GiB.
+- Read-only post-verification run `35335975701`: **SUCCESS**.
+- Read-only lineage verification run `35336201587`: **SUCCESS**. Manifest `ready_pointer.parquet_key` is `production/ready/runs/2026-09-17.parquet` and SHA-256 is `0c008dcff3a4383073b1353a046ebce2766a2e477cab3275b1db4ac89146df16`, matching the canonical immutable READY object.
+- Compaction preserves `first_published_at=2026-09-18T10:34:06.894460Z`; later pointer maintenance updates `updated_at` independently.
+- Institutional sponsorship snapshot date remains publication/version semantics, not a required per-decision-date snapshot. No synthetic 2026-09-17 institutional snapshot was created.
+
+The production date-gap incident is therefore **CLOSED / VERIFIED**. Reopen only on contradictory evidence or a new unresolved canonical READY date.

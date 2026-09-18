@@ -135,6 +135,48 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 - R2 retention remains rolling 7 days with protected snapshots and at least the two newest **distinct session dates** retained for cross-session handoff/recovery safety.
 - Within an as-of/session date, exactly one canonical Candidate snapshot is retained: the current-pointer snapshot when applicable, otherwise the newest run. Non-canonical same-date rerun/remediation snapshots are operational duplicates and may be removed immediately unless explicitly protected.
 
+## Architecture ordering observation — 2026-09-18
+
+**IDENTIFIED / NOT REMEDIATED — production baseline remains frozen**
+
+A direct audit of `scripts/publish_production_candidates.py` establishes that the current production implementation is compute-ordered as:
+
+```text
+ALL READY OHLCV
+→ frozen #33 O'Neil pattern scan across the ready universe
+→ pattern assessments
+→ PIT C/A + L/I/M evidence
+→ build_candidate()
+→ frozen eligibility / Candidate publication
+→ T+1 Entry
+```
+
+This implementation order must be distinguished from the conceptual CAN SLIM decision order:
+
+```text
+MARKET CONTEXT
+→ CAN SLIM stock-quality / fundamental screening
+→ eligible watchlist
+→ chart/base monitoring
+→ valid O'Neil pattern
+→ pivot / breakout / buy condition
+→ entry
+```
+
+The distinction is currently an **architecture-ordering observation**, not evidence that production semantics are wrong. Pattern remains the timing/entry gate conceptually even though the production publisher computes pattern assessments before assembling the full CAN SLIM evidence state.
+
+Governance decision:
+
+- do **not** reopen or tune frozen #33 morphology;
+- do **not** refactor production merely for compute efficiency or conceptual aesthetics;
+- do **not** use the current pattern-first production implementation as a requirement for historical full-universe pattern replay;
+- historical/backtest architecture may remain FA-first/event-driven and is governed separately;
+- any future proposal to pre-screen CAN SLIM quality/watchlist before invoking #33 must be a separately governed architecture workstream;
+- such a refactor must demonstrate output-semantic equivalence to the frozen baseline for the same inputs/decision time, including Candidate eligibility, pattern identity/provenance, pivot/breakout state, and fail-closed behavior;
+- wait for a concrete operational requirement or evidence from the backtest/research workstream before deciding whether this optimization is warranted.
+
+**Current disposition:** `ARCHITECTURE_ORDERING_ISSUE = IDENTIFIED / NOT_YET_REMEDIATED`.
+
 ## Controlled debt / observation boundaries
 
 - `PRODUCTION ENTRY→LIFECYCLE OBSERVATION: BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` until a natural executable production entry exists.

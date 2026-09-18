@@ -46,6 +46,11 @@ jobs:
           CANSLIM_V2_P33_INPUT: shadow-v2-p33.json
           CANSLIM_V2_CANDIDATE_OUTPUT: shadow-v2-candidates.json
         run: python scripts/run_shadow_v2_candidate.py
+      - name: Build causal v2 T+1 shadow execution
+        env:
+          CANSLIM_V2_CANDIDATE_INPUT: shadow-v2-candidates.json
+          CANSLIM_V2_EXECUTION_OUTPUT: shadow-v2-execution.json
+        run: python scripts/run_shadow_v2_execution.py
       - name: Summarize v2 shadow observation
         run: |
           python - <<'PY'
@@ -68,4 +73,5 @@ jobs:
             shadow-v2-watchlist.json
             shadow-v2-p33.json
             shadow-v2-candidates.json
+            shadow-v2-execution.json
           retention-days: 7

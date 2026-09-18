@@ -279,3 +279,33 @@ Future semantic changes require separately governed evidence/research. Integrati
 - Full-universe #33 is separated conceptually as periodic Pattern Intelligence; the daily v2 CAN SLIM critical path evaluates #33 only for qualified identities.
 - Heavy-work recovery boundary is watchlist checkpoint before #33, with immutable READY/PIT lineage.
 - Next action: implement a shadow-only v2 watchlist + eligibility path and tests. No live Entry/Lifecycle cutover is authorized.
+
+
+## CAN SLIM v2 shadow integration — 2026-09-18
+
+Status: **INTEGRATION COMPLETE / FINAL AUDIT BEFORE CUTOVER**
+
+Validated path:
+
+```text
+READY -> PIT C+A watchlist -> qualified-only frozen O'Neil Pattern Engine
+-> role-aware L/I/M + breakout-volume candidate
+-> causal T+1 Open execution
+-> frozen #37/#40/#42 exit channels
+-> #43 lifecycle arbiter
+```
+
+Evidence:
+- real-data qualified-only pattern/candidate shadow run: GitHub Actions `35338391462` SUCCESS;
+- v2 contract + T+1 execution tests: GitHub Actions `35340482345` SUCCESS;
+- institutional sponsorship now resolves through the existing PIT resolver rather than a forced placeholder;
+- candidate, execution, and lifecycle artifacts carry pinned READY/checkpoint lineage and remain read-only shadow outputs;
+- no production cutover, retroactive entry, synthetic entry, or synthetic exit is authorized.
+
+Remaining before cutover:
+1. final workflow/lineage audit;
+2. merge/default-branch scheduling verification;
+3. freeze/cutover decision after shadow semantics are accepted;
+4. natural executable entry remains the required evidence for populated Entry->Lifecycle observation.
+
+Engineering completion estimate: **97%**. This percentage describes system implementation readiness, not trading performance or strategy validity.

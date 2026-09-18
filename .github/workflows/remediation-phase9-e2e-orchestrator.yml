@@ -7,9 +7,6 @@ name: remediation-phase9-e2e-orchestrator
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/phase9-controlled-e2e-trigger'
   schedule:
     # Tue-Sat UTC corresponds to the preceding Mon-Fri US session.
     # ussy-data production starts at 05:07 UTC and can run for >2h; this

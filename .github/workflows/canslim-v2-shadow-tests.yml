@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/canslim_research/watchlist_v2.py'
       - 'src/canslim_research/eligibility_v2.py'
+      - 'src/canslim_research/shadow_v2_pipeline.py'
       - 'tests/test_shadow_v2_contracts.py'
       - '.github/workflows/canslim-v2-shadow-tests.yml'
 
@@ -26,7 +27,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install pytest
-        run: python -m pip install --disable-pip-version-check pytest
+        run: python -m pip install --disable-pip-version-check pytest pandas
       - name: Run shadow v2 contract tests
         env:
           PYTHONPATH: src

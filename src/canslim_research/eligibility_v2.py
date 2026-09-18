@@ -50,11 +50,12 @@ def evaluate_v2(x: EligibilityV2Input) -> tuple[bool, tuple[str, ...]]:
         )
 
     if x.M_entry_state != "ALLOW_NEW_BUYS":
-        reasons.append(
-            "M_NOT_EVALUABLE"
-            if x.M_entry_state == "NOT_EVALUABLE"
-            else "M_BLOCK_NEW_BUYS"
-        )
+        if x.M_entry_state == "STALE":
+            reasons.append("M_STALE")
+        elif x.M_entry_state == "NOT_EVALUABLE":
+            reasons.append("M_NOT_EVALUABLE")
+        else:
+            reasons.append("M_BLOCK_NEW_BUYS")
 
     # N non-price catalyst, broader S and I are deliberately evidence-only in
     # initial v2. Their states are preserved by the caller, never promoted to

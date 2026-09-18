@@ -101,21 +101,22 @@ def test_recognized_confirmed_breakout_can_be_eligible_with_all_mandatory_letter
     assert result.N_catalyst_state == "NOT_IMPLEMENTED"
     assert result.rs_rating_proxy_percentile == 85.0
     assert result.M_market_state == "FOLLOW_THROUGH_CONFIRMED"
-    assert result.candidate_stage == "CANSLIM_ELIGIBLE"
+    assert result.candidate_stage == "CANSLIM_V2_ELIGIBLE"
     assert result.eligibility_reason_codes == ()
 
 
 def test_catalyst_not_implemented_is_evidence_only_not_a_mandatory_gate():
     pattern = PatternAssessment.from_mapping(pattern_row())
     result = build_candidate(pattern, bars(), evidence(N_catalyst_state="NOT_IMPLEMENTED"))
-    assert result.candidate_stage == "CANSLIM_ELIGIBLE"
+    assert result.candidate_stage == "CANSLIM_V2_ELIGIBLE"
 
 
-def test_institutional_not_evaluable_blocks_full_eligibility():
+def test_institutional_not_evaluable_is_evidence_only_in_v2():
     pattern = PatternAssessment.from_mapping(pattern_row())
     result = build_candidate(pattern, bars(), evidence(I_evidence_state="NOT_EVALUABLE"))
-    assert result.candidate_stage == "BREAKOUT_CONFIRMED"
-    assert "I_NOT_PASS:NOT_EVALUABLE" in result.eligibility_reason_codes
+    assert result.candidate_stage == "CANSLIM_V2_ELIGIBLE"
+    assert result.I_evidence_state == "NOT_EVALUABLE"
+    assert result.eligibility_reason_codes == ()
 
 
 def test_low_volume_cross_remains_pivot_crossed():
@@ -151,7 +152,7 @@ def test_failed_mandatory_evidence_does_not_erase_confirmed_breakout():
     result = build_candidate(pattern, bars(), evidence(A_screen_state="NOT_EVALUABLE"))
     assert result.volume_confirmation_state == "CONFIRMED_ON_BREAKOUT"
     assert result.candidate_stage == "BREAKOUT_CONFIRMED"
-    assert "A_NOT_PASS:NOT_EVALUABLE" in result.eligibility_reason_codes
+    assert "WATCHLIST_NOT_QUALIFIED" in result.eligibility_reason_codes
 
 
 def test_c_adapter_requires_eps_and_revenue_and_is_pit_safe():

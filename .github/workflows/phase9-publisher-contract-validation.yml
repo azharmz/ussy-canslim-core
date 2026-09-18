@@ -1,0 +1,44 @@
+name: Phase9 publisher contract validation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/publish_production_candidates.py'
+      - 'src/canslim_research/candidate_v2.py'
+      - 'src/canslim_research/candidate_v2_adapters.py'
+      - 'src/canslim_research/institutional_pit.py'
+      - 'tests/test_phase9_cross_session_handoff.py'
+      - '.github/workflows/phase9-publisher-contract-validation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase9-publisher-contract-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Checkout frozen O'Neil pattern repo
+        uses: actions/checkout@v7
+        with:
+          repository: azharmz/ussy-oneil-patterns
+          path: oneil-patterns
+          ref: c433cc1e35a5aa32a46f732cd8c5545935e36e40
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
+          python -m pip install --disable-pip-version-check -e ./oneil-patterns
+      - name: Compile production publisher
+        run: python -m py_compile scripts/publish_production_candidates.py
+      - name: Run frozen boundary regressions
+        run: |
+          PYTHONPATH=src:. python -m pytest -q             tests/test_execution_entry_v1.py             tests/test_phase7_entry_publisher_contract.py             tests/test_phase8_lifecycle_publisher_contract.py             tests/test_phase9_cross_session_handoff.py

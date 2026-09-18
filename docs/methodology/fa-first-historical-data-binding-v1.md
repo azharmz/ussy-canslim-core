@@ -5,9 +5,9 @@ Status: PARTIAL BINDING / FAIL CLOSED ON M
 
 ## Stock OHLCV — RESOLVED
 
-Use the already-frozen #35 historical source:
+Use the canonical namespace for the already-frozen #35 historical source (the former `backtest/ohlcv/` root was migrated/cleaned upstream without changing price semantics):
 
-`backtest/ohlcv/{security_id}.parquet`
+`history/ohlcv/{security_id}.parquet`
 
 Authority: `docs/decisions/2026-09-13-35-historical-ohlcv-source.md`.
 

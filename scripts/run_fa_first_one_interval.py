@@ -60,6 +60,15 @@ def pq(s3, bucket: str, key: str) -> pd.DataFrame:
     return pd.read_parquet(io.BytesIO(raw(s3, bucket, key)))
 
 
+def historical_ohlcv(s3, bucket: str, security_id: str) -> pd.DataFrame:
+    """Read the frozen #35 full-history object and fail closed if it is absent."""
+    key = f"backtest/ohlcv/{security_id}.parquet"
+    try:
+        return pq(s3, bucket, key)
+    except s3.exceptions.NoSuchKey as exc:
+        raise RuntimeError(f"HISTORICAL_OHLCV_MISSING:{security_id}:{key}") from exc
+
+
 def ensure_oneil_checkout(target: Path) -> None:
     subprocess.run(["git", "clone", "-q", "https://github.com/azharmz/ussy-oneil-patterns.git", str(target)], check=True)
     subprocess.run(["git", "-C", str(target), "checkout", "-q", PINNED_ONEIL_SHA], check=True)
@@ -131,7 +140,7 @@ def rs_percentile_for_day(s3, bucket: str, asof: str) -> float | None:
     target_raw = None
     for sid in universe["security_id"].astype(str):
         try:
-            df = pq(s3, bucket, f"backtest/ohlcv/{sid}.parquet")
+            df = historical_ohlcv(s3, bucket, sid)
         except Exception:
             continue
         df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date.astype(str)
@@ -159,7 +168,7 @@ def main() -> None:
 
     s3 = s3_client(); bucket = need("R2_BUCKET_NAME")
     interval = DEFAULT_INTERVAL
-    stock = pq(s3, bucket, f"backtest/ohlcv/{interval.security_id}.parquet")
+    stock = historical_ohlcv(s3, bucket, interval.security_id)
     bars = daily_bars(stock)
     m_decisions = market_replay(s3, bucket)
     i_events = historical_i_events(s3, bucket, interval.security_id)

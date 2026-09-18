@@ -33,9 +33,7 @@ A missing physical institutional 2026-09-17 directory is therefore not, by itsel
 
 ## Validation / closure
 
-A narrow temporary push-path workflow `recovery-gap-lightweight-validation.yml` was added and triggered for compile + Entry/Phase7/Phase8/Phase9 regressions. The available GitHub connector cannot enumerate push-triggered workflow runs, so terminal evidence is still required before closure. No heavy #33 R2-backed rerun has been started by this remediation.
-
-Do not mark CLOSED until lightweight validation is PASS, storage preflight is safe, one controlled reconciliation restores Candidate 2026-09-17, actual R2 object/manifest/pointer state is verified, no retroactive Entry/Lifecycle mutation occurred, retention/storage post-state is verified, and the temporary validation trigger/workflow is removed.
+Closure was completed only after lightweight regressions passed, read-only R2 storage preflight was safe, controlled reconciliation restored Candidate 2026-09-17, the actual R2 object/manifest/pointer state was verified, no retroactive Entry was published, retention/storage post-state passed, and all temporary validation/preflight/post-verification workflows and triggers were removed from `main`.
 
 
 ## Closure evidence — 2026-09-18

@@ -75,12 +75,29 @@ def daily_bars(df: pd.DataFrame) -> list[DailyBar]:
     ]
 
 
+def _index_object_key(index_meta: dict, *, index_id: str) -> str:
+    """Resolve #49 market-index manifest objects without changing frozen M semantics."""
+    for field in ("key", "parquet_key", "object_key"):
+        value = index_meta.get(field)
+        if isinstance(value, str) and value:
+            return value
+    raise RuntimeError(
+        f"MARKET_INDEX_MANIFEST_KEY_UNRESOLVED:{index_id}:fields={sorted(index_meta)}"
+    )
+
+
 def market_replay(s3, bucket: str):
     ptr = js(s3, bucket, "market/indexes/official.json")
     manifest = js(s3, bucket, ptr["manifest_key"])
+    indexes = manifest.get("indexes")
+    if not isinstance(indexes, dict):
+        raise RuntimeError("MARKET_INDEX_MANIFEST_INDEXES_INVALID")
     series = {}
     for index_id in ("NASDAQ_COMPOSITE", "SP500", "DJIA"):
-        df = pq(s3, bucket, manifest["indexes"][index_id]["key"])
+        meta = indexes.get(index_id)
+        if not isinstance(meta, dict):
+            raise RuntimeError(f"MARKET_INDEX_MANIFEST_INDEX_MISSING:{index_id}")
+        df = pq(s3, bucket, _index_object_key(meta, index_id=index_id))
         df["date"] = pd.to_datetime(df["date"], errors="raise").dt.date.astype(str)
         series[index_id] = tuple(
             IndexBar(str(r.date), float(r.low), float(r.close), None if pd.isna(r.volume) else float(r.volume))

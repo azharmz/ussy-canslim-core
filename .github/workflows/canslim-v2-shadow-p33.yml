@@ -21,9 +21,17 @@ jobs:
       R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
     steps:
       - uses: actions/checkout@v7
+      - name: Checkout frozen O'Neil pattern repo
+        uses: actions/checkout@v7
+        with:
+          repository: azharmz/ussy-oneil-patterns
+          path: oneil-patterns
+          ref: c433cc1e35a5aa32a46f732cd8c5545935e36e40
       - uses: actions/setup-python@v7
         with: {python-version: '3.12'}
-      - run: python -m pip install --disable-pip-version-check pandas pyarrow boto3
+      - run: |
+          python -m pip install --disable-pip-version-check pandas pyarrow boto3 numpy
+          python -m pip install --disable-pip-version-check -e ./oneil-patterns
       - name: Build fresh read-only v2 watchlist
         env:
           CANSLIM_V2_WATCHLIST_OUTPUT: shadow-v2-watchlist.json

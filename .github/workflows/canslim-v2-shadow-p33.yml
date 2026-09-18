@@ -51,6 +51,11 @@ jobs:
           CANSLIM_V2_CANDIDATE_INPUT: shadow-v2-candidates.json
           CANSLIM_V2_EXECUTION_OUTPUT: shadow-v2-execution.json
         run: python scripts/run_shadow_v2_execution.py
+      - name: Build v2 shadow lifecycle boundary
+        env:
+          CANSLIM_V2_EXECUTION_INPUT: shadow-v2-execution.json
+          CANSLIM_V2_LIFECYCLE_OUTPUT: shadow-v2-lifecycle.json
+        run: python scripts/run_shadow_v2_lifecycle.py
       - name: Summarize v2 shadow observation
         run: |
           python - <<'PY'
@@ -74,4 +79,5 @@ jobs:
             shadow-v2-p33.json
             shadow-v2-candidates.json
             shadow-v2-execution.json
+            shadow-v2-lifecycle.json
           retention-days: 7

@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/fa-first-one-interval.yml"
       - "scripts/run_fa_first_one_interval.py"
+      - ".github/fa-first-medp-2021-trigger"
 
 permissions:
   contents: read

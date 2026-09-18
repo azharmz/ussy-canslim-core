@@ -65,7 +65,7 @@ def next_bar(ready: pd.DataFrame, security_id: str, signal_date: date):
 
 
 def candidate_was_timely(cptr: dict, next_session_date: date) -> bool:
-    published = cptr.get("updated_at")
+    published = cptr.get("first_published_at") or cptr.get("updated_at")
     if not published:
         return False
     published_at = datetime.fromisoformat(str(published).replace("Z", "+00:00"))

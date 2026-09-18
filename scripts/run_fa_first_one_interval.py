@@ -25,12 +25,12 @@ from canslim_research.market_state_v1 import IndexBar
 
 PINNED_ONEIL_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 DEFAULT_INTERVAL = FundamentalPassInterval(
-    interval_id="MEDP-2021-07-27__2021-10-26",
+    interval_id="MEDP-2021-07-28__2021-10-26",
     security_id="US58506Q1094",
     ticker="MEDP",
-    start_date="2021-07-27",
+    start_date="2021-07-28",
     end_date="2021-10-26",
-    state_identity="historical-fundamental-screener-v1:35175083156:MEDP:2021-07-27",
+    state_identity="historical-fundamental-screener-v1:35175083156:MEDP:decision-sessions",
 )
 
 

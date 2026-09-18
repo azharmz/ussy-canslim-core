@@ -61,8 +61,8 @@ def pq(s3, bucket: str, key: str) -> pd.DataFrame:
 
 
 def historical_ohlcv(s3, bucket: str, security_id: str) -> pd.DataFrame:
-    """Read the frozen #35 full-history object and fail closed if it is absent."""
-    key = f"backtest/ohlcv/{security_id}.parquet"
+    """Read the canonical full-history object backing frozen #35 semantics."""
+    key = f"history/ohlcv/{security_id}.parquet"
     try:
         return pq(s3, bucket, key)
     except s3.exceptions.NoSuchKey as exc:

@@ -4,7 +4,6 @@ from datetime import date
 import hashlib, json, subprocess, sys
 from pathlib import Path
 
-import pandas as pd
 
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"

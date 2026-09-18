@@ -88,3 +88,48 @@ def test_nonqualified_watchlist_cannot_bypass_fundamentals():
     ok, reasons = eligible(watchlist_state="C_FAIL")
     assert ok is False
     assert reasons[0] == "WATCHLIST_NOT_QUALIFIED"
+
+
+def test_checkpoint_is_deterministic_and_pins_lineage():
+    from canslim_research.shadow_v2_pipeline import watchlist_checkpoint_payload
+
+    assessments = {"two": wl(c="FAIL", sid="two"), "one": wl(sid="one")}
+    a = watchlist_checkpoint_payload(assessments, LINEAGE, producer_commit="sha", producer_run="run")
+    b = watchlist_checkpoint_payload(dict(reversed(list(assessments.items()))), LINEAGE, producer_commit="sha", producer_run="run")
+    assert a["content_sha256"] == b["content_sha256"]
+    assert a["qualified_count"] == 1
+    assert a["lineage"]["ready_sha256"] == "abc"
+
+
+def test_checkpoint_lineage_mismatch_fails_closed():
+    import pytest
+    from canslim_research.shadow_v2_pipeline import validate_checkpoint_lineage, watchlist_checkpoint_payload
+
+    checkpoint = watchlist_checkpoint_payload({"one": wl(sid="one")}, LINEAGE, producer_commit="sha", producer_run="run")
+    wrong = WatchlistLineage(
+        decision_date=LINEAGE.decision_date,
+        ready_key=LINEAGE.ready_key,
+        ready_sha256="different",
+        fundamental_source_identity=LINEAGE.fundamental_source_identity,
+    )
+    with pytest.raises(RuntimeError, match="LINEAGE_MISMATCH"):
+        validate_checkpoint_lineage(checkpoint, wrong)
+
+
+def test_frozen_p33_runner_receives_only_qualified_rows():
+    import pandas as pd
+    from canslim_research.shadow_v2_pipeline import run_frozen_p33_for_qualified
+
+    ready = pd.DataFrame({
+        "security_id": ["one", "one", "two", "two"],
+        "date": ["2026-09-16", "2026-09-17"] * 2,
+    })
+    assessments = {"one": wl(sid="one"), "two": wl(c="FAIL", sid="two")}
+    observed = {}
+
+    def fake_frozen_runner(frame):
+        observed["ids"] = set(frame["security_id"])
+        return "p33-result"
+
+    assert run_frozen_p33_for_qualified(ready, assessments, runner=fake_frozen_runner) == "p33-result"
+    assert observed["ids"] == {"one"}

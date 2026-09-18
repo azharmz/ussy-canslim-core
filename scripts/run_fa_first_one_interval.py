@@ -114,7 +114,7 @@ def rs_percentile_for_day(s3, bucket: str, asof: str) -> float | None:
     target_raw = None
     for sid in universe["security_id"].astype(str):
         try:
-            df = pq(s3, bucket, f"backtest/ohlcv/{sid}.parquet")
+            df = pq(s3, bucket, f"history/ohlcv/{sid}.parquet")
         except Exception:
             continue
         df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date.astype(str)
@@ -142,7 +142,7 @@ def main() -> None:
 
     s3 = s3_client(); bucket = need("R2_BUCKET_NAME")
     interval = DEFAULT_INTERVAL
-    stock = pq(s3, bucket, f"backtest/ohlcv/{interval.security_id}.parquet")
+    stock = pq(s3, bucket, f"history/ohlcv/{interval.security_id}.parquet")
     bars = daily_bars(stock)
     m_decisions = market_replay(s3, bucket)
     i_events = historical_i_events(s3, bucket, interval.security_id)

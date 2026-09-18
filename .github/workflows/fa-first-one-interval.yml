@@ -2,6 +2,9 @@ name: FA-first one-interval validation
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/fa-first-one-interval-trigger'
 
 permissions:
   contents: read

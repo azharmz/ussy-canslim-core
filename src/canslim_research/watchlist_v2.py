@@ -58,8 +58,10 @@ def assess_watchlist(
 
     if not reasons:
         state = QUALIFIED
-    elif any(r.endswith("NOT_EVALUABLE") for r in reasons):
-        state = "INPUT_NOT_EVALUABLE"
+    elif "C_NOT_EVALUABLE" in reasons:
+        state = "C_NOT_EVALUABLE"
+    elif "A_NOT_EVALUABLE" in reasons:
+        state = "A_NOT_EVALUABLE"
     elif "C_FAIL" in reasons:
         state = "C_FAIL"
     else:

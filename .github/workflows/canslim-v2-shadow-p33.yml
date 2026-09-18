@@ -38,10 +38,17 @@ jobs:
           CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
           CANSLIM_V2_P33_OUTPUT: shadow-v2-p33.json
         run: python scripts/run_shadow_v2_p33.py
+      - name: Build role-aware v2 shadow candidates
+        env:
+          CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
+          CANSLIM_V2_P33_INPUT: shadow-v2-p33.json
+          CANSLIM_V2_CANDIDATE_OUTPUT: shadow-v2-candidates.json
+        run: python scripts/run_shadow_v2_candidate.py
       - uses: actions/upload-artifact@v6
         with:
           name: canslim-v2-shadow-qualified-p33-${{ github.run_id }}
           path: |
             shadow-v2-watchlist.json
             shadow-v2-p33.json
+            shadow-v2-candidates.json
           retention-days: 7

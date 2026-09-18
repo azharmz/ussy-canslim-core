@@ -7,7 +7,8 @@ import json
 import os
 from collections import Counter
 from dataclasses import asdict
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time as dtime, timezone
+from zoneinfo import ZoneInfo
 
 import boto3
 import pandas as pd
@@ -63,6 +64,17 @@ def next_bar(ready: pd.DataFrame, security_id: str, signal_date: date):
     return row["date"].date(), float(row["open"]), prior_close
 
 
+def candidate_was_timely(cptr: dict, next_session_date: date) -> bool:
+    published = cptr.get("updated_at")
+    if not published:
+        return False
+    published_at = datetime.fromisoformat(str(published).replace("Z", "+00:00"))
+    if published_at.tzinfo is None:
+        return False
+    t1_open = datetime.combine(next_session_date, dtime(9, 30), ZoneInfo("America/New_York"))
+    return published_at.astimezone(timezone.utc) < t1_open.astimezone(timezone.utc)
+
+
 def resolve_candidate_source(s3, bucket: str, ready_max_date: date) -> tuple[dict, str]:
     cptr = js(s3, bucket, CANDIDATE_POINTER_KEY)
     if cptr.get("status") != "READY":
@@ -85,6 +97,13 @@ def main() -> None:
     cptr, maturity = resolve_candidate_source(s3, bucket, ready_max_date)
     if maturity == "WAITING_FOR_T1_BAR":
         print(json.dumps({"status": maturity, "candidate_asof_date": cptr["asof_date"], "ready_max_date": ready_max_date.isoformat()}, sort_keys=True)); return
+
+    signal_date = date.fromisoformat(str(cptr["asof_date"]))
+    later_dates = sorted({d for d in ready["date"].dt.date if d > signal_date})
+    if not later_dates:
+        print(json.dumps({"status": "WAITING_FOR_T1_BAR", "candidate_asof_date": cptr["asof_date"], "ready_max_date": ready_max_date.isoformat()}, sort_keys=True)); return
+    if not candidate_was_timely(cptr, later_dates[0]):
+        print(json.dumps({"status": "LATE_RECOVERY_NO_RETROACTIVE_ENTRY", "candidate_asof_date": cptr["asof_date"], "candidate_published_at": cptr.get("updated_at"), "t1_session_date": later_dates[0].isoformat()}, sort_keys=True)); return
 
     stored, candidate_bytes = artifact_bytes(s3, bucket, cptr["candidates_key"])
     stored_expected = cptr.get("candidates_stored_sha256")

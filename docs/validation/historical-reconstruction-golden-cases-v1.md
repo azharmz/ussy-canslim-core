@@ -130,6 +130,70 @@ This disposition must not be read as a claim that the documented O'Neil trade wa
 
 The T+1 open of 390.00 therefore remains an execution observation only: no production fill is authorized because eligibility was false before the execution layer.
 
+
+## Golden Case 002 — AMD 2019 — MORPHOLOGY/BREAKOUT REPLAY VERIFIED
+
+Decision/breakout date: 2019-11-04.
+
+Frozen source oracle for the replay:
+- expected family: CUP_WITHOUT_HANDLE
+- reported pivot/buy point: 35.55
+- reported breakout date: 2019-11-04
+- source-reported cup low: 27.43
+- source context reports breakout volume about 67% above average
+- quarterly reference evidence is C-layer evidence only; do not infer A annual evidence from it
+
+Replay identity:
+- branch: validation/historical-golden-reconstruction-v1
+- successful run: 35411908528
+- producer commit: 09aeb26b0a49ddb72efe179072ff2cca5d0ae87c
+- frozen Pattern Engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- candidate detector cutoff: 2019-11-04; T+1 2019-11-05 is excluded from detector input
+- candidate price basis: provider historical basis unchanged; no reconstruction split transform applied
+
+Source-fidelity morphology finding:
+- Frozen engine emits a source-faithful OPEN_RIGHT_EDGE_CNH candidate with LEFT_RIM 2019-08-09, CUP_LOW 2019-10-03, pivot_source_date 2019-08-09 and pivot 35.54999924.
+- Candidate state: CUP_WITHOUT_HANDLE_RECOGNIZED / RECOGNIZED.
+- Candidate depth: 22.841066%; detector_faults: [].
+- Observed trough price is 27.43 and pivot is an exact practical match to the 35.55 oracle.
+- Therefore AMD provides a positive source-fidelity case for frozen CUP_WITHOUT_HANDLE morphology and pivot reconstruction. Other emitted historical candidates are not substituted for the source-faithful candidate.
+
+Breakout-day observation (ORIGINAL layer):
+- 2019-11-04 OHLC: O 35.189999 / H 36.450001 / L 34.759998 / C 36.290001.
+- Both daily high and close are above the 35.55 pivot; close is +2.0816% versus pivot and remains inside the original 5% buy zone upper bound 37.3275.
+- Volume: 83,343,800 versus frozen prior-50 completed-session mean 49,447,172, or +68.5512% / ratio 1.6855.
+- This exceeds the frozen USSY >=1.40 breakout-volume confirmation threshold and closely corroborates the source-reported approximately +67% volume expansion.
+- Daily bars support BREAKOUT_DAY_CONFIRMED_FROM_DAILY_BAR. Exact intraday crossing/cumulative-volume sequence remains INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED.
+
+Historical M (DATA_ADAPTATION layer):
+- market_state: FOLLOW_THROUGH_CONFIRMED.
+- M_entry_state: ALLOW_NEW_BUYS.
+- reason: NO_NEW_STATE_CHANGING_EVIDENCE / M45_NEW_ENTRIES_ALLOWED.
+- provenance: HISTORICAL_INDEX_ONLY_FROZEN_46_REPLAY, adapter fa-first-historical-m-adapter-v0.1.
+- The index-only limitation remains explicit; leadership/weakening/correction-reset facts are not fabricated.
+
+USSY T+1 observation (OPERATIONALIZATION layer):
+- 2019-11-05 open: 36.560001.
+- T+1 open is +2.8411% versus pivot and +0.7440% versus breakout-day close.
+- T+1 open remains inside the original 5% buy zone.
+- Therefore this case does not exhibit a T+1 extended-price adaptation gap. This is still an execution observation, not an automatic production fill.
+
+Three-layer disposition:
+| Layer | Reference / expected | Observed | Classification |
+|---|---|---|---|
+| O'Neil morphology | CUP_WITHOUT_HANDLE, pivot 35.55 | source-faithful candidate RECOGNIZED; pivot 35.549999; trough 27.43; no faults | SOURCE-FIDELITY MATCH |
+| Original breakout day | breakout 2019-11-04 with strong volume | high/close above pivot; volume ratio 1.6855; close inside 5% zone | DAILY-BAR MATCH; INTRADAY TIMING UNAVAILABLE |
+| USSY execution adaptation | evaluate after finalized T | T+1 open 36.56, +2.84% vs pivot, inside 5% zone | NO EXTENDED-PRICE ADAPTATION GAP |
+
+Historical L follows the frozen Golden Case 001 governance: no defensible PIT broad comparison-universe asset is available in this workstream. Freeze L_individual_state=NOT_EVALUABLE / HISTORICAL_COMPARISON_UNIVERSE_NOT_AVAILABLE rather than back-projecting a current universe.
+
+### Golden Case 002 — current CAN SLIM v2 reconstruction boundary
+
+The morphology, pivot, breakout-volume and M hard gates are positively reconstructed for AMD. Historical L remains NOT_EVALUABLE. C quarterly reference evidence may be recorded as reference evidence, but A annual evidence must remain NOT_DOCUMENTED unless an authoritative source is frozen. Therefore do not label the complete frozen-v2 candidate ELIGIBLE yet; missing watchlist C/A qualification and L remain evidence-availability blockers, not negative morphology/breakout findings.
+
+The important validation result is narrower and stronger: unlike LRCX, AMD reproduces the documented O'Neil pattern family, pivot and breakout-volume behavior under the frozen engine without tuning.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -188,7 +252,7 @@ Preserve: case_id; symbol; decision/breakout date; authoritative source; source 
 | Lifecycle | not reconstructed | causal future-bar replay |
 | DOUBLE_BOTTOM | uncovered | authoritative case needed |
 | FLAT_BASE | uncovered | authoritative case needed |
-| CUP_WITHOUT_HANDLE | uncovered | authoritative case needed |
+| CUP_WITHOUT_HANDLE | AMD 2019 source-faithful candidate RECOGNIZED; pivot 35.549999 vs oracle 35.55; breakout volume ratio 1.6855 | COVERED / POSITIVE FIDELITY CASE |
 
 ## Recovery boundary
 
@@ -201,4 +265,4 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 
 CAN SLIM v2 engineering implementation remains 100% complete.
 
-Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.
+Historical reconstruction progress is separate. AMD Golden Case 002 morphology/pivot, breakout-volume, historical M and T+1 reconstruction are now complete as a positive CUP_WITHOUT_HANDLE fidelity case; C/A and L evidence boundaries remain explicit. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.

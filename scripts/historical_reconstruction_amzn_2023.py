@@ -50,7 +50,7 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # AMZN has no price-scale transformation in this replay; provider basis is retained unchanged.
+    # AMZN has no price-scale transformation in this replay; provider basis is retained unchanged.\n    # Trigger token: AMZN-2023-CWOH-v1
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 

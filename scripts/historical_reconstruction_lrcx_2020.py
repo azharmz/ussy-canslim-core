@@ -132,7 +132,7 @@ def main():
       "target_oracle_structure_diagnostic":target_diag,
       "breakout_day_assessment":breakout,
       "ussy_t1_execution_observation":t1,
-      "historical_M_reconstruction":{"classification":"DATA_ADAPTATION","decision":m_on_t.__dict__,"input_lineage":market_lineage,"limitation":"index-only frozen historical adapter; leadership/weakening booleans and correction-reset evidence are not fabricated"},
+      "historical_M_reconstruction":{"classification":"DATA_ADAPTATION","decision":{"asof_date":m_on_t.asof_date,"market_state":m_on_t.market_state,"M_entry_state":m_on_t.M_entry_state,"classifier_reason":m_on_t.classifier_reason,"entry_reason":m_on_t.entry_reason,"provenance":m_on_t.provenance,"version":m_on_t.version},"input_lineage":market_lineage,"limitation":"index-only frozen historical adapter; leadership/weakening booleans and correction-reset evidence are not fabricated"},
       "primary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in primary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "auxiliary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in auxiliary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "fused_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in fused if x.price_date>=cutoff],

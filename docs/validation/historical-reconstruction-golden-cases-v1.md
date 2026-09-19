@@ -1022,6 +1022,31 @@ Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_1.46PCT / SOURCE_NEAR_ST
 ### 016 URBN 2025
 IBD oracle: CUP_WITH_HANDLE pivot 74.45, breakout 2025-07-21. Daily replay: O 72.81 / H 75.98 / L 72.69 / C 74.62; volume 2,126,000 vs prior50 2,205,444 (~0.964x); close +0.2283%. T+1 open 75.79, +1.7999%, inside 5% zone. Frozen engine does not reproduce source-target 74.45 CWH; representative candidates carry DEEP_HANDLE_EXCEPTIONAL. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 
+
+## CWH numeric audit 007 — URBN 2025
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | source-near open-right-edge CUP_WITH_HANDLE_AMBIGUOUS | same family / nearby structure found |
+| Pivot | 74.45 | 75.80000305 | +1.350003 / **+1.8133%** |
+| Source-near right rim | source pivot area 74.45 | 2025-05-28 / 75.80000305 | near, not exact |
+| Source-near handle low | not numerically frozen from source | 2025-06-23 | not scored |
+| Engine depth field | no numeric source depth frozen | 24.193839% | not scored |
+| Final state | valid CWH per source | AMBIGUOUS | categorical mismatch |
+| Faults on source-near candidate | source accepts structure | SHARP_V; DEEP_HANDLE_EXCEPTIONAL | **true morphology-semantics gap** |
+| Breakout date | 2025-07-21 | high 75.98 / close 74.62 crossed 74.45 | **chronology corroborated** |
+| Breakout volume | no source numeric ratio frozen | 0.96398x prior-50 | below USSY 1.40 confirmation; separate from morphology fidelity |
+| Breakout close vs oracle pivot | breakout | +0.2283% | inside 5% zone |
+| T+1 open vs oracle pivot | n/a to source morphology | +1.7999% | inside 5% zone |
+
+Numeric adjudication: the full output contains a source-near open-right-edge CWH with pivot 75.80000305, about **1.81% above** the 74.45 oracle. This is materially closer to the source setup than the older 58–61 pivots visible among other emitted historical structures, so the earlier blanket SOURCE_TARGET_CWH_NOT_RECONSTRUCTED description is too coarse.
+
+The engine nevertheless does not reproduce the oracle pivot as closely as LRCX or TSLA, and the source-near candidate remains AMBIGUOUS due to SHARP_V and DEEP_HANDLE_EXCEPTIONAL. Since no source numeric depth or handle landmarks are frozen, the engine's 24.193839% depth and handle date are retained as observations, not scored mismatches.
+
+Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_1.81PCT / SOURCE_NEAR_STRUCTURE_FOUND / SHARP_V_AND_HANDLE_DEPTH_SEMANTICS_GAP**.
+
 ### 017 SHOP 2025
 IBD oracle: early-stage deep CUP_WITH_HANDLE pivot 112.38, breakout 2025-06-11. Daily replay: O 111.625 / H 117.36 / L 111.29 / C 114.13; volume 14,078,100 vs prior50 14,202,128 (~0.991x); close +1.5572%. T+1 open 113.25, +0.7742%, inside 5% zone. Frozen engine does not reproduce the source-target CWH; representative candidate pivot 111.00 is faulted BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 

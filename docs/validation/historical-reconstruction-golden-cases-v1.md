@@ -1078,6 +1078,32 @@ Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_1.23PCT / SOURCE_NEAR_ST
 ### 018 RBLX 2025
 IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 74.24, breakout 2025-05-13. Daily replay: O 73.93 / H 77.24 / L 73.38 / C 77.02; volume 12,375,800 vs prior50 8,210,696 (~1.507x); close +3.7446%. T+1 open 77.40, +4.2565%, inside 5% zone. Frozen engine emits nearby CWH candidates but the representative 75.74 pivot is AMBIGUOUS/DEEP_HANDLE_EXCEPTIONAL rather than an exact source-target reconstruction. Classification: **MORPHOLOGY_FIDELITY_GAP / CWH_PIVOT_AND_HANDLE_SEMANTICS**.
 
+
+## CWH numeric audit 009 — RBLX 2025
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | CWH candidates emitted; one RECOGNIZED, source-near candidate AMBIGUOUS | family recognition is clearly present |
+| Pivot | 74.24 | 75.73999786 on closest source-near candidate | +1.499998 / **+2.0205%** |
+| Source-near right rim | source pivot area 74.24 | 2025-02-05 / 75.73999786 | near, not exact |
+| Source-near handle low | not numerically frozen from source | 2025-03-10 or open-right-edge 2025-04-07 depending lineage | not scored |
+| Source-near depth | no numeric source depth frozen | 12.976403% on narrower candidate; 22.568656% on broader lineage | not scored |
+| Final state at source-near pivot | valid CWH per source | AMBIGUOUS | categorical mismatch |
+| Source-near faults | source accepts structure | DEEP_HANDLE_EXCEPTIONAL on narrower candidate; broader variants also SHARP_V / FRAGMENTED_BOTTOM | morphology-semantics gap |
+| Other engine CWH | n/a | RECOGNIZED pivot 55.09999847, no faults | proves CWH family can reach RECOGNIZED, but this is **not** the oracle structure |
+| Breakout date | 2025-05-13 | high 77.24 / close 77.02 crossed 74.24 | **chronology corroborated** |
+| Breakout volume | no source numeric ratio frozen | 1.50728x prior-50 | passes USSY 1.40 confirmation |
+| Breakout close vs oracle pivot | breakout | +3.7446% | inside 5% zone |
+| T+1 open vs oracle pivot | n/a to source morphology | +4.2565% | inside 5% zone |
+
+Numeric adjudication: RBLX requires separating **family recognition** from **source-target recognition**. The frozen engine does produce a fully RECOGNIZED CWH with no faults, but its pivot is 55.10 and therefore it is not the IBD 74.24 setup. The closest source-relevant emitted pivot is 75.73999786, about **2.02% above** the oracle. That nearby structure remains AMBIGUOUS, commonly due to DEEP_HANDLE_EXCEPTIONAL, with broader lineages also carrying SHARP_V / FRAGMENTED_BOTTOM.
+
+Thus RBLX is neither a blanket CWH failure nor a source-target positive control. It is evidence that the detector can recognize CWH on the same security while selecting different structural boundaries from the oracle setup.
+
+Audit conclusion: **CWH_FAMILY_RECOGNIZED_ON_SECURITY / SOURCE_PIVOT_NEAR_MATCH_2.02PCT / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / BOUNDARY_AND_HANDLE_SEMANTICS_GAP**.
+
 ### 019 DUOL 2024
 IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 241.86; source documents the setup and later reporting confirms a brief move past the buy point. Daily replay uses 2024-05-06 as the completed daily crossing: O 242.245 / H 251.30 / L 241.156 / C 248.20; volume 863,700 vs prior50 839,762 (~1.029x); close +2.6213%. T+1 2024-05-07 open 246.19, +1.7903%, inside 5% zone. Frozen engine does not exactly reconstruct the 241.86 source-target CWH; representative candidates include pivot 231.89 with FRAGMENTED_BOTTOM + BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 

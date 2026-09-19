@@ -409,6 +409,47 @@ For each discrepant family, the target remains at least two additional independe
 No detector code or production rule is changed by this registry.
 
 
+## Golden Case 005 — SNPS flat-base source oracle v1
+
+Status: FROZEN_SOURCE_ORACLE_V1 / REPLAY NOT YET ADJUDICATED.
+
+Authoritative source:
+- Investor's Business Daily, "Synopsys Blasted From This Bullish Pattern Found In Many Market Winners."
+- The article identifies Synopsys (SNPS) as the educational example.
+
+Source facts frozen as oracle fields:
+- expected family: FLAT_BASE
+- prior peak / base high: 392.79 on April 4
+- source buy point: 392.79
+- base duration: six weeks
+- base trading range/depth characterization: tight 8% range
+- breakout date: May 18
+- breakout move: gap up 8.7%
+- breakout volume: 163% above its 50-day average
+- source buy-zone upper bound: 412.43
+- prior context: an earlier cup-with-handle breakout occurred Feb. 1; this fact is context only and must not be used to force the flat-base detector
+
+Year resolution:
+- The source chronology is treated as the historical SNPS flat-base example whose April 4 peak and May 18 breakout are to be resolved against provider history before detector replay.
+- The replay script must fail closed if historical OHLCV cannot uniquely corroborate the 392.79 April-4 high / May-18 breakout chronology. Do not silently guess a year.
+
+Validation question:
+Does the frozen FLAT_BASE detector independently recover the source-labelled six-week structure and 392.79 pivot when supplied only historical bars through the resolved May-18 decision date?
+
+Special reason for selection:
+This is an independent test of the AAPL finding. Unlike AAPL's frozen candidate, the source explicitly characterizes SNPS as a six-week flat base, which is above IBD's five-week educational minimum. If the frozen engine still fails TOO_SHORT, that would materially strengthen the duration-semantics fidelity concern. WIDE_LOOSE must be evaluated separately.
+
+Oracle-input prohibition:
+392.79, six weeks, 8%, and May 18 are comparison/oracle fields. They may be used to select and validate the historical fixture, but never injected as detector landmarks or pattern boundaries.
+
+Next checkpoint:
+1. resolve/freeze the unique historical year and candidate OHLCV basis;
+2. truncate detector input at breakout date T;
+3. run frozen engine unchanged;
+4. compare emitted FLAT_BASE family, pivot, duration/depth and faults;
+5. only afterward reconstruct breakout volume, M and T+1.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |

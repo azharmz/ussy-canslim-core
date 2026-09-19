@@ -50,6 +50,42 @@ Source facts verified directly for the reconstruction oracle:
 Oracle state: FROZEN_SOURCE_ORACLE_V1.
 Do not silently add facts not explicitly supported by the source. Subsequent return is not a validation target.
 
+
+## LRCX replay finding — frozen evidence
+
+Replay lineage:
+- reconstruction branch: validation/historical-golden-reconstruction-v1
+- frozen pattern engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40
+- price basis: DATA_ADAPTATION restoring the contemporaneous pre-2024 10-for-1 split basis
+- detector cutoff: 2020-11-04; T+1 bar is excluded from detector input
+
+Expected vs observed morphology:
+- Oracle CUP_WITH_HANDLE structure is present in the frozen landmark vocabulary: 2020-08-03 high 387.70 -> 2020-09-11 low 292.28 -> 2020-10-14 right rim 381.96 -> 2020-10-28 handle low 333.31.
+- Exact cup body is CUP_RECOGNIZED with no cup faults; depth 24.6118%, 52 sessions, right-rim/left-rim ratio 98.52%.
+- Open-right-edge handle is causally observable by 2020-11-04, but frozen handle semantics return HANDLE_REJECTED solely for BELOW_CUP_MIDPOINT. Its depth is 12.737%.
+- The implied open-right-edge pivot is 381.95999, an exact practical match to the 381.96 source oracle.
+- Therefore the final CWH mismatch is localized to handle morphology semantics, not candidate OHLCV, cup landmarks, cup segmentation, cup-body recognition, or pivot reconstruction.
+- Classification: MORPHOLOGY_FIDELITY_GAP / HANDLE_GATE_BELOW_CUP_MIDPOINT. No frozen-engine tuning is authorized by this finding.
+
+Breakout-day observation (ORIGINAL layer):
+- 2020-11-04 OHLC on contemporaneous basis: O 373.89 / H 383.20 / L 367.28 / C 380.34.
+- The daily high crossed the 381.96 pivot, while the close finished 0.424% below pivot.
+- Daily-bar evidence therefore supports BREAKOUT_DAY_CONFIRMED_FROM_DAILY_BAR for a price crossing, with INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED.
+- Observed volume was 1,528,000 versus prior-50-session mean about 1,760,441 (-13.20%). This raw daily comparison does not independently reproduce a strong +40% volume-confirmation condition. Preserve the distinction between the official source oracle and this reconstructed provider/bar calculation.
+
+USSY T+1 observation (OPERATIONALIZATION layer):
+- 2020-11-05 open: 390.00.
+- T+1 open was +2.105% versus the 381.96 pivot and +2.540% versus the breakout-day close.
+- 390.00 remained inside the original 5% buy zone upper bound of 401.058.
+- This is an execution observation only. It does not override the frozen CAN SLIM candidate eligibility result or retroactively convert the rejected frozen handle into a production candidate.
+
+Three-layer disposition:
+| Layer | Reference / expected | Observed | Classification |
+|---|---|---|---|
+| O'Neil morphology | CWH, 24% depth, pivot 381.96 | cup/pivot reconstructed; handle rejected BELOW_CUP_MIDPOINT | FIDELITY GAP |
+| Original breakout day | breakout 2020-11-04 | high crossed pivot; close below; reconstructed volume not elevated vs prior-50 mean | DAILY-BAR PARTIAL / SOURCE ORACLE PRESERVED |
+| USSY execution adaptation | evaluate only after finalized T | T+1 open 390.00, within 5% buy zone | EXECUTION OBSERVATION; NO RETROACTIVE FILL |
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -95,16 +131,16 @@ Preserve: case_id; symbol; decision/breakout date; authoritative source; source 
 | Source oracle | VERIFIED/FROZEN v1 | preserve provenance |
 | C quarterly reference | VERIFIED | reference only |
 | A annual reference | NOT YET DOCUMENTED | do not infer |
-| Cup with handle | VERIFIED oracle | execute replay |
-| Pivot | VERIFIED 381.96 | execute replay |
-| Breakout | VERIFIED 2020-11-04 | execute replay |
+| Cup with handle | VERIFIED oracle; cup/pivot reconstructed; final handle gate mismatch | frozen finding documented |
+| Pivot | VERIFIED 381.96; observed 381.95999 on oracle structure | MATCH |
+| Breakout | VERIFIED 2020-11-04; daily high crossed pivot | original-entry assessment in progress |
 | S / breakout volume | source context + OHLCV needed | freeze OHLCV |
 | L | not reconstructed | after morphology replay |
 | I | not frozen | source fact or NOT_DOCUMENTED |
 | N | not frozen | source fact or NOT_DOCUMENTED |
 | M | not reconstructed | after morphology replay |
-| Original entry | not reconstructed | breakout-day assessment |
-| T+1 adaptation | not reconstructed | next-session open |
+| Original entry | daily crossing reconstructed; intraday timing unavailable; volume discrepancy preserved | source-fidelity adjudication needed |
+| T+1 adaptation | 2020-11-05 open 390.00; inside 5% buy zone | observation complete; eligibility boundary preserved |
 | Lifecycle | not reconstructed | causal future-bar replay |
 | DOUBLE_BOTTOM | uncovered | authoritative case needed |
 | FLAT_BASE | uncovered | authoritative case needed |
@@ -121,4 +157,4 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 
 CAN SLIM v2 engineering implementation remains 100% complete.
 
-Historical reconstruction progress is separate. LRCX source oracle is now verified/frozen; executable historical OHLCV replay is the next stage.
+Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, and T+1 observation are complete. L/M and full CAN SLIM v2 eligibility reconstruction remain.

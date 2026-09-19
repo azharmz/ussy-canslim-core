@@ -1348,3 +1348,31 @@ This materially changes the earlier adjudication. The prior wording `SOURCE_TARG
 Numeric adjudication: AVTR is a second positive CWOH source-fidelity control at the fields the current oracle can score. Depth, duration and detailed landmark fidelity remain unscored because the frozen source oracle does not provide comparable numeric values for those fields.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.
+
+
+## CWOH numeric audit 003 — SE 2019
+
+Status: **AUDITED / PRIOR PIVOT-GEOMETRY SHORTHAND REFINED / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from replay run **35439712313**, using the IBD oracle pivot **38.10** and breakout date **2019-11-20** only for post-replay adjudication.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 38.10 | 38.00 | -0.10 / **-0.2625%**; near match |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2019-08-02 / CUP_LOW 2019-10-21 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 30.5000% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | source-near structure present through oracle date | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | 2019-11-20 intraday pivot cross | H 38.98 > 38.10; C 37.27 < 38.10 | **intraday daily-bar cross corroborated; close faded below pivot** |
+| Breakout volume | source numeric oracle not frozen | 1.2136x prior-50 / +21.36% | separate breakout evidence; not morphology-scored |
+| T+1 open | n/a to source morphology | 37.28 = -2.1522% vs oracle pivot | below pivot; operationalization only |
+
+All frozen CWOH candidates were inspected. The source-nearest candidate is **RECOGNIZED**, LEFT_RIM **2019-08-02**, CUP_LOW **2019-10-21**, pivot **38.00**, depth **30.50%**, with **no detector faults**. This candidate is materially closer to the 38.10 oracle than the previously highlighted 36.90000153 candidate. Other recognized CWOH pivots include 37.00, 36.90000153, 32.93, 32.00, 25.00 and 13.09.
+
+The oracle-to-engine pivot delta is only **-0.10 (-0.2625%)**. Therefore the earlier characterization as a broad `CWOH_PIVOT_GEOMETRY_MISMATCH` was too coarse. The engine recognizes the correct family and contains a source-near, fault-free structure with a pivot within about 0.26% of the oracle. Because the frozen source does not supply numeric depth, duration, or defensible landmark dates, those dimensions remain NOT SCORED.
+
+The breakout-day evidence remains distinct: the daily high **38.98** crossed the oracle pivot **38.10**, while the close **37.27** finished below it. This corroborates the source's intraday pivot-cross description without converting it into a close-confirmed breakout. T+1 open **37.28** remained below the oracle pivot and is an execution-layer observation only.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_NEAR_STRUCTURE_FOUND / PIVOT_NEAR_MATCH_0.26PCT / RECOGNIZED_NO_FAULTS / INTRADAY_ORACLE_BREAKOUT_CROSS_CORROBORATED**.

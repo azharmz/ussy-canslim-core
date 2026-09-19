@@ -38,6 +38,7 @@ def main():
     from oneil_patterns.morphology.cup_body_detector import assess_cup_body
     from oneil_patterns.morphology.cup_family import assess_handle
     from oneil_patterns.validation.pivot_adapter import cup_with_handle_pivot
+    from oneil_patterns.validation.open_right_edge_handle import enumerate_open_right_edge_handles
 
     frame=fetch_yfinance(SYMBOL,START,ASOF)
     raw_csv=ROOT/"ohlcv-yahoo-split-adjusted.csv"
@@ -77,8 +78,11 @@ def main():
         target_diag={
           "cup_geometry":{"left_rim":cup.left_rim.price_date.isoformat(),"trough":cup.trough.price_date.isoformat(),"right_rim":cup.right_rim.price_date.isoformat(),"duration_sessions":cup.duration_sessions,"depth_pct":cup.depth_pct,"right_rim_to_left_rim_ratio":cup.right_rim_to_left_rim_ratio,"sessions_within_5pct_of_trough":cup.sessions_within_5pct_of_trough,"sessions_within_10pct_of_trough":cup.sessions_within_10pct_of_trough,"max_bottom_run_10pct":cup.max_bottom_run_10pct},
           "cup_assessment":{"state":body.state.value,"faults":[x.value for x in body.faults],"theory_gates_pass":body.theory_gates_pass,"research_bands_pass":body.research_bands_pass},
-          "handles":[]
+          "handles":[],
+          "open_right_edge_handles":[]
         }
+        for o in enumerate_open_right_edge_handles(contemporaneous,cup,fused,asof_date=ASOF):
+            target_diag["open_right_edge_handles"].append({"low":o.handle_low.price_date.isoformat(),"asof_date":o.asof_date.isoformat(),"duration_sessions":o.duration_sessions,"depth_pct":o.depth_pct,"low_in_upper_half":o.low_in_upper_half,"state":o.state.value,"faults":[x.value for x in o.faults],"implied_pivot":cup.right_rim.price,"implied_pivot_date":cup.right_rim.price_date.isoformat()})
         for h in handles:
             ha=assess_handle(h); pv=cup_with_handle_pivot(cup,h)
             target_diag["handles"].append({"low":h.handle_low.price_date.isoformat(),"recovery":h.handle_recovery.price_date.isoformat(),"duration_sessions":h.duration_sessions,"depth_pct":h.depth_pct,"low_in_upper_half":h.low_in_upper_half,"state":ha.state.value,"faults":[x.value for x in ha.faults],"pivot":pv.pivot_level,"pivot_date":pv.pivot_source_date.isoformat()})

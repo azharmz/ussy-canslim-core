@@ -50,8 +50,12 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # NFLX has no price-scale transformation in this replay; provider basis is retained unchanged.
+    # Restore contemporaneous pre-2024 10-for-1 split price basis.
     contemporaneous=frame.copy()
+    for col in ["open","high","low","close","adj_close"]:
+        if col in contemporaneous.columns:
+            contemporaneous[col]=contemporaneous[col]*10.0
+    contemporaneous["volume"]=contemporaneous["volume"]/10.0
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 
     csv=ROOT/"ohlcv-2024-provider-basis.csv"

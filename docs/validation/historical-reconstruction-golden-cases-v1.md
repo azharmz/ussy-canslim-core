@@ -705,3 +705,14 @@ USSY T+1 observation: 2019-07-25 open 212.55, +8.94% vs pivot and -1.08% vs July
 Historical M: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NOT_EVALUABLE under the frozen cross-sectional-universe limitation.
 
 CWH adjudication after LRCX + EW: two authoritative CWH examples now show source-fidelity discrepancies, but not the same terminal gate. LRCX is an explicit handle midpoint-gate rejection; EW preserves the source-like cup body yet fails to assemble/recognize the source-target CWH. This supports continued targeted CWH replication and component-level diagnostics, not a family-wide rule change.
+
+
+## Targeted replication checkpoint — BRP 2020 CWH suitability
+
+Status: **SOURCE-ORACLE SUITABILITY REVIEWED / NOT PROMOTED TO COMPLETED-BREAKOUT GOLDEN CASE**.
+
+Authoritative IBD Top Stocks 2020 material explicitly identifies BRP Group (BRP) as forming a cup-with-handle and gives a new buy point of 18.88. The source language is prospective: the stock "is forming a handle" / "is forming a cup-with-handle base". It does not, in the located passage, freeze a completed breakout date through 18.88 with breakout-day price/volume evidence.
+
+Decision: retain BRP as **PRE-BREAKOUT / SETUP-STATE CWH EVIDENCE**, not as a completed-breakout replication equivalent to LRCX or EW. Do not infer a breakout date from later bars merely to make the case fit the validation template. This preserves source fidelity and the oracle-input prohibition.
+
+Usefulness: BRP can later test whether the frozen engine recognizes a source-labelled in-progress CWH as-of the publication/setup state, but it cannot by itself answer the current completed-breakout CWH discrepancy question. The next CWH replication candidate should therefore be another authoritative example with an explicit completed breakout chronology, pivot, and sufficient historical date resolution.

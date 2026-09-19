@@ -17,7 +17,8 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install --upgrade pip
-      - run: python scripts/historical_reconstruction_lrcx_2020.py | tee replay.log
+      - run: set -o pipefail
+          python scripts/historical_reconstruction_lrcx_2020.py | tee replay.log
       - uses: actions/upload-artifact@v4
         with:
           name: historical-reconstruction-lrcx-2020

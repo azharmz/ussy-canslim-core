@@ -1,9 +1,5 @@
 name: Historical golden replay — FTCH 2020
 on:
-  push:
-    branches: [validation/historical-golden-reconstruction-v1]
-    paths:
-      - .github/workflows/historical-reconstruction-ftch-2020.yml
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,4 +29,4 @@ jobs:
             artifacts/historical-reconstruction/ftch-2020/
             replay.log
 
-# one-shot trigger after TWELVE_DATA_API_KEY was added; remove push trigger after this replay
+# FTCH replay parked: historical OHLCV unavailable from configured providers; manual dispatch only

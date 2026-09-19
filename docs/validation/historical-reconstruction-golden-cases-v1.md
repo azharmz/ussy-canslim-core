@@ -755,3 +755,40 @@ CWH adjudication after LRCX + EW + NVO:
 - Three independent authoritative CWH examples now produce three distinct terminal fidelity mechanisms under the frozen engine: LRCX -> BELOW_CUP_MIDPOINT; EW -> CWH assembly/handle-recognition miss after source-like cup body; NVO -> DEEP_HANDLE_EXCEPTIONAL with a near-source pivot.
 - This strengthens evidence that CWH source-fidelity is not yet robust, but does **not** identify one universal gate whose removal is justified.
 - No detector tuning or production-rule change is authorized from these cases alone. Any engine revision requires a separate component-level study with authoritative positive and negative controls.
+
+
+## Golden Case 010 — AVTR 2021 — CWOH REPLICATION
+
+Status: **FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.
+
+Replay identity:
+- successful first run: 35439158198
+- producer commit: 72dcf424c366a08c3b4c91995aaecfca6bcc7515
+- frozen engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- source oracle: CUP_WITHOUT_HANDLE, pivot 33.99, breakout 2021-06-16
+- provider historical basis retained unchanged; breakout bar neighborhood independently corroborates the oracle price scale.
+
+Source-fidelity morphology finding:
+- The frozen engine emits multiple CUP_WITHOUT_HANDLE_RECOGNIZED structures, but none of the emitted source pivots is near the source oracle 33.99 at the 2021-06-16 as-of date.
+- Representative latest recognized structure uses LEFT_RIM 2020-10-21 / CUP_LOW 2020-10-30 with pivot 25.70000076 and no detector faults; other recognized CWOH pivots include 28.97999954, 19.50, and 18.09000015.
+- Therefore generic pattern-family recognition is present, but the source-labelled AVTR base is not reconstructed.
+- Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_BASE_NOT_RECONSTRUCTED**.
+
+Breakout-day reconstruction (2021-06-16):
+- O 33.36 / H 34.50 / L 33.25 / C 34.05; volume 5,454,200.
+- Oracle pivot 33.99 was crossed; close finished +0.1765% above pivot and inside the 5% buy zone.
+- Prior-50-session average volume 3,960,106; breakout volume +37.73% (1.3773x), narrowly below the USSY >=1.40 confirmation threshold.
+- Daily-bar limitation remains INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED.
+
+USSY T+1 observation (2021-06-17):
+- open 34.05; +0.1765% versus pivot and unchanged versus breakout close.
+- T+1 open remained inside the original 5% buy zone: **T1_OPEN_IN_BUY_ZONE / NOT_EXTENDED**.
+
+Historical M reconstruction:
+- FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS.
+- Historical L remains NOT_EVALUABLE under the frozen cross-sectional-universe boundary.
+
+CWOH adjudication checkpoint:
+- AMD remains the clean source-fidelity positive control.
+- AVTR shows that recognizing some CWOH structures on the same security is not sufficient: source-target base selection/assembly can still miss the authoritative base.
+- No detector tuning is authorized from this single discrepancy; continue the planned 10-case CWOH tranche.

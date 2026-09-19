@@ -34,3 +34,5 @@ jobs:
 # replacement replay trigger after literal-newline repair
 
 # trigger after verified line-level EW initialization repair
+
+# trigger after stale-template audit and cleanup

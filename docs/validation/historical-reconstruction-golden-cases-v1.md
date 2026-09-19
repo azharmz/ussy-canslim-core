@@ -572,6 +572,40 @@ TSM changes the interpretation of the IPHI result. The family now has both:
 The next double-bottom replication should therefore be selected to discriminate the undercut semantics directly, ideally an authoritative example whose two trough relationship can be reconstructed unambiguously. It should not be chosen merely to accumulate another passing case.
 
 
+## Golden Case 007 — WMT 2024 — DOUBLE-BOTTOM LANDMARK/SEGMENTATION FIDELITY GAP
+
+Replay identity:
+- valid diagnostic run: 35428260263
+- producer commit: 6aedc85b7b09c63591d95b112217532366857e37
+- frozen Pattern Engine unchanged: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- source oracle: DOUBLE_BOTTOM; pivot 60.89; first low 58.88; second low 58.55; breakout date 2024-05-16
+- diagnostic oracle landmarks are comparison-only and are never injected into detector generation.
+
+Detector result:
+- no emitted DOUBLE_BOTTOM candidate matched any of the source-target 2024 oracle landmarks used by the diagnostic.
+- `oracle_candidate_matches=[]`.
+- diagnostic landmark/segment arrays for the source-target path are empty.
+- the engine does emit an older, unrelated fault-free DOUBLE_BOTTOM (2023-09-13 / 2023-10-06 / 2023-11-15 / 2023-12-11; pivot 56.64666748). That older candidate must not be substituted for the source-labelled 2024 structure.
+- therefore WMT does not test the `NO_SECOND_TROUGH_UNDERCUT` morphology gate at all: the source-target structure fails upstream of morphology assessment.
+- classification: `MORPHOLOGY_FIDELITY_GAP / LANDMARK_OR_SEGMENTATION_MISS`.
+- no detector change is authorized.
+
+Breakout / execution observations, retained separately from morphology:
+- 2024-05-16: O 64.22 / H 64.42 / L 62.94 / C 64.01 versus oracle pivot 60.89.
+- close is +5.1240% above pivot, just above the conventional 5% buy-zone ceiling 63.9345.
+- volume 60,545,600 versus prior-50 completed-session mean 15,207,442: total ratio 3.9813x, or +298.13% above average.
+- T+1 2024-05-17 open 64.24: +5.5017% versus pivot and therefore above the 5% buy zone.
+- historical M on 2024-05-16: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS.
+- these observations do not repair the morphology miss and must not be used as detector inputs.
+
+Double-bottom adjudication after IPHI + TSM + WMT:
+- IPHI: source-near candidate reaches morphology but is AMBIGUOUS due `NO_SECOND_TROUGH_UNDERCUT`.
+- TSM: source structure is independently recovered with exact pivot and fault-free `DOUBLE_BOTTOM_RECOGNIZED`.
+- WMT: source-labelled 2024 structure is not emitted as a corresponding candidate; discrepancy occurs upstream at landmark/segmentation generation.
+- Consequently there is still no evidence that one universal double-bottom gate is the dominant family-level problem. The discrepancies occupy different layers.
+- Next work should diagnose WMT's landmark/segmentation boundary, not relax `NO_SECOND_TROUGH_UNDERCUT` and not tune morphology from golden cases.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |

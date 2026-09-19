@@ -828,3 +828,34 @@ CWOH checkpoint after AMD + AVTR + SE:
 - AVTR: source-target base not reconstructed despite generic CWOH recognition.
 - SE: source family recognized, but engine pivot geometry differs from the authoritative 38.10 source pivot.
 - Continue the planned 10-case CWOH tranche; no detector tuning is authorized from these cases alone.
+
+
+## Golden Case 012 — AMZN 2023 — CWOH REPLICATION
+
+Status: **FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.
+
+Authoritative IBD oracle: Amazon formed a cup-without-handle after a September 2023 pullback, with buy point 145.86. IBD describes the breakout in the week of Nov. 17; daily OHLCV establishes the first actual 145.86 pivot cross on 2023-11-20 (Nov. 17 high was 145.23). Daily replay therefore uses 2023-11-20 as the causal breakout session and 2023-11-21 as T+1.
+
+Replay identity:
+- valid successful run: 35439948453
+- producer commit: 8d26eb6ab928e32924badcab50420e0c9e5a9ffd
+- frozen engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- provider basis unchanged.
+
+Morphology finding:
+- frozen engine emits CUP_WITHOUT_HANDLE_RECOGNIZED candidates, but the source-labelled September-November base/pivot 145.86 is not reconstructed.
+- Representative recognized structure at the oracle as-of uses LEFT_RIM 2023-04-27 / CUP_LOW 2023-05-02 / pivot 110.86000061 / depth 8.758794%, no faults.
+- Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_BASE_NOT_RECONSTRUCTED**.
+
+Breakout day 2023-11-20:
+- O 145.13 / H 146.63 / L 144.73 / C 146.13; volume 41,951,200.
+- high and close above 145.86; close +0.1851% versus pivot and inside 5% buy zone.
+- prior-50 average volume 55,536,578; breakout volume -24.46% versus average, below USSY >=1.40 confirmation threshold.
+
+T+1 2023-11-21:
+- open 143.91; -1.3369% versus pivot and -1.5192% versus breakout close.
+- **T1_OPEN_BELOW_PIVOT / NOT_EXTENDED**.
+
+Historical M: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NOT_EVALUABLE.
+
+CWOH progress: AMD, AVTR, SE, AMZN = **4 / 10 valid cases**.

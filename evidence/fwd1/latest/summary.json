@@ -1,6 +1,6 @@
 {
-  "code_sha": "4d0d91bad8db33c3a52c0a3f25bff7165908ea1f",
-  "collected_at_utc": "2026-09-18T09:06:04.478925+00:00",
+  "code_sha": "5f19e022b9c1f9572cb582ca06b4544824c718e4",
+  "collected_at_utc": "2026-09-19T08:53:14.965722+00:00",
   "experiment": "FWD1_FORWARD_VALIDATION",
   "forward_boundary_exclusive": "2026-09-09",
   "forward_candidate_count": 0,
@@ -35,7 +35,7 @@
   "methodology": "docs/methodology/forward-validation-v1.md",
   "methodology_frozen_before_forward_collection": true,
   "research_universe": "CURRENT_COMPLIANT_UNIVERSE_FROZEN_AT_2026_08_28",
-  "run_id": "35327719880",
+  "run_id": "35433192804",
   "source_data_ready_for_forward_inference": true,
   "variants": [
     {

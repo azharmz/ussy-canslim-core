@@ -964,6 +964,33 @@ Audit conclusion: **ORACLE_PIVOT_AND_BREAKOUT_CORROBORATED / SOURCE_TARGET_CWH_N
 ### 014 TSLA 2020
 IBD oracle: off-kilter CUP_WITH_HANDLE, pivot 466.00, breakout 2020-11-18. Yahoo current history is adjusted for the later 2022 3-for-1 split; replay restores contemporaneous Nov-2020 basis by multiplying OHLC by 3 and dividing volume by 3. Corrected breakout: O 448.35 / H 496.00 / L 443.50 / C 486.64; volume 78,044,000 vs prior50 48,526,294 (~1.608x); close +4.4292% vs pivot and inside 5% zone. T+1 open 492.00, +5.5794%, above the 5% zone: **MISSED_EXTENDED / T1_OPEN_ABOVE_5PCT_BUY_ZONE**. Engine's representative CWH is AMBIGUOUS with pivot 358.998 and DEEP_HANDLE_EXCEPTIONAL, not the source-target structure. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 
+
+## CWH numeric audit 005 — TSLA 2020
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+Authoritative replay for this audit is corrected run 35441985710 on the restored contemporaneous pre-2022-split price basis. Earlier uncorrected TSLA evidence remains superseded.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | off-kilter CUP_WITH_HANDLE | source-near open-right-edge CUP_WITH_HANDLE_AMBIGUOUS | **same family and source-near structure found** |
+| Pivot | 466.00 | 465.90000916 | -0.099991 / **-0.02146%**; practical exact match |
+| Source-near right rim | pivot implies source area | 2020-10-14 / 465.90000916 | practical pivot match |
+| Source-near handle low | not numerically frozen from source | 2020-11-13 | not scored |
+| Engine depth field | no numeric source depth frozen | 11.579787% | not scored against absent oracle |
+| Final state | valid off-kilter CWH per source | AMBIGUOUS | categorical mismatch |
+| Faults on source-near candidate | source accepts structure | SHARP_V; FRAGMENTED_BOTTOM; DEEP_HANDLE_EXCEPTIONAL | **true morphology-semantics gap** |
+| Breakout date | 2020-11-18 | high 496.00 / close 486.64 crossed pivot | **chronology corroborated** |
+| Breakout volume | no source ratio frozen in current oracle | 1.6083x prior-50 | passes USSY 1.40 confirmation |
+| Breakout close vs pivot | breakout | +4.4292% | inside 5% zone |
+| T+1 open vs pivot | n/a to source morphology | +5.5794% | outside 5% zone |
+
+Numeric adjudication: the earlier tranche summary understated how close the frozen engine gets to the authoritative TSLA setup. The replay contains an **open-right-edge CWH candidate with pivot 465.90000916**, only about **0.0215% below the 466.00 oracle**. This is the appropriate source-near candidate for numeric comparison; the unrelated 358.998 CWH candidate must not be used as if it were the source-target pivot.
+
+The remaining discrepancy is therefore not source-target pivot reconstruction. It is the engine's morphology semantics: the source-near candidate is retained as AMBIGUOUS because of SHARP_V, FRAGMENTED_BOTTOM, and DEEP_HANDLE_EXCEPTIONAL. Since the frozen oracle does not contain numeric source depth/handle measurements, those individual dimensions remain unscored.
+
+Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_PRACTICAL_EXACT_MATCH_0.0215PCT / SOURCE_NEAR_STRUCTURE_FOUND / MORPHOLOGY_SEMANTICS_GAP**. This supersedes the earlier shorthand SOURCE_TARGET_CWH_NOT_RECONSTRUCTED for TSLA.
+
 ### 015 TOL 2024
 IBD retrospective oracle: CUP_WITH_HANDLE pivot 128.75; breakout occurred one week before the 2024-05-22 selloff, reconstructed as 2024-05-15. Daily replay: O 131.56 / H 135.37 / L 131.05 / C 134.92; volume 2,067,000 vs prior50 1,213,256 (~1.704x); close +4.7922% and inside 5% zone. T+1 open 133.91, +4.0078%, inside zone. Frozen engine does not reconstruct the 128.75 source-target CWH; representative candidates are faulted BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 

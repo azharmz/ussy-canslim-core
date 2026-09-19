@@ -1135,3 +1135,82 @@ Numeric adjudication: DUOL is a major refinement over the earlier tranche shorth
 The remaining disagreement is categorical morphology semantics. The source-near candidate with exact pivot is AMBIGUOUS because of DEEP_HANDLE_EXCEPTIONAL; an alternate open-right-edge lineage at the same pivot is AMBIGUOUS because of FRAGMENTED_BOTTOM and BELOW_CUP_MIDPOINT. The engine also emits unrelated fully RECOGNIZED CWH structures on DUOL, confirming that the family detector itself is operational.
 
 Audit conclusion: **CWH_FAMILY_RECOGNIZED_ON_SECURITY / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / HANDLE_AND_BOTTOM_SEMANTICS_GAP**.
+
+
+# CWOH completion tranche — cases 020–025
+
+Status: **COMPLETE / 10 OF 10 CWOH GOLDEN CASES NOW PRESENT / NO ENGINE TUNING**.
+
+The six cases below complete the CUP_WITHOUT_HANDLE tranche. Oracle facts were rechecked against IBD/MarketSurge material before replay. The frozen detector remains `33-core-p8-frozen-v1`; oracle values are comparison evidence only and are not detector inputs.
+
+## 020 JPM 2023 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD identifies JPMorgan's August–November 2023 cup base and breakout in the week ended 2023-12-15. The prior-high pivot is **159.38**.
+- Daily reconstruction date: **2023-12-15**. Yahoo provider basis: O 163.08 / H 165.28 / L 162.39 / C 165.23.
+- Breakout volume: 20,309,300 vs prior-50 average 9,526,808 = **2.1318x**.
+- Frozen engine: source-target CWOH **RECOGNIZED**, pivot **159.38000488**, practical exact match; an alternate lineage at the same pivot is AMBIGUOUS from FRAGMENTED_BOTTOM.
+- T+1 2023-12-18 open 165.92 = **+4.1034%** vs pivot, inside original 5% buy zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / CWOH_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH**.
+- Authoritative replay: workflow run **35472174644**, job **105974993887**.
+
+## 021 COST 2024 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD/MarketSurge cup base, pivot **787.08**; initial clearance **2024-05-10**, with a later renewed breakout on May 16.
+- Daily reconstruction 2024-05-10: O 779.04 / H 787.45 / L 778.16 / C 787.19.
+- Breakout volume: 1,652,700 vs prior-50 average 2,090,694 = **0.7905x**; morphology fidelity is separate from volume confirmation.
+- Frozen engine: source-target CWOH **RECOGNIZED**, pivot **787.08001709**, no faults — practical exact match.
+- T+1 2024-05-13 open 788.00 = **+0.1169%**, inside 5% zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / CWOH_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH**.
+- Authoritative replay: workflow run **35471986323**, job **105974484713**.
+
+## 022 AX 2024 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD/MarketSurge cup base pivot **60.00**; IBD later records the stock moving above the cup-base buy point on **2024-05-06**.
+- Daily reconstruction 2024-05-06: O 58.15 / H 60.23 / L 57.78 / C 59.68. Intraday high crossed the pivot but the close finished below it.
+- Breakout-day volume: 608,100 vs prior-50 average 492,006 = **1.2360x**.
+- Frozen engine: source-target CWOH pivot **60.00 exactly**, but state **AMBIGUOUS** with `FRAGMENTED_BOTTOM`.
+- T+1 2024-05-07 open 59.80 = **-0.3333%** vs pivot, below the original buy zone.
+- Adjudication: **CWOH_FAMILY_MATCH / PIVOT_EXACT_MATCH / SOURCE_TARGET_AMBIGUOUS / FRAGMENTED_BOTTOM_SEMANTICS_GAP**.
+- Authoritative replay: workflow run **35471986323**, job **105974484640**.
+
+## 023 NFLX 2024 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD/MarketSurge six-week cup base, pivot **697.49**, breakout **2024-08-20**.
+- Corporate-action adaptation: current Yahoo history reflects the later 2025 10-for-1 split; replay restores the contemporaneous 2024 basis by **x10 OHLC / ÷10 volume**.
+- Daily reconstruction: O 688.86 / H 711.33 / L 688.25 / C 698.54.
+- Breakout volume: 4,813,100 vs prior-50 average 3,348,412 = **1.4374x**, above the 1.40 USSY confirmation threshold.
+- Frozen engine: source-target CWOH **RECOGNIZED**, pivot **697.49000549**, no faults — practical exact match.
+- T+1 2024-08-21 open 697.00 = **-0.0703%** vs pivot, fractionally below pivot.
+- Adjudication: **SOURCE_FIDELITY_MATCH / CWOH_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH**.
+- Authoritative corrected replay: workflow run **35472064980**, job **105974698199**.
+
+## 024 ALL 2024 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD identifies a cup-without-handle/cup-base entry at **168.05**; the stock reclaimed the pivot on **2024-04-18**.
+- Daily reconstruction: O 165.10 / H 169.53 / L 164.68 / C 169.11.
+- Breakout volume: 2,068,300 vs prior-50 average 1,747,922 = **1.1833x**.
+- Frozen engine: source-target CWOH **RECOGNIZED**, pivot **168.05000305**, no faults — practical exact match. The engine also emits a CWH interpretation at the same pivot, so cross-pattern overlap is preserved rather than hidden.
+- T+1 2024-04-19 open 170.01 = **+1.1663%**, inside 5% zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / CWOH_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH / CROSS_PATTERN_OVERLAP_PRESENT**.
+- Authoritative replay: workflow run **35471986323**, job **105974484898**.
+
+## 025 NVDA 2023 — CUP_WITHOUT_HANDLE
+
+- Source oracle: IBD historical teaching example identifies a six-week cup without handle with pivot **187.90** and breakout in the week ended 2023-01-27. Daily reconstruction establishes the first crossing on **2023-01-23**.
+- Corporate-action adaptation: current Yahoo history reflects Nvidia's later 2024 10-for-1 split; replay restores contemporaneous basis by **x10 OHLC / ÷10 volume**.
+- Daily crossing 2023-01-23: O 180.64 / H 192.45 / L 178.18 / C 191.93.
+- Breakout volume: 65,516,300 vs prior-50 average 45,508,718 = **1.4396x**, above the 1.40 threshold.
+- Frozen engine emits the exact oracle pivot **187.90000916**, but that narrow source-target lineage is **REJECTED / TOO_SHORT**. The detector also emits nearby fully RECOGNIZED CWOH structures, including pivot 191.63999557.
+- The exact source base spans 2022-12-13 to 2023-01-23: approximately six calendar weeks but fewer than the detector's minimum-session gate. This isolates a duration-semantics disagreement rather than a pivot-generation miss.
+- T+1 2023-01-24 open 188.27 = **+0.1969%**, inside 5% zone.
+- Adjudication: **CWOH_FAMILY_MATCH / PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_REJECTED_TOO_SHORT / CALENDAR_WEEK_VS_SESSION_DURATION_SEMANTICS_GAP**.
+- Authoritative corrected replay: workflow run **35472174644**, job **105974994015**.
+
+## CWOH tranche status after cases 020–025
+
+CUP_WITHOUT_HANDLE golden reconstruction is now **10/10 complete**:
+
+- existing: AMD 2019, AVTR 2021, SE 2019, AMZN 2023;
+- completion tranche: JPM 2023, COST 2024, AX 2024, NFLX 2024, ALL 2024, NVDA 2023.
+
+The completion tranche materially improves the evidence balance: **JPM, COST, NFLX and ALL are source-target positive controls with practical-exact pivots**; AX isolates `FRAGMENTED_BOTTOM`; NVDA isolates a `TOO_SHORT` duration-semantics disagreement despite an exact pivot. No detector threshold or frozen engine code was changed to obtain these outcomes.

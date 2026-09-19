@@ -1,4 +1,3 @@
-PRICE_FACTOR=3.0  # DATA_ADAPTATION: restore 2019 contemporaneous pre-2020 3-for-1 split basis
 #!/usr/bin/env python3
 from __future__ import annotations
 from datetime import date
@@ -14,7 +13,7 @@ PRICE_FACTOR = 3.0  # DATA_ADAPTATION: restore 2019 contemporaneous pre-2020 3-f
 EXECUTION_END = date(2019,7,25)
 START = date(2018,7,1)
 ORACLE = {"pattern":"CUP_WITH_HANDLE","pivot":195.10,"breakout_date":"2019-07-24","source_depth_pct":16.3,"source":"IBD Top Stocks 2019"}
-# EW replay uses the provider historical basis unchanged for the 2019 source comparison.
+# Yahoo historical bars are normalized to the contemporaneous 2019 pre-split basis below.
 ROOT=Path("artifacts/historical-reconstruction/ew-2019")
 ROOT.mkdir(parents=True,exist_ok=True)
 

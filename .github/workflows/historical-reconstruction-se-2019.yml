@@ -1,11 +1,5 @@
 name: Historical golden replay — SE 2019
-on:
-  push:
-    branches: [validation/historical-golden-reconstruction-v1]
-    paths:
-      - scripts/historical_reconstruction_se_2019.py
-      - .github/workflows/historical-reconstruction-se-2019.yml
-  workflow_dispatch:
+on:\n  workflow_dispatch:
 permissions:
   contents: read
 jobs:

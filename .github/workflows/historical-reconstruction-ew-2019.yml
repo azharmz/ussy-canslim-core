@@ -28,3 +28,5 @@ jobs:
           path: |
             artifacts/historical-reconstruction/ew-2019/
             replay.log
+
+# replacement replay trigger after provider-basis initialization fix

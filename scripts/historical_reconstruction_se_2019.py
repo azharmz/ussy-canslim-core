@@ -50,7 +50,7 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # SE has no price-scale transformation in this replay; provider basis is retained unchanged.
+    # SE has no price-scale transformation in this replay; provider basis is retained unchanged.\n    # Trigger token: SE-2019-CWOH-v1
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 

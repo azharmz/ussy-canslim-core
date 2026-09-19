@@ -8,10 +8,10 @@ from pathlib import Path
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "NVDA"
-ASOF = date(2023,1,27)
-EXECUTION_END = date(2023,1,30)
+ASOF = date(2023,1,23)
+EXECUTION_END = date(2023,1,24)
 START = date(2021,9,1)
-ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":187.90,"breakout_date":"2023-01-27"}
+ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":187.90,"breakout_date":"2023-01-23"}
 ROOT=Path("artifacts/historical-reconstruction/nvda-2023")
 ROOT.mkdir(parents=True,exist_ok=True)
 

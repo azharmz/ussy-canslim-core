@@ -11,7 +11,7 @@ SYMBOL = "AMD"
 ASOF = date(2019,11,4)
 EXECUTION_END = date(2019,11,5)
 START = date(2019,1,1)
-ORACLE = {"pattern":"CUP_WITH_HANDLE","pivot":381.96,"breakout_date":"2020-11-04"}
+ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":35.55,"breakout_date":"2019-11-04"}
 SPLIT_FACTOR = 1.0
 ROOT=Path("artifacts/historical-reconstruction/amd-2019")
 ROOT.mkdir(parents=True,exist_ok=True)

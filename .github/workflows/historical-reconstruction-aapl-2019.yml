@@ -5,7 +5,7 @@ on:
     paths:
       - scripts/historical_reconstruction_aapl_2019.py
       - .github/workflows/historical-reconstruction-aapl-2019.yml
-  workflow_dispatch:
+  workflow_dispatch:\n  # replay trigger revision: 1
 permissions:
   contents: read
 jobs:

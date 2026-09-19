@@ -14,6 +14,7 @@ LIFECYCLE_END = date(2024,8,31)
 START = date(2023,7,1)
 ORACLE = {"pattern":"DOUBLE_BOTTOM","pivot":60.89,"breakout_date":"2024-05-16","first_low":58.88,"second_low":58.55,"source":"IBD"}
 SPLIT_FACTOR = 1.0
+ORACLE_LANDMARKS = {"trough_1": "2024-04-19", "middle_peak": "2024-05-03", "trough_2": "2024-05-10"}
 ROOT=Path("artifacts/historical-reconstruction/wmt-2024")
 ROOT.mkdir(parents=True,exist_ok=True)
 
@@ -114,8 +115,22 @@ def main():
     # oracle horizon. No thresholds are changed and no oracle fact is fed into
     # landmark/segmentation generation.
     cutoff=date(2024,1,1)
-    target=[]  # WMT oracle landmarks are not injected into detector selection; inspect emitted candidates first.
-    target_diag=None
+    target=[]  # Oracle landmarks remain diagnostic-only; never injected into detector generation.
+    target_diag={"oracle_landmarks": ORACLE_LANDMARKS, "oracle_candidate_matches": []}
+    # Compare emitted DOUBLE_BOTTOM candidates to the source-defined 2024 structure after generation.
+    # This diagnoses segmentation/landmark fidelity without tuning any gate.
+    for a in observed.assessments:
+        if getattr(a, "pattern", None).value != "DOUBLE_BOTTOM":
+            continue
+        sig=list(getattr(a, "structural_signature", ()) or ())
+        if any("2024-04-19" in x or "2024-05-03" in x or "2024-05-10" in x for x in sig):
+            target_diag["oracle_candidate_matches"].append({
+                "native_state": a.native_state,
+                "structural_signature": sig,
+                "pivot_level": a.pivot_level,
+                "pivot_source_date": a.pivot_source_date.isoformat() if a.pivot_source_date else None,
+                "faults": list(a.detector_faults),
+            })
     if target:
         seg=target[0]
         cup=build_cup_body_geometry(detector_frame,seg.start,seg.trough,seg.recovery)

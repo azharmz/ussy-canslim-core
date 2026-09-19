@@ -451,6 +451,67 @@ Next checkpoint:
 5. only afterward reconstruct breakout volume, M and T+1.
 
 
+## Golden Case 005 — SNPS 2023 — FLAT-BASE REPLICATION VERIFIED
+
+Replay identity:
+- successful corrected run: 35418641005
+- producer commit: 1d718ae31336491b9929a9c65df3efda99e79c4f
+- the earlier run 35418204224 is INVALID AS EVIDENCE because inherited AAPL dates remained in the first SNPS script revision
+- frozen Pattern Engine unchanged: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- decision date: 2023-05-18; T+1: 2023-05-19
+- provider historical basis unchanged
+
+Source-fidelity morphology finding:
+- The frozen engine independently recovers the exact source high/pivot: LEFT_HIGH 2023-04-04, pivot 392.79000854 versus oracle 392.79.
+- It independently locates BASE_LOW 2023-04-25 and measures depth 8.2538%, closely consistent with the source's approximately 8% characterization.
+- The confirmed-structure FLAT_BASE candidate is REJECTED with TOO_SHORT and WIDE_LOOSE.
+- The open-right-edge FLAT_BASE through breakout day preserves the same 2023-04-04 / 2023-04-25 structure and exact pivot, but is AMBIGUOUS with WIDE_LOOSE.
+- Therefore the AAPL FLAT_BASE discrepancy repeats on a second independent source-labelled flat base. In SNPS, however, the source explicitly calls the base six weeks, so the frozen TOO_SHORT result is now a stronger duration-semantics fidelity concern rather than merely an uncertain AAPL boundary.
+- Classification: REPEATED_MORPHOLOGY_FIDELITY_GAP / FLAT_BASE_DURATION_AND_TIGHTNESS_SEMANTICS.
+- No detector rule is changed.
+
+Important cross-pattern observation:
+- The same 2023-04-04 pivot / 2023-04-25 low is also emitted as a RECOGNIZED open-right-edge CUP_WITHOUT_HANDLE with no faults.
+- A separate longer cup-with-handle candidate using 2023-04-04 as right rim is also recognized.
+- These alternate-family outputs do not replace the source oracle. They are evidence that the frozen engine sees the price structure but classifies the source-labelled six-week flat base differently.
+
+Breakout-day observation:
+- 2023-05-18 OHLC: O 387.50 / H 410.91 / L 386.50 / C 409.71.
+- High and close exceed 392.79; close is +4.3076% versus pivot and remains barely inside the original 5% buy zone upper bound 412.4295.
+- Volume 2,005,700 versus prior-50 completed-session mean 738,404: +171.6264%, ratio 2.7163.
+- This exceeds the frozen USSY >=1.40 breakout-volume threshold and is directionally consistent with the source's very large breakout-volume expansion.
+- Daily bars support BREAKOUT_DAY_CONFIRMED_FROM_DAILY_BAR; exact intraday crossing/cumulative-volume timing is unavailable.
+
+Historical M:
+- FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS on 2023-05-18.
+- classifier reason: VALID_DAY4_PLUS_FOLLOW_THROUGH.
+- provenance: HISTORICAL_INDEX_ONLY_FROZEN_46_REPLAY.
+- M is not a blocker.
+
+USSY T+1 execution adaptation:
+- 2023-05-19 open: 413.03.
+- +5.1529% versus pivot and +0.8103% versus breakout close.
+- This is just outside the original 5% buy-zone upper bound 412.4295.
+- Classification: MISSED_EXTENDED / T1_OPEN_ABOVE_5PCT_BUY_ZONE.
+- This is the first golden reconstruction in the suite where an original breakout-day opportunity and the USSY T+1 Open adaptation materially diverge on the 5% buy-zone rule.
+
+Three-layer disposition:
+
+| Layer | Source / expected | Observed | Classification |
+|---|---|---|---|
+| O'Neil morphology | six-week FLAT_BASE, pivot 392.79, ~8% range | exact pivot/high and ~8.25% depth recovered; FLAT_BASE rejected/ambiguous on TOO_SHORT/WIDE_LOOSE | REPEATED MORPHOLOGY FIDELITY GAP |
+| Original breakout | 2023-05-18 with exceptional volume | high/close above pivot; close +4.31%; volume ratio 2.7163 | DAILY-BAR BREAKOUT CORROBORATION |
+| USSY adaptation | finalized T then T+1 Open | 413.03 = +5.153% vs pivot, outside 5% zone | MISSED_EXTENDED / EXECUTION ADAPTATION GAP |
+
+### Flat-base validation state after AAPL + SNPS
+
+The flat-base question is no longer supported by only one golden example:
+- AAPL: source pivot exactly recovered; FLAT_BASE fails/ambiguous on TOO_SHORT/WIDE_LOOSE.
+- SNPS: source explicitly says six weeks and ~8%; exact pivot and ~8.25% provider depth recovered, yet FLAT_BASE again fails/ambiguous on TOO_SHORT/WIDE_LOOSE.
+
+This is **repeat evidence**, not authorization to relax the detector. At least one further independent authoritative flat-base example and a defensible counterexample/negative control should be reconstructed before a family-level semantic change proposal is considered.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |

@@ -1,12 +1,5 @@
 name: Historical golden replay — DB completion batch
-on:
-  push:
-    branches:
-      - validation/historical-golden-reconstruction-v1
-    paths:
-      - ".github/workflows/historical-reconstruction-db-completion-batch.yml"
-      - "scripts/historical_reconstruction_db_completion.py"
-  workflow_dispatch:
+on:\n  workflow_dispatch:
 permissions:
   contents: read
 jobs:

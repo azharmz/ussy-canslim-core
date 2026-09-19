@@ -30,8 +30,8 @@ def main():
  start=search_start-timedelta(days=550); end=search_end+timedelta(days=10)
  frame=fetch_yfinance(symbol,start,end)
  frame["date"]=pd.to_datetime(frame["date"])
- window=frame[(frame.date.dt.date>=search_start)&(frame.date.dt.date<=search_end)&(frame["high"]>=pivot)]
- if window.empty: raise RuntimeError(f"No pivot crossing for {symbol} {pivot} in frozen search window")
+ window=frame[(frame.date.dt.date>=search_start)&(frame.date.dt.date<=search_end)&(frame["close"]>=pivot)]
+ if window.empty: raise RuntimeError(f"No daily close crossing for {symbol} {pivot} in frozen search window")
  asof=window.iloc[0].date.date()
  after=frame[frame.date.dt.date>asof]
  if after.empty: raise RuntimeError("No T+1 bar")
@@ -48,7 +48,7 @@ def main():
   "symbol":symbol,"asof_date":asof.isoformat(),
   "engine":{"repo":"azharmz/ussy-oneil-patterns","sha":ENGINE_SHA},
   "oracle":{"pattern":"DOUBLE_BOTTOM","pivot":pivot,"source_note":source_note,
-            "breakout_date_method":"first daily high >= oracle pivot inside source-bounded chronology window",
+            "breakout_date_method":"first daily close >= oracle pivot inside source-bounded chronology window",
             "search_start":search_start.isoformat(),"search_end":search_end.isoformat()},
   "source":{"provider":"Yahoo via yfinance","auto_adjust":False,"start":start.isoformat(),"end":end.isoformat(),
             "rows":len(frame),"sha256":hashlib.sha256(csv.read_bytes()).hexdigest()},

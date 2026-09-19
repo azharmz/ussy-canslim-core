@@ -51,7 +51,8 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # Provider basis is retained unchanged; no oracle facts enter detector generation.\n    contemporaneous=frame.copy()
+    # Provider basis is retained unchanged; no oracle facts enter detector generation.
+    contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 
     csv=ROOT/"ohlcv-2019-provider-basis.csv"

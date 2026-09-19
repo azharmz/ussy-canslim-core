@@ -8,10 +8,10 @@ from pathlib import Path
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "AMZN"
-ASOF = date(2023,11,17)
-EXECUTION_END = date(2023,11,20)
+ASOF = date(2023,11,21)
+EXECUTION_END = date(2023,11,21)
 START = date(2023,1,1)
-ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":145.86,"breakout_date":"2023-11-17"}
+ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":145.86,"breakout_date":"2023-11-20"}
 ROOT=Path("artifacts/historical-reconstruction/amzn-2023")
 ROOT.mkdir(parents=True,exist_ok=True)
 
@@ -50,7 +50,7 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # AMZN has no price-scale transformation in this replay; provider basis is retained unchanged.\n    # Trigger token: AMZN-2023-CWOH-v1
+    # AMZN has no price-scale transformation in this replay; provider basis is retained unchanged.\n    # Trigger token: AMZN-2023-CWOH-v2-oracle-date-corrected
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 

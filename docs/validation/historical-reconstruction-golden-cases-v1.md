@@ -87,6 +87,31 @@ Three-layer disposition:
 | USSY execution adaptation | evaluate only after finalized T | T+1 open 390.00, within 5% buy zone | EXECUTION OBSERVATION; NO RETROACTIVE FILL |
 
 
+
+## CWH numeric audit 001 — LRCX 2020
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+This audit separates numeric agreement from the final categorical detector state.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | cup recognized; final handle rejected | categorical mismatch localized to handle |
+| Pivot | 381.96 | 381.95999 | -0.00001 (~0.000003%); practical exact match |
+| Base depth | 24.0% | 24.6118% | +0.6118 percentage point |
+| Base duration | 13 weeks | 52 trading sessions | approximately 10.4 trading weeks; calendar/source counting convention not directly identical |
+| Handle duration | 2 weeks | open-right handle observable through breakout | source duration supported; engine rejection is not a missing-handle-data problem |
+| Cup left rim | source summary does not publish exact date/price | 2020-08-03 / 387.70 | engine-only reconstruction; not scored against absent oracle |
+| Cup low | source summary does not publish exact price | 2020-09-11 / 292.28 | engine-only reconstruction; not scored |
+| Right rim / pivot area | pivot 381.96 | 2020-10-14 / 381.96 | exact practical price agreement |
+| Handle low | source summary does not publish exact price | 2020-10-28 / 333.31 | engine-only reconstruction; not scored |
+| Handle depth | source summary does not publish exact percentage | 12.737% | engine-only reconstruction; not scored |
+| Final handle gate | source calls structure valid CWH | HANDLE_REJECTED: BELOW_CUP_MIDPOINT | **true source-fidelity gap** |
+
+Numeric adjudication: **LRCX is not a broad morphology failure.** Pivot reconstruction is effectively exact and base depth is within 0.612 percentage point of the source's rounded 24%. The cup body is recognized with no cup faults. The meaningful disagreement is the frozen handle semantic gate BELOW_CUP_MIDPOINT. Base-duration figures are retained but not treated as a clean numeric mismatch because the source reports weeks while the engine reports trading sessions and their boundary/counting conventions are not guaranteed identical.
+
+Audit conclusion: **CUP_GEOMETRY_MATCH / PIVOT_MATCH / HANDLE_SEMANTICS_GAP**. This supersedes any shorthand interpretation that LRCX was an across-the-board CWH miss.
+
 ## Historical L comparison-universe decision v1
 
 Status: FROZEN FOR GOLDEN RECONSTRUCTION / NOT PRODUCTION.

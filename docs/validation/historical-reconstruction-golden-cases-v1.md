@@ -716,3 +716,42 @@ Authoritative IBD Top Stocks 2020 material explicitly identifies BRP Group (BRP)
 Decision: retain BRP as **PRE-BREAKOUT / SETUP-STATE CWH EVIDENCE**, not as a completed-breakout replication equivalent to LRCX or EW. Do not infer a breakout date from later bars merely to make the case fit the validation template. This preserves source fidelity and the oracle-input prohibition.
 
 Usefulness: BRP can later test whether the frozen engine recognizes a source-labelled in-progress CWH as-of the publication/setup state, but it cannot by itself answer the current completed-breakout CWH discrepancy question. The next CWH replication candidate should therefore be another authoritative example with an explicit completed breakout chronology, pivot, and sufficient historical date resolution.
+
+
+## Golden Case 009 — NVO 2024 — CWH REPLICATION VERIFIED
+
+Status: **FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.
+
+Replay identity:
+- successful run: 35438338999
+- producer commit: 0481bcb8754571918e299d01296ca2344380dc8b
+- frozen engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- source oracle: CUP_WITH_HANDLE, pivot 137.22, breakout 2024-06-04
+- provider price basis retained unchanged; breakout bar price neighborhood corroborates the 137.22 oracle scale.
+
+Source-fidelity morphology finding:
+- The frozen engine does emit an open-right-edge CUP_WITH_HANDLE candidate relevant to the source period, but it is **AMBIGUOUS**, not RECOGNIZED.
+- Engine structure: LEFT_RIM 2023-11-24; CUP_LOW 2023-12-11; RIGHT_RIM 2024-03-07; HANDLE_LOW 2024-05-03.
+- Engine pivot: 138.27999878 versus source oracle 137.22 (~0.77% higher).
+- Cup depth: 10.369949%.
+- Terminal detector fault: **DEEP_HANDLE_EXCEPTIONAL**.
+- Classification: **MORPHOLOGY_FIDELITY_GAP / DEEP_HANDLE_EXCEPTIONAL**.
+
+Breakout-day reconstruction (2024-06-04):
+- O 136.44 / H 140.00 / L 135.78 / C 139.92; volume 5,071,200.
+- Source pivot 137.22 was crossed and the close finished +1.9676% above pivot, inside the original 5% buy zone.
+- Prior-50-session average volume: 3,712,446; breakout volume +36.60% (1.366x), below the USSY >=1.40 confirmation threshold.
+- Daily-bar limitation remains INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED.
+
+USSY T+1 observation (2024-06-05):
+- open 141.36; +3.0171% versus source pivot and +1.0292% versus breakout close.
+- T+1 open remained inside the original 5% buy zone: **T1_OPEN_IN_BUY_ZONE / NOT_EXTENDED**.
+
+Historical M reconstruction:
+- FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS.
+- Historical L remains NOT_EVALUABLE under the frozen cross-sectional-universe boundary.
+
+CWH adjudication after LRCX + EW + NVO:
+- Three independent authoritative CWH examples now produce three distinct terminal fidelity mechanisms under the frozen engine: LRCX -> BELOW_CUP_MIDPOINT; EW -> CWH assembly/handle-recognition miss after source-like cup body; NVO -> DEEP_HANDLE_EXCEPTIONAL with a near-source pivot.
+- This strengthens evidence that CWH source-fidelity is not yet robust, but does **not** identify one universal gate whose removal is justified.
+- No detector tuning or production-rule change is authorized from these cases alone. Any engine revision requires a separate component-level study with authoritative positive and negative controls.

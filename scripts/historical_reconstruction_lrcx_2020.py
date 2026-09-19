@@ -109,7 +109,7 @@ def main():
     bar_t=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date == ASOF].iloc[0]
     bar_t1=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date == EXECUTION_END].iloc[0]
     pivot=ORACLE["pivot"]
-    avg50=float(detector_frame.tail(50)["volume"].iloc[:-1].mean()) if len(detector_frame)>=51 else float(detector_frame.iloc[:-1].tail(50)["volume"].mean())
+    avg50=float(detector_frame.iloc[:-1].tail(50)["volume"].mean())
     breakout={
       "classification":"ORIGINAL",
       "daily_bar_limitation":"INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED",

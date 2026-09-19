@@ -86,6 +86,26 @@ Three-layer disposition:
 | Original breakout day | breakout 2020-11-04 | high crossed pivot; close below; reconstructed volume not elevated vs prior-50 mean | DAILY-BAR PARTIAL / SOURCE ORACLE PRESERVED |
 | USSY execution adaptation | evaluate only after finalized T | T+1 open 390.00, within 5% buy zone | EXECUTION OBSERVATION; NO RETROACTIVE FILL |
 
+
+## Historical L comparison-universe decision v1
+
+Status: FROZEN FOR GOLDEN RECONSTRUCTION / NOT PRODUCTION.
+
+The production L gate is a cross-sectional RS proxy percentile and therefore cannot be reconstructed from LRCX alone. A 2026 READY/Musaffa membership must not be projected backward to 2020.
+
+Source audit found no existing PIT historical US-wide membership asset in ussy-data or this repository. The research-quality reference is a survivorship-aware security master such as CRSP, but no licensed CRSP dataset is available in this workstream. Free/current exchange lists are not acceptable substitutes for an exact 2020-11-04 broad-universe membership.
+
+For Golden Case 001, freeze:
+- L_individual_state: NOT_EVALUABLE
+- reason: HISTORICAL_COMPARISON_UNIVERSE_NOT_AVAILABLE
+- rs_proxy_percentile: null
+- proprietary historical IBD RS Rating, if later sourced, is REFERENCE ORACLE only and must not be substituted for the USSY cross-sectional proxy.
+- current/future survivor membership must not be back-projected.
+
+This is a data-availability limitation, not an L FAIL and not permission to invent a smaller comparison set. The case remains useful because frozen morphology and breakout-volume gates already determine v2 ineligibility independently of L.
+
+A future reusable historical-L fixture may replace NOT_EVALUABLE only when it pins a defensible PIT membership source, identity rules, decision date, constituent manifest checksum, OHLCV lineage, RS formula/version and producer identity. Such a fixture is isolated historical reconstruction data and must never advance production READY pointers.
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -135,7 +155,7 @@ Preserve: case_id; symbol; decision/breakout date; authoritative source; source 
 | Pivot | VERIFIED 381.96; observed 381.95999 on oracle structure | MATCH |
 | Breakout | VERIFIED 2020-11-04; daily high crossed pivot | original-entry assessment in progress |
 | S / breakout volume | source context + OHLCV needed | freeze OHLCV |
-| L | not reconstructed | after morphology replay |
+| L | NOT_EVALUABLE — PIT historical comparison universe unavailable | do not fabricate/back-project 2026 membership |
 | I | not frozen | source fact or NOT_DOCUMENTED |
 | N | not frozen | source fact or NOT_DOCUMENTED |
 | M | not reconstructed | after morphology replay |
@@ -157,4 +177,4 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 
 CAN SLIM v2 engineering implementation remains 100% complete.
 
-Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, and T+1 observation are complete. L/M and full CAN SLIM v2 eligibility reconstruction remain.
+Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction remains.

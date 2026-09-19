@@ -6,6 +6,7 @@ on:
       - .github/triggers/cwh-completion-batch-v1
       - .github/triggers/cwh-tsla-basis-v2
       - .github/triggers/cwh-tsla-basis-v3
+      - .github/triggers/cwh-tsla-basis-v4
   workflow_dispatch:
 permissions:
   contents: read

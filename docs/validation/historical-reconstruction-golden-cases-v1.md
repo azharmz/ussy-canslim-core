@@ -859,3 +859,34 @@ T+1 2023-11-21:
 Historical M: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NOT_EVALUABLE.
 
 CWOH progress: AMD, AVTR, SE, AMZN = **4 / 10 valid cases**.
+
+
+## CWH completion tranche — Golden Cases 013–019
+
+Status: **CWH 10/10 COMPLETE / FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.
+
+Batch replay: run 35441720017 (OLED, TOL, URBN, SHOP, RBLX, DUOL; all jobs SUCCESS). TSLA required a corporate-action basis correction for Yahoo's later 2022 3-for-1 split; authoritative corrected replay is run 35441985710. Earlier TSLA batch evidence is superseded and must not be used.
+
+### 013 OLED 2019
+IBD oracle: second-stage CUP_WITH_HANDLE, pivot 177.05, breakout 2019-06-18. Daily replay: O 176.08 / H 186.31 / L 175.94 / C 184.70; volume 1,028,500 vs prior50 743,744 (~1.383x). T+1 2019-06-19 open 185.80, +4.9421% vs pivot, still inside 5% zone. Frozen engine does not reproduce the source-target 177.05 CWH; emitted CWH candidates are faulted (including DEEP_HANDLE_EXCEPTIONAL / BELOW_CUP_MIDPOINT). Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### 014 TSLA 2020
+IBD oracle: off-kilter CUP_WITH_HANDLE, pivot 466.00, breakout 2020-11-18. Yahoo current history is adjusted for the later 2022 3-for-1 split; replay restores contemporaneous Nov-2020 basis by multiplying OHLC by 3 and dividing volume by 3. Corrected breakout: O 448.35 / H 496.00 / L 443.50 / C 486.64; volume 78,044,000 vs prior50 48,526,294 (~1.608x); close +4.4292% vs pivot and inside 5% zone. T+1 open 492.00, +5.5794%, above the 5% zone: **MISSED_EXTENDED / T1_OPEN_ABOVE_5PCT_BUY_ZONE**. Engine's representative CWH is AMBIGUOUS with pivot 358.998 and DEEP_HANDLE_EXCEPTIONAL, not the source-target structure. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### 015 TOL 2024
+IBD retrospective oracle: CUP_WITH_HANDLE pivot 128.75; breakout occurred one week before the 2024-05-22 selloff, reconstructed as 2024-05-15. Daily replay: O 131.56 / H 135.37 / L 131.05 / C 134.92; volume 2,067,000 vs prior50 1,213,256 (~1.704x); close +4.7922% and inside 5% zone. T+1 open 133.91, +4.0078%, inside zone. Frozen engine does not reconstruct the 128.75 source-target CWH; representative candidates are faulted BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### 016 URBN 2025
+IBD oracle: CUP_WITH_HANDLE pivot 74.45, breakout 2025-07-21. Daily replay: O 72.81 / H 75.98 / L 72.69 / C 74.62; volume 2,126,000 vs prior50 2,205,444 (~0.964x); close +0.2283%. T+1 open 75.79, +1.7999%, inside 5% zone. Frozen engine does not reproduce source-target 74.45 CWH; representative candidates carry DEEP_HANDLE_EXCEPTIONAL. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### 017 SHOP 2025
+IBD oracle: early-stage deep CUP_WITH_HANDLE pivot 112.38, breakout 2025-06-11. Daily replay: O 111.625 / H 117.36 / L 111.29 / C 114.13; volume 14,078,100 vs prior50 14,202,128 (~0.991x); close +1.5572%. T+1 open 113.25, +0.7742%, inside 5% zone. Frozen engine does not reproduce the source-target CWH; representative candidate pivot 111.00 is faulted BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### 018 RBLX 2025
+IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 74.24, breakout 2025-05-13. Daily replay: O 73.93 / H 77.24 / L 73.38 / C 77.02; volume 12,375,800 vs prior50 8,210,696 (~1.507x); close +3.7446%. T+1 open 77.40, +4.2565%, inside 5% zone. Frozen engine emits nearby CWH candidates but the representative 75.74 pivot is AMBIGUOUS/DEEP_HANDLE_EXCEPTIONAL rather than an exact source-target reconstruction. Classification: **MORPHOLOGY_FIDELITY_GAP / CWH_PIVOT_AND_HANDLE_SEMANTICS**.
+
+### 019 DUOL 2024
+IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 241.86; source documents the setup and later reporting confirms a brief move past the buy point. Daily replay uses 2024-05-06 as the completed daily crossing: O 242.245 / H 251.30 / L 241.156 / C 248.20; volume 863,700 vs prior50 839,762 (~1.029x); close +2.6213%. T+1 2024-05-07 open 246.19, +1.7903%, inside 5% zone. Frozen engine does not exactly reconstruct the 241.86 source-target CWH; representative candidates include pivot 231.89 with FRAGMENTED_BOTTOM + BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
+
+### CWH family adjudication after 10 valid cases
+The CWH tranche is now closed at **10/10**: LRCX, EW, NVO, OLED, TSLA, TOL, URBN, SHOP, RBLX, DUOL. The accumulated evidence shows repeated source-fidelity gaps, but they are not explained by one universal terminal gate: observed mechanisms include BELOW_CUP_MIDPOINT, assembly/handle-recognition misses, DEEP_HANDLE_EXCEPTIONAL, source-target base/pivot mismatch, and nearby-but-nonidentical handle/pivot semantics. This is strong evidence that CWH source fidelity of the frozen engine is not robust across authoritative historical examples, but **does not authorize detector tuning**. Any engine revision requires a separate morphology-engine workstream with positive and negative controls.

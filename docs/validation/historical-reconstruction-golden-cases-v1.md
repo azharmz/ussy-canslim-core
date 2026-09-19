@@ -1050,6 +1050,31 @@ Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_1.81PCT / SOURCE_NEAR_ST
 ### 017 SHOP 2025
 IBD oracle: early-stage deep CUP_WITH_HANDLE pivot 112.38, breakout 2025-06-11. Daily replay: O 111.625 / H 117.36 / L 111.29 / C 114.13; volume 14,078,100 vs prior50 14,202,128 (~0.991x); close +1.5572%. T+1 open 113.25, +0.7742%, inside 5% zone. Frozen engine does not reproduce the source-target CWH; representative candidate pivot 111.00 is faulted BELOW_CUP_MIDPOINT. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 
+
+## CWH numeric audit 008 — SHOP 2025
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | early-stage deep CUP_WITH_HANDLE | multiple CUP_WITH_HANDLE_AMBIGUOUS candidates | family vocabulary present |
+| Pivot | 112.38 | 111.00 on closest pivot candidate | -1.38 / **-1.2280%** |
+| Closest candidate right rim | source pivot area 112.38 | 2025-03-25 / 111.00 | near, not exact |
+| Closest candidate handle low | not numerically frozen from source | 2025-04-04 | not scored |
+| Closest candidate depth | no numeric source depth frozen | 22.937211% | not scored |
+| Final state | valid CWH per source | AMBIGUOUS | categorical mismatch |
+| Fault on closest-pivot candidate | source accepts structure | BELOW_CUP_MIDPOINT | **true morphology-semantics gap** |
+| Breakout date | 2025-06-11 | high 117.36 / close 114.13 crossed 112.38 | **chronology corroborated** |
+| Breakout volume | no source numeric ratio frozen | 0.99127x prior-50 | below USSY 1.40 confirmation; separate from morphology fidelity |
+| Breakout close vs oracle pivot | breakout | +1.5572% | inside 5% zone |
+| T+1 open vs oracle pivot | n/a to source morphology | +0.7742% | inside 5% zone |
+
+Numeric adjudication: the earlier tranche summary already mentioned the 111.00 candidate but treated SHOP broadly as SOURCE_TARGET_CWH_NOT_RECONSTRUCTED. Full-output review shows that 111.00 is the **closest emitted CWH pivot to the 112.38 oracle**, only about **1.23% lower**. Its structural signature is LEFT_RIM 2024-11-13, CUP_LOW 2025-03-13, RIGHT_RIM 2025-03-25, HANDLE_LOW 2025-04-04, with engine depth 22.937211%.
+
+Other emitted CWH candidates use materially higher pivots (115.37, 115.62, 120.72, 129.38), so the 111.00 structure is the defensible source-near numeric comparator. It remains AMBIGUOUS solely on BELOW_CUP_MIDPOINT. Because the frozen source record does not publish numeric depth or handle landmarks, those dimensions are observations rather than scored mismatches.
+
+Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_1.23PCT / SOURCE_NEAR_STRUCTURE_FOUND / HANDLE_MIDPOINT_SEMANTICS_GAP**. This refines the prior blanket SOURCE_TARGET_CWH_NOT_RECONSTRUCTED wording.
+
 ### 018 RBLX 2025
 IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 74.24, breakout 2025-05-13. Daily replay: O 73.93 / H 77.24 / L 73.38 / C 77.02; volume 12,375,800 vs prior50 8,210,696 (~1.507x); close +3.7446%. T+1 open 77.40, +4.2565%, inside 5% zone. Frozen engine emits nearby CWH candidates but the representative 75.74 pivot is AMBIGUOUS/DEEP_HANDLE_EXCEPTIONAL rather than an exact source-target reconstruction. Classification: **MORPHOLOGY_FIDELITY_GAP / CWH_PIVOT_AND_HANDLE_SEMANTICS**.
 

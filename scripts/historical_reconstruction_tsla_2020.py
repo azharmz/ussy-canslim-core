@@ -50,7 +50,7 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # Yahoo historical TSLA bars are adjusted for the 2022 3-for-1 split.\n    # Restore the contemporaneous Nov-2020 post-2020-split / pre-2022-split price basis.\n    for c in ["open","high","low","close","adj_close"]:\n        if c in df.columns: df[c] = df[c] * 3.0\n    if "volume" in df.columns: df["volume"] = df["volume"] / 3.0
+    # Yahoo historical TSLA bars are adjusted for the 2022 3-for-1 split.\n    # Restore the contemporaneous Nov-2020 post-2020-split / pre-2022-split price basis.\n    for c in ["open","high","low","close","adj_close"]:\n        if c in frame.columns: frame[c] = frame[c] * 3.0\n    if "volume" in frame.columns: frame["volume"] = frame["volume"] / 3.0
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 

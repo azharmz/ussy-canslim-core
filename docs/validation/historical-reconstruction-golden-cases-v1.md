@@ -1404,3 +1404,30 @@ This materially supersedes the earlier `SOURCE_TARGET_BASE_NOT_RECONSTRUCTED` di
 The breakout layer remains separate. On 2023-11-20 both high and close crossed 145.86, with close +0.1851% above pivot and inside the original 5% zone, but volume was only about **0.7554x** the prior-50 mean. T+1 open **143.91** fell back below the oracle pivot; that is a USSY execution observation, not an O'Neil morphology failure.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / SHARP_V_AND_FRAGMENTED_BOTTOM_SEMANTICS_GAP**.
+
+
+## CWOH numeric audit 005 — JPM 2023
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35472174644**, job **105974993887**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 159.38 | 159.38000488 | +0.00000488 / **~+0.0000031%**; practical exact match |
+| Source-target landmarks | source describes Aug-Nov cup; exact numeric landmark dates not frozen | LEFT_RIM 2023-07-31 / CUP_LOW 2023-10-05 | **NOT SCORED / SOURCE LANDMARK BOUNDARIES NOT NUMERICALLY COMPARABLE** |
+| Cup depth | source numeric depth not frozen | 11.638852% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source describes Aug-Nov base; exact comparable duration not frozen | source-near lineage through breakout | **NOT SCORED / SOURCE BOUNDARY NOT NUMERICALLY COMPARABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | week ended 2023-12-15 | 2023-12-15 H 165.28 / C 165.23 above 159.38 | **daily crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 2.1318x prior-50 / +113.18% | strong separate breakout evidence |
+| T+1 open | n/a to source morphology | 165.92 = +4.1034% vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | provider basis unchanged; identity transform | **no corporate-action transform applied** |
+
+All emitted CWOH candidates were inspected. The closest source-target lineage is **RECOGNIZED**, LEFT_RIM **2023-07-31**, CUP_LOW **2023-10-05**, pivot **159.38000488**, depth **11.638852%**, with no detector faults. A second lineage at the same exact-practical pivot is **AMBIGUOUS** with CUP_LOW **2023-10-27** and `FRAGMENTED_BOTTOM`; it does not displace the clean recognized source-near candidate. Other CWOH pivots include 153.11000061, 144.33999634 and 143.36999512.
+
+The important component-level result is that both a clean RECOGNIZED lineage and an alternate ambiguous lineage exist at the oracle pivot. Therefore the alternate `FRAGMENTED_BOTTOM` candidate is evidence of boundary sensitivity, but it is not a source-fidelity failure because the engine independently emits a fault-free source-near CWOH at the same pivot.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS / ALTERNATE_SAME_PIVOT_BOUNDARY_SENSITIVE_LINEAGE_PRESENT**.

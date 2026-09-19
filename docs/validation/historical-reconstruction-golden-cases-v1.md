@@ -680,3 +680,28 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 CAN SLIM v2 engineering implementation remains 100% complete.
 
 Historical reconstruction first-pass core-pattern coverage is complete: all four frozen families now have a source-backed replay, with AMD as the positive morphology control and LRCX/IPHI/AAPL carrying localized fidelity questions. No frozen-engine change is authorized. Targeted multi-example replication is the next validation tranche. IPHI Golden Case 003 morphology/pivot, breakout, M, T+1 and original O'Neil loss-cut lifecycle are complete; the frozen engine preserves a DOUBLE_BOTTOM fidelity gap at NO_SECOND_TROUGH_UNDERCUT. AMD Golden Case 002 morphology/pivot, breakout-volume, historical M and T+1 reconstruction are now complete as a positive CUP_WITHOUT_HANDLE fidelity case; C/A and L evidence boundaries remain explicit. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.
+
+
+## Golden Case 008 — EW 2019 — CUP_WITH_HANDLE
+
+Status: **COMPLETE / FROZEN — VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**
+
+Source oracle: IBD Top Stocks 2019 describes Edwards Lifesciences (EW) as a solid cup with handle, 16.3% deep, with proper buy point 195.10. Source chronology distinguishes thin-volume pivot crossing around July 22–23 from the July 24 breakaway gap / strong-volume confirmation.
+
+Price-basis adaptation: Yahoo historical 2019 bars reflect the later 3-for-1 split basis. For source-faithful reconstruction, OHLC/adj_close are restored x3 and volume /3 before detector replay. Oracle facts remain reference-only and are not detector inputs.
+
+Frozen engine replay (run 35433862533, engine c433cc1e35a5aa32a46f732cd8c5545935e36e40):
+- source-target diagnostic: null; no CUP_WITH_HANDLE candidate matching the 195.10 source structure was emitted.
+- primary/fused landmarks do contain the source-near cup body: SWING_HIGH 2019-03-18 at 197.85999 and SWING_LOW 2019-05-29 at 165.689999.
+- atomic segment: start 2019-03-18, trough 2019-05-29, recovery null, depth 16.25897%, closely matching the source 16.3% depth.
+- therefore the evidence localizes the discrepancy downstream of cup-body landmark/depth discovery: the frozen engine does not assemble/recognize the documented CWH structure by the July 24 as-of date.
+
+Classification: **MORPHOLOGY_FIDELITY_GAP / CWH_ASSEMBLY_OR_HANDLE_RECOGNITION_MISS**. This is distinct from LRCX's explicit BELOW_CUP_MIDPOINT rejection: EW reaches a source-faithful cup-body geometry but produces no source-target CWH diagnostic. No detector tuning is authorized from this case alone.
+
+Breakaway confirmation observation on 2019-07-24 (daily-bar reconstruction): O 218.16, H 219.71, L 210.73, C 214.88, volume 3,633,500 on contemporaneous basis. Prior-50-session average volume 1,307,968; ratio 2.77797x (+177.80%), comfortably above the frozen >=1.40 confirmation threshold. Close was +10.14% above the 195.10 pivot and already outside the original 5% buy zone. Daily OHLCV cannot reconstruct exact intraday entry timing.
+
+USSY T+1 observation: 2019-07-25 open 212.55, +8.94% vs pivot and -1.08% vs July 24 close; outside the original 5% buy zone => **MISSED_EXTENDED / T1_OPEN_ABOVE_5PCT_BUY_ZONE** if July 24 strong-volume confirmation is used as finalized T.
+
+Historical M: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NOT_EVALUABLE under the frozen cross-sectional-universe limitation.
+
+CWH adjudication after LRCX + EW: two authoritative CWH examples now show source-fidelity discrepancies, but not the same terminal gate. LRCX is an explicit handle midpoint-gate rejection; EW preserves the source-like cup body yet fails to assemble/recognize the source-target CWH. This supports continued targeted CWH replication and component-level diagnostics, not a family-wide rule change.

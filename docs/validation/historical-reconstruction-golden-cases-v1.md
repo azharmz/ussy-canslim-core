@@ -1320,3 +1320,31 @@ The source-reported cup low **27.43** is independently reconstructed at **27.430
 Numeric adjudication: AMD is a clean positive control for CWOH. The engine finds the correct family, source-target structure, pivot and source-reported trough, reaches RECOGNIZED with no faults, and the reconstructed breakout-day volume closely corroborates the source's rounded strong-volume description.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / CUP_LOW_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.
+
+
+## CWOH numeric audit 002 — AVTR 2021
+
+Status: **AUDITED / PRIOR SHORTHAND SUPERSEDED / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from replay run **35439158198**. It supersedes the earlier statement that no emitted CWOH pivot was near the 33.99 oracle.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 33.99 | 33.99000168 | +0.00000168 / **~+0.0000049%**; practical exact match |
+| Source-target landmarks | source numeric landmarks beyond pivot not frozen | LEFT_RIM 2021-04-29 / CUP_LOW 2021-05-11 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 12.974409% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | source-near structure present through 2021-06-16 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | 2021-06-16 | H 34.50 / C 34.05 above 33.99 | **daily crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 1.3773x prior-50 / +37.73% | separate breakout evidence; not morphology-scored |
+| T+1 open | n/a to source morphology | 34.05 = +0.1765% vs pivot | inside original 5% zone; operationalization only |
+
+All emitted CWOH candidates were inspected. The closest candidate is **RECOGNIZED** with LEFT_RIM **2021-04-29**, CUP_LOW **2021-05-11**, pivot **33.99000168**, depth **12.974409%**, and **no detector faults**. Other CWOH outputs at 31.05, 30.99, 30.73, 28.98, 25.70, 19.50 and 18.09 are alternate structures and must not replace the exact source-near candidate.
+
+This materially changes the earlier adjudication. The prior wording `SOURCE_TARGET_BASE_NOT_RECONSTRUCTED` resulted from inspecting a representative recognized structure rather than the full candidate set. The frozen output itself contains a practically exact 33.99 source-target pivot and a clean RECOGNIZED CWOH candidate.
+
+Numeric adjudication: AVTR is a second positive CWOH source-fidelity control at the fields the current oracle can score. Depth, duration and detailed landmark fidelity remain unscored because the frozen source oracle does not provide comparable numeric values for those fields.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.

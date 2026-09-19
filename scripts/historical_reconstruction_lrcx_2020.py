@@ -41,8 +41,14 @@ def main():
     from oneil_patterns.morphology.cup_family import assess_handle
     from oneil_patterns.validation.pivot_adapter import cup_with_handle_pivot
     from oneil_patterns.validation.open_right_edge_handle import enumerate_open_right_edge_handles
+    from canslim_research.market_state_v1 import IndexBar
+    from canslim_research.historical_market_adapter import replay_historical_market, decision_on
 
     frame=fetch_yfinance(SYMBOL,START,EXECUTION_END)
+    market_raw={}
+    market_ids={"NASDAQ_COMPOSITE":"^IXIC","SP500":"^GSPC","DJIA":"^DJI"}
+    for index_id,ticker in market_ids.items():
+        market_raw[index_id]=fetch_yfinance(ticker,date(2020,7,1),ASOF)
     raw_csv=ROOT/"ohlcv-yahoo-split-adjusted.csv"
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
@@ -89,6 +95,16 @@ def main():
         for h in handles:
             ha=assess_handle(h); pv=cup_with_handle_pivot(cup,h)
             target_diag["handles"].append({"low":h.handle_low.price_date.isoformat(),"recovery":h.handle_recovery.price_date.isoformat(),"duration_sessions":h.duration_sessions,"depth_pct":h.depth_pct,"low_in_upper_half":h.low_in_upper_half,"state":ha.state.value,"faults":[x.value for x in ha.faults],"pivot":pv.pivot_level,"pivot_date":pv.pivot_source_date.isoformat()})
+    index_series={}
+    market_lineage={}
+    for index_id,mf in market_raw.items():
+        mf=mf[pd.to_datetime(mf["date"]).dt.date <= ASOF].copy()
+        index_series[index_id]=tuple(IndexBar(date=pd.Timestamp(r["date"]).date().isoformat(),low=float(r["low"]),close=float(r["close"]),volume=float(r["volume"]) if pd.notna(r["volume"]) else None) for _,r in mf.iterrows())
+        raw=mf.to_csv(index=False).encode()
+        market_lineage[index_id]={"source":"Yahoo via yfinance","symbol":market_ids[index_id],"start":pd.Timestamp(mf.iloc[0]["date"]).date().isoformat(),"end":pd.Timestamp(mf.iloc[-1]["date"]).date().isoformat(),"rows":len(mf),"sha256":hashlib.sha256(raw).hexdigest()}
+    m_decisions=replay_historical_market(index_series=index_series)
+    m_on_t=decision_on(m_decisions,ASOF.isoformat())
+
     bar_t=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date == ASOF].iloc[0]
     bar_t1=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date == EXECUTION_END].iloc[0]
     pivot=ORACLE["pivot"]
@@ -115,6 +131,7 @@ def main():
       "target_oracle_structure_diagnostic":target_diag,
       "breakout_day_assessment":breakout,
       "ussy_t1_execution_observation":t1,
+      "historical_M_reconstruction":{"classification":"DATA_ADAPTATION","decision":m_on_t.__dict__,"input_lineage":market_lineage,"limitation":"index-only frozen historical adapter; leadership/weakening booleans and correction-reset evidence are not fabricated"},
       "primary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in primary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "auxiliary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in auxiliary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "fused_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in fused if x.price_date>=cutoff],

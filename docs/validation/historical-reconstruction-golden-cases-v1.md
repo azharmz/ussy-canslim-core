@@ -802,6 +802,30 @@ CWH adjudication after LRCX + EW + NVO:
 - No detector tuning or production-rule change is authorized from these cases alone. Any engine revision requires a separate component-level study with authoritative positive and negative controls.
 
 
+
+## CWH numeric audit 003 — NVO 2024
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | CUP_WITH_HANDLE_AMBIGUOUS | same family found; final-state mismatch |
+| Pivot | 137.22 | 138.27999878 | +1.059999 / **+0.7725%** |
+| Cup depth | source oracle does not publish a numeric depth in the frozen record | 10.369949% | engine-only value; not scored |
+| Left rim | not numerically frozen from source | 2023-11-24 | not scored |
+| Cup low | not numerically frozen from source | 2023-12-11 | not scored |
+| Right rim | not numerically frozen from source | 2024-03-07 | not scored |
+| Handle low | not numerically frozen from source | 2024-05-03 | not scored |
+| Handle/final gate | source labels valid CWH | DEEP_HANDLE_EXCEPTIONAL | **true source-fidelity gap** |
+| Breakout close vs oracle pivot | breakout 2024-06-04 | close 139.92 = +1.9676% | pivot crossed; inside 5% zone |
+| Breakout volume | source numeric oracle not frozen | 1.366x prior-50 | below USSY 1.40 threshold; not scored as source morphology mismatch |
+
+Numeric adjudication: NVO differs materially from EW because the frozen engine **does find the same pattern family and a near-source pivot**. The pivot difference is only 1.06 price units, or about **0.77% above the IBD 137.22 oracle**. There is no frozen source depth/landmark number with which to score the engine's 10.369949% cup depth or individual landmark dates, so those fields must remain unscored rather than labelled mismatches.
+
+The actual documented disagreement is categorical at the handle gate: IBD treats the setup as a valid CWH while the frozen engine retains it as AMBIGUOUS due to DEEP_HANDLE_EXCEPTIONAL.
+
+Audit conclusion: **CWH_FAMILY_MATCH / PIVOT_NEAR_MATCH_0.77PCT / HANDLE_DEPTH_SEMANTICS_GAP**. This supersedes shorthand that could imply the entire NVO morphology failed.
+
 ## Golden Case 010 — AVTR 2021 — CWOH REPLICATION
 
 Status: **FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.

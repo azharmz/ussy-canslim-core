@@ -1292,3 +1292,31 @@ DOUBLE_BOTTOM golden reconstruction is now **10/10 complete**: the prior three c
 The completion tranche provides five strong source-target pivot/family matches (LLY, STRL, URI, UBS, NXPI) and two informative source-target morphology/boundary gaps (FIS, CAG). These mismatches are retained as validation evidence and **do not authorize tuning** of the frozen detector. Breakout-volume observations and USSY T+1 observations remain separate layers and do not retroactively alter morphology adjudication.
 
 Overall golden reconstruction progress after this freeze: **32/40 = 80%**. CWH **10/10**, CWOH **10/10**, DOUBLE_BOTTOM **10/10**, FLAT_BASE **2/10**. Per batch governance, stop here before starting the FLAT_BASE completion tranche.
+
+
+## CWOH numeric audit 001 — AMD 2019
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35411908528** rather than relying on a representative candidate.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 35.55 | 35.54999924 | -0.00000076 / **~0.0000021%**; practical exact match |
+| Source cup low | 27.43 | 27.43000031 on 2019-10-03 | **practical exact landmark match** |
+| Cup depth | source numeric depth not frozen | 22.841066% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | engine structure 2019-08-09 through 2019-11-04 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | 2019-11-04 | H 36.45 / C 36.29 above 35.55 | **daily crossing confirmed** |
+| Breakout volume | source context about +67% | 1.6855x prior-50 = +68.55% | **strong corroboration; ~+1.55 pp vs rounded source context** |
+| T+1 open | n/a to source morphology | 36.56 = +2.8411% vs pivot | inside original 5% zone; operationalization only |
+
+All frozen CWOH candidates were considered. The source-near candidate is not merely the first or a convenient RECOGNIZED candidate: it uses **LEFT_RIM 2019-08-09 / CUP_LOW 2019-10-03**, pivot **35.54999924**, depth **22.841066%**, status **RECOGNIZED**, and no detector faults. Other CWOH candidates exist at pivots including 34.86, 34.30, 32.05, 29.95 and 21.44, but they are not substituted for the oracle structure.
+
+The source-reported cup low **27.43** is independently reconstructed at **27.43000031**, while the oracle pivot **35.55** is reconstructed essentially exactly. The source material frozen for this case does not provide a numeric cup-depth or directly comparable duration value, so the engine's depth and duration are retained as evidence but not scored.
+
+Numeric adjudication: AMD is a clean positive control for CWOH. The engine finds the correct family, source-target structure, pivot and source-reported trough, reaches RECOGNIZED with no faults, and the reconstructed breakout-day volume closely corroborates the source's rounded strong-volume description.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / CUP_LOW_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.

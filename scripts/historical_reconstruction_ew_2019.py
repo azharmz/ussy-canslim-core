@@ -135,7 +135,7 @@ def main():
       "production_use":"NEVER_PRODUCTION",
       "symbol":SYMBOL,"asof_date":ASOF.isoformat(),
       "source":{"provider":"Yahoo via yfinance","auto_adjust":False,"start":START.isoformat(),"end":EXECUTION_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"yahoo_split_adjusted_sha256":raw_sha},
-      "price_basis":{"classification":"DATA_ADAPTATION","corporate_action":"2024-10-02 10-for-1 forward split; post-split trading 2024-10-03","factor":SPLIT_FACTOR,"price_transform":"OHLC and adj_close * 10","volume_transform":"volume / 10","contemporaneous_sha256":sha},
+      "price_basis":{"classification":"DATA_ADAPTATION","basis":"Yahoo historical provider basis retained unchanged","price_transform":"none","volume_transform":"none","provider_basis_sha256":sha},
       "engine":{"repo":"azharmz/ussy-oneil-patterns","sha":ENGINE_SHA},
       "oracle":ORACLE,
       "candidate_diagnostics":diag,

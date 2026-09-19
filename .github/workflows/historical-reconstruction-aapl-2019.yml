@@ -3,7 +3,7 @@ on:
   push:
     branches: [validation/historical-golden-reconstruction-v1]
     paths:
-      - scripts/historical_reconstruction_amd_2019.py
+      - scripts/historical_reconstruction_aapl_2019.py
       - .github/workflows/historical-reconstruction-aapl-2019.yml
   workflow_dispatch:
 permissions:
@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python scripts/historical_reconstruction_amd_2019.py | tee replay.log
+          python scripts/historical_reconstruction_aapl_2019.py | tee replay.log
       - uses: actions/upload-artifact@v4
         with:
           name: historical-reconstruction-aapl-2019

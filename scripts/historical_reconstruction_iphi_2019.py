@@ -8,8 +8,8 @@ from pathlib import Path
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "IPHI"
-ASOF = date(2019,11,4)
-EXECUTION_END = date(2019,11,5)
+ASOF = date(2019,10,15)
+EXECUTION_END = date(2019,10,16)
 START = date(2019,1,1)
 ORACLE = {"pattern":"DOUBLE_BOTTOM","pivot":64.85,"breakout_date":"2019-10-15"}
 SPLIT_FACTOR = 1.0

@@ -1,0 +1,41 @@
+name: Historical golden replay — CWOH completion batch
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - validation/historical-golden-reconstruction-v1
+    paths:
+      - ".github/triggers/cwoh-completion-batch-v1"
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - jpm_2023
+          - cost_2024
+          - ax_2024
+          - nflx_2024
+          - all_2024
+          - nvda_2023
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - name: Run frozen replay
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/historical_reconstruction_${{ matrix.case }}.py | tee replay-${{ matrix.case }}.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cwoh-${{ matrix.case }}
+          path: |
+            artifacts/historical-reconstruction/
+            replay-${{ matrix.case }}.log

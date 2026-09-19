@@ -512,6 +512,66 @@ The flat-base question is no longer supported by only one golden example:
 This is **repeat evidence**, not authorization to relax the detector. At least one further independent authoritative flat-base example and a defensible counterexample/negative control should be reconstructed before a family-level semantic change proposal is considered.
 
 
+## Golden Case 006 — TSM 2024 — DOUBLE-BOTTOM REPLICATION VERIFIED
+
+Replay identity:
+- successful run: 35420754613
+- producer commit: 0d28126a589367e2b05b24b6c80161abdbafcd0c
+- frozen Pattern Engine unchanged: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- decision date: 2024-05-10; T+1: 2024-05-13
+- source oracle: DOUBLE_BOTTOM, buy point 148.43
+
+Source-fidelity morphology finding:
+- The frozen engine independently emits a RECOGNIZED DOUBLE_BOTTOM whose pivot is 148.42999268, effectively exact versus the source oracle 148.43.
+- Structural signature: LEFT_HIGH 2024-02-09; TROUGH_1 2024-03-19; MIDDLE_PEAK 2024-04-10; TROUGH_2 2024-04-22.
+- normalized_status: RECOGNIZED.
+- native_state: DOUBLE_BOTTOM_RECOGNIZED.
+- detector_faults: [].
+- measured depth: 6.9468%.
+- Therefore TSM is a positive-control double-bottom case. The IPHI NO_SECOND_TROUGH_UNDERCUT discrepancy does **not** automatically repeat on another authoritative double-bottom.
+- Classification: SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_POSITIVE_CONTROL.
+
+The detector also emits other alternative DOUBLE_BOTTOM candidates, several with NO_SECOND_TROUGH_UNDERCUT or other faults. Those are not substituted for the source-faithful candidate: the decisive fact is that the frozen engine independently recovers the source pivot 148.43 with a fault-free RECOGNIZED double-bottom.
+
+Breakout-day observation:
+- 2024-05-10 OHLC: O 147.22 / H 150.50 / L 146.93 / C 149.26.
+- high and close exceed pivot 148.43; close is +0.5592% versus pivot and remains inside the 5% buy zone.
+- volume: 23,671,400 versus prior-50 completed-session mean 16,163,340.
+- volume expansion: +46.4512%, ratio 1.4645.
+- therefore the frozen USSY >=1.40 breakout-volume requirement passes.
+- This daily reconstruction corroborates IBD's contemporaneous report that TSM broke out of a double-bottom at 148.43. Exact intraday crossing/cumulative-volume timing is not reconstructed.
+
+USSY T+1 execution adaptation:
+- 2024-05-13 open: 148.0200.
+- open is -0.2762% below pivot and -0.8308% below breakout close.
+- The script's strict original-buy-zone boolean is false because the open is below the pivot, not because price is extended above the 5% upper bound.
+- Classification: T1_OPEN_BELOW_PIVOT / NOT_EXTENDED.
+- This must not be mislabeled MISSED_EXTENDED. Whether a production order would fill depends on the production entry/order semantics, which is a separate operationalization question.
+
+Double-bottom adjudication after IPHI + TSM:
+- IPHI remains a real source-fidelity discrepancy: official source calls the setup DOUBLE_BOTTOM, while the source-near frozen candidate is AMBIGUOUS on NO_SECOND_TROUGH_UNDERCUT.
+- TSM is a clean positive control: exact source pivot recovered as DOUBLE_BOTTOM_RECOGNIZED with no faults.
+- Consequently the current evidence does **not** justify saying the frozen undercut gate is generally incompatible with O'Neil double bottoms.
+- The correct next question is narrower: why does IPHI's documented double bottom fail that gate while TSM passes? Possible explanations to test separately are source morphology nuance, provider/price-basis differences, landmark selection, or an over-restrictive gate for a subset of documented examples.
+- No detector change is authorized.
+
+Three-layer disposition:
+
+| Layer | Source / expected | Observed | Classification |
+|---|---|---|---|
+| O'Neil morphology | DOUBLE_BOTTOM, pivot 148.43 | exact pivot 148.42999268; RECOGNIZED; no faults | SOURCE-FIDELITY MATCH |
+| Original breakout | breakout through 148.43 | high/close above pivot; volume ratio 1.4645 | DAILY-BAR BREAKOUT CORROBORATION |
+| USSY adaptation | finalized T then T+1 Open | open 148.02, slightly below pivot | T1_OPEN_BELOW_PIVOT / NOT_EXTENDED |
+
+### Double-bottom validation state
+
+TSM changes the interpretation of the IPHI result. The family now has both:
+- IPHI: documented DOUBLE_BOTTOM with a localized NO_SECOND_TROUGH_UNDERCUT fidelity gap.
+- TSM: documented DOUBLE_BOTTOM with exact pivot and fault-free recognition.
+
+The next double-bottom replication should therefore be selected to discriminate the undercut semantics directly, ideally an authoritative example whose two trough relationship can be reconstructed unambiguously. It should not be chosen merely to accumulate another passing case.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |

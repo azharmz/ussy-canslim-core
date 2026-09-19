@@ -364,6 +364,51 @@ The next work is **targeted replication**, not broad backtesting and not detecto
 CUP_WITHOUT_HANDLE does not need immediate gate investigation; AMD remains the positive-control case while resources focus on the three observed discrepancy families.
 
 
+## Targeted replication candidate registry v1
+
+Status: SOURCE DISCOVERY STARTED / ORACLE NOT YET FROZEN.
+
+Purpose: expand only the three morphology families with first-pass fidelity gaps. Candidate inclusion here is not evidence that a setup will rescue or contradict the frozen detector.
+
+### Source-methodology anchors
+
+Authoritative IBD educational material defines the common pattern boundaries used to frame source review:
+- CUP_WITH_HANDLE: minimum base length seven weeks; the handle requires at least five trading sessions. The LRCX educational example explicitly notes its handle was two weeks and 13% deep.
+- DOUBLE_BOTTOM: IBD's buying checklist describes a seven-week minimum and a buy point above the middle peak of the W.
+- FLAT_BASE: minimum five weeks, generally no more than 15% deep; buy point above the highest point in the base.
+
+These are source-methodology anchors only. They do not overwrite the frozen detector semantics.
+
+### Candidate queue
+
+| Priority | Family | Candidate/source | Why useful | Oracle status |
+|---|---|---|---|---|
+| 1 | FLAT_BASE | Synopsys (SNPS), IBD educational flat-base case | Source describes a six-week flat base and breakout on May 18 with volume 163% above average; directly useful against AAPL TOO_SHORT/WIDE_LOOSE | SOURCE LOCATED; exact year/pivot/date facts must be frozen from article before replay |
+| 2 | DOUBLE_BOTTOM | Mobileye (MBLY), IBD Stock Guide Spring 2017 | Source explicitly labels a first-stage eight-week double-bottom base and describes a June 17 move with volume 52% above average | SOURCE LOCATED; determine exact base landmarks/buy point before replay |
+| 3 | CUP_WITH_HANDLE | Edwards Lifesciences (EW), IBD Top Stocks 2019 | Source explicitly describes a later solid cup with handle, 16.3% correction and proper buy point 195.10 around July 22-24 | SOURCE LOCATED; freeze exact source chronology before replay |
+| 4 | CUP_WITH_HANDLE | BRP Group (BRP), IBD Top Stocks 2020 | Source explicitly identifies a cup-with-handle and new buy point 18.88 | SOURCE LOCATED; may be setup/pre-breakout rather than completed historical breakout, so suitability requires source adjudication |
+
+### Selection rules
+
+A candidate becomes a frozen reconstruction case only when the authoritative source supplies enough information to establish, without chart-fitting:
+- symbol and historical period;
+- source-labelled pattern family;
+- source buy point/pivot or sufficient explicit source structure to identify it;
+- breakout/decision date when the validation question requires breakout behavior;
+- no use of the expected landmarks as detector inputs.
+
+For each discrepant family, the target remains at least two additional independent authoritative examples plus a negative/counterexample when a defensible source exists.
+
+### Immediate execution order
+
+1. SNPS flat-base source-oracle extraction, because its source-described six-week duration directly tests whether the AAPL geometry discrepancy repeats on an unambiguously >=5-week educational example.
+2. MBLY double-bottom source-oracle extraction, because the source explicitly calls the base eight weeks and therefore supplies an independent structural example.
+3. EW cup-with-handle source-oracle extraction, with special attention to handle geometry and whether the frozen upper-half gate agrees.
+4. BRP is reserve CWH evidence until a completed breakout can be source-frozen.
+
+No detector code or production rule is changed by this registry.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |

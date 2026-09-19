@@ -306,6 +306,64 @@ Three-layer disposition:
 Historical L remains NOT_EVALUABLE under frozen governance. This case completes first-pass coverage of all four frozen core morphology families without tuning the detector.
 
 
+## Cross-case fidelity matrix v1 — first-pass adjudication
+
+Status: FIRST-PASS COMPLETE / VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED.
+
+| Case | Frozen core family | Oracle pivot | Engine pivot | Morphology result | Breakout-volume reconstruction | Historical M | T+1 vs 5% zone | Primary finding |
+|---|---|---:|---:|---|---|---|---|---|
+| LRCX 2020 | CUP_WITH_HANDLE | 381.96 | 381.95999 | cup/pivot match; final handle rejected | below frozen 1.40 threshold | ALLOW_NEW_BUYS | inside | HANDLE_GATE_BELOW_CUP_MIDPOINT fidelity gap |
+| AMD 2019 | CUP_WITHOUT_HANDLE | 35.55 | 35.549999 | RECOGNIZED, no faults | 1.6855, passes | ALLOW_NEW_BUYS | inside | positive morphology/pivot fidelity control |
+| IPHI 2019 | DOUBLE_BOTTOM | 64.85 | 64.75 | AMBIGUOUS | 1.1462, fails | ALLOW_NEW_BUYS | inside | NO_SECOND_TROUGH_UNDERCUT fidelity gap |
+| AAPL 2019 | FLAT_BASE | 221.37 | 221.369995 | REJECTED/AMBIGUOUS | 1.7080, passes | ALLOW_NEW_BUYS | inside | FLAT_BASE geometry-gate fidelity gap |
+
+### What the four cases establish
+
+1. Pivot reconstruction is not the dominant problem in this first-pass suite. LRCX, AMD and AAPL reproduce the source pivot to practical equality; IPHI differs by only 0.10.
+2. The principal source-fidelity discrepancies are localized morphology semantics, not an inability to locate the relevant price structures:
+   - CWH: handle upper-half gate (`BELOW_CUP_MIDPOINT`).
+   - DOUBLE_BOTTOM: strict second-trough-undercut gate (`NO_SECOND_TROUGH_UNDERCUT`).
+   - FLAT_BASE: duration/tightness geometry (`TOO_SHORT` / `WIDE_LOOSE`).
+3. CUP_WITHOUT_HANDLE has a positive historical control: AMD is recognized with source-faithful pivot/trough and no detector faults. Therefore the suite is not merely a collection of detector failures.
+4. Breakout-volume adaptation is independently material. AMD and AAPL pass the frozen >=1.40 prior-50 threshold; LRCX and IPHI do not. This is separate from morphology fidelity.
+5. Historical M is not responsible for any of the four discrepancies: every replay returns `ALLOW_NEW_BUYS` under the frozen historical index-only adapter.
+6. T+1 Open is not the source of rejection in these four examples. Every reconstructed T+1 open remains inside the original 5% buy zone. This does not prove T+1 is generally harmless; it only bounds these four cases.
+7. Historical L remains intentionally NOT_EVALUABLE because no defensible PIT broad comparison universe is frozen. This must not be converted to either PASS or FAIL.
+
+### Action classification
+
+| Finding | Action now | Production implication |
+|---|---|---|
+| AMD CWOH positive match | PRESERVE as regression control | none; confirms one frozen family can reproduce a documented example |
+| LRCX handle gate | OPEN VALIDATION QUESTION | no production change; research whether the frozen upper-half requirement is source-faithful across multiple authoritative CWH examples |
+| IPHI second-trough undercut gate | OPEN VALIDATION QUESTION | no production change; research whether strict undercut is universal, optional, or provider-sensitive |
+| AAPL flat-base geometry gates | OPEN VALIDATION QUESTION | no production change; determine whether daily detector duration/tightness semantics align with documented weekly flat-base examples |
+| Breakout-volume mismatches | KEEP SEPARATE FROM MORPHOLOGY | do not alter morphology to compensate for volume behavior |
+| Historical L unavailable | DATA GAP / HOLD | acquire defensible PIT universe only if justified; never back-project current membership |
+| T+1 observations | PRESERVE AS ADAPTATION EVIDENCE | no rule change from four cases |
+
+### Decision gate before any engine revision
+
+No frozen-engine modification is justified by one golden case. A morphology rule may move from validation question to change proposal only after:
+- multiple independent authoritative examples for the same family are reconstructed;
+- the discrepancy repeats under defensible historical price bases/providers;
+- the source methodology supports the proposed semantic interpretation;
+- positive controls and counterexamples are included so relaxing a gate is not evaluated only on cases it would rescue;
+- the proposal is reviewed separately from this historical-reconstruction branch.
+
+Until that evidence exists, `c433cc1e35a5aa32a46f732cd8c5545935e36e40` remains the authoritative frozen Pattern Engine for this workstream.
+
+### Next validation tranche
+
+The next work is **targeted replication**, not broad backtesting and not detector tuning. Priorities:
+1. Add at least two independent authoritative examples for each discrepant family: CWH, DOUBLE_BOTTOM and FLAT_BASE.
+2. Include at least one source-backed negative/counterexample per family where possible.
+3. Replay with the same frozen engine and classify whether each gate discrepancy repeats.
+4. Only then issue a morphology-fidelity adjudication for that family: source-faithful, over-restrictive, under-restrictive, or unresolved.
+
+CUP_WITHOUT_HANDLE does not need immediate gate investigation; AMD remains the positive-control case while resources focus on the three observed discrepancy families.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -377,4 +435,4 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 
 CAN SLIM v2 engineering implementation remains 100% complete.
 
-Historical reconstruction progress is separate. IPHI Golden Case 003 morphology/pivot, breakout, M, T+1 and original O'Neil loss-cut lifecycle are complete; the frozen engine preserves a DOUBLE_BOTTOM fidelity gap at NO_SECOND_TROUGH_UNDERCUT. AMD Golden Case 002 morphology/pivot, breakout-volume, historical M and T+1 reconstruction are now complete as a positive CUP_WITHOUT_HANDLE fidelity case; C/A and L evidence boundaries remain explicit. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.
+Historical reconstruction first-pass core-pattern coverage is complete: all four frozen families now have a source-backed replay, with AMD as the positive morphology control and LRCX/IPHI/AAPL carrying localized fidelity questions. No frozen-engine change is authorized. Targeted multi-example replication is the next validation tranche. IPHI Golden Case 003 morphology/pivot, breakout, M, T+1 and original O'Neil loss-cut lifecycle are complete; the frozen engine preserves a DOUBLE_BOTTOM fidelity gap at NO_SECOND_TROUGH_UNDERCUT. AMD Golden Case 002 morphology/pivot, breakout-volume, historical M and T+1 reconstruction are now complete as a positive CUP_WITHOUT_HANDLE fidelity case; C/A and L evidence boundaries remain explicit. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.

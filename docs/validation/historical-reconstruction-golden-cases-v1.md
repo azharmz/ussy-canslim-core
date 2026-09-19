@@ -1109,3 +1109,29 @@ IBD/MarketSurge oracle: CUP_WITH_HANDLE pivot 241.86; source documents the setup
 
 ### CWH family adjudication after 10 valid cases
 The CWH tranche is now closed at **10/10**: LRCX, EW, NVO, OLED, TSLA, TOL, URBN, SHOP, RBLX, DUOL. The accumulated evidence shows repeated source-fidelity gaps, but they are not explained by one universal terminal gate: observed mechanisms include BELOW_CUP_MIDPOINT, assembly/handle-recognition misses, DEEP_HANDLE_EXCEPTIONAL, source-target base/pivot mismatch, and nearby-but-nonidentical handle/pivot semantics. This is strong evidence that CWH source fidelity of the frozen engine is not robust across authoritative historical examples, but **does not authorize detector tuning**. Any engine revision requires a separate morphology-engine workstream with positive and negative controls.
+
+
+## CWH numeric audit 010 — DUOL 2024
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | multiple CWH candidates emitted, including RECOGNIZED structures | family recognition clearly present |
+| Pivot | 241.86 | 241.86000061 on source-near candidates | +0.00000061 / **~+0.00000025%**; practical exact match |
+| Source-near right rim | pivot 241.86 | 2024-03-01 / 241.86000061 | **practical exact pivot reconstruction** |
+| Source-near handle lows | not numerically frozen from source | 2024-03-06 or open-right-edge 2024-04-16 depending lineage | not scored |
+| Source-near depth | no numeric source depth frozen | 24.852033% or 24.319319% depending lineage | not scored |
+| Final source-near state | valid CWH per source | AMBIGUOUS | categorical mismatch |
+| Source-near faults | source accepts structure | DEEP_HANDLE_EXCEPTIONAL; alternate open-right-edge lineage FRAGMENTED_BOTTOM + BELOW_CUP_MIDPOINT | morphology-semantics gap |
+| Other engine CWH | n/a | RECOGNIZED pivots 179.83999634 and 174.69999695, no faults | proves CWH family can reach RECOGNIZED, but these are not the oracle structure |
+| Breakout/crossing date used in reconstruction | 2024-05-06 | high 251.30 / close 248.20 crossed 241.86 | **daily crossing corroborated** |
+| Breakout volume | no source numeric ratio frozen | 1.02851x prior-50 | below USSY 1.40 confirmation; separate from morphology fidelity |
+| Breakout close vs oracle pivot | crossing | +2.6213% | inside 5% zone |
+| T+1 open vs oracle pivot | n/a to source morphology | +1.7903% | inside 5% zone |
+
+Numeric adjudication: DUOL is a major refinement over the earlier tranche shorthand. The frozen engine reconstructs the oracle pivot **241.86 essentially exactly**: emitted source-near CWH candidates use pivot 241.86000061 from the 2024-03-01 right rim. Therefore the prior SOURCE_TARGET_CWH_NOT_RECONSTRUCTED wording is not defensible at pivot level.
+
+The remaining disagreement is categorical morphology semantics. The source-near candidate with exact pivot is AMBIGUOUS because of DEEP_HANDLE_EXCEPTIONAL; an alternate open-right-edge lineage at the same pivot is AMBIGUOUS because of FRAGMENTED_BOTTOM and BELOW_CUP_MIDPOINT. The engine also emits unrelated fully RECOGNIZED CWH structures on DUOL, confirming that the family detector itself is operational.
+
+Audit conclusion: **CWH_FAMILY_RECOGNIZED_ON_SECURITY / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / HANDLE_AND_BOTTOM_SEMANTICS_GAP**.

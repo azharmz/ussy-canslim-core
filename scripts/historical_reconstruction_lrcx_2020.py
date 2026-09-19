@@ -28,6 +28,7 @@ def main():
     subprocess.run([sys.executable,"-m","pip","install","-q","-e",f"{eng}[validation]"],check=True)
 
     import pandas as pd
+    sys.path.insert(0,str(Path("src").resolve()))
     sys.path.insert(0,str(eng/"src"))
     from oneil_patterns.validation.external_ohlcv import fetch_yfinance
     from oneil_patterns.production.engine import analyze_security

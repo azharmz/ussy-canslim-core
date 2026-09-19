@@ -1,5 +1,6 @@
 name: Historical golden replay — AMZN 2023
-on:\n  workflow_dispatch:
+on:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

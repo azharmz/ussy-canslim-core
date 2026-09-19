@@ -1,11 +1,6 @@
 name: Historical golden replay — CWOH completion batch
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - validation/historical-golden-reconstruction-v1
-    paths:
-      - ".github/triggers/cwoh-completion-batch-v1"
 permissions:
   contents: read
 jobs:

@@ -587,7 +587,9 @@ Detector result:
 - diagnostic landmark/segment arrays for the source-target path are empty.
 - the engine does emit an older, unrelated fault-free DOUBLE_BOTTOM (2023-09-13 / 2023-10-06 / 2023-11-15 / 2023-12-11; pivot 56.64666748). That older candidate must not be substituted for the source-labelled 2024 structure.
 - therefore WMT does not test the `NO_SECOND_TROUGH_UNDERCUT` morphology gate at all: the source-target structure fails upstream of morphology assessment.
-- classification: `MORPHOLOGY_FIDELITY_GAP / LANDMARK_OR_SEGMENTATION_MISS`.
+- boundary diagnostic run `35428665101` localizes the failure further: primary, auxiliary, and fused landmark vocabularies contain no April-May 2024 landmarks; consequently atomic and multiturn segment sets also contain no April-May 2024 structure.
+- classification refined to: `MORPHOLOGY_FIDELITY_GAP / LANDMARK_GENERATION_MISS`.
+- segmentation is downstream-empty, not independently implicated by this replay.
 - no detector change is authorized.
 
 Breakout / execution observations, retained separately from morphology:
@@ -601,9 +603,9 @@ Breakout / execution observations, retained separately from morphology:
 Double-bottom adjudication after IPHI + TSM + WMT:
 - IPHI: source-near candidate reaches morphology but is AMBIGUOUS due `NO_SECOND_TROUGH_UNDERCUT`.
 - TSM: source structure is independently recovered with exact pivot and fault-free `DOUBLE_BOTTOM_RECOGNIZED`.
-- WMT: source-labelled 2024 structure is not emitted as a corresponding candidate; discrepancy occurs upstream at landmark/segmentation generation.
+- WMT: source-labelled 2024 structure is not emitted because landmark generation itself produces no April-May 2024 landmarks; segmentation is downstream-empty.
 - Consequently there is still no evidence that one universal double-bottom gate is the dominant family-level problem. The discrepancies occupy different layers.
-- Next work should diagnose WMT's landmark/segmentation boundary, not relax `NO_SECOND_TROUGH_UNDERCUT` and not tune morphology from golden cases.
+- WMT boundary diagnosis is now localized to landmark generation. Any future engineering investigation belongs in the landmark extractor workstream and must be tested against independent positive/negative controls before proposing a frozen-engine change; do not relax `NO_SECOND_TROUGH_UNDERCUT` or tune morphology from this case.
 
 
 ## Required data by component

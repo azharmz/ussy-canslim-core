@@ -106,6 +106,30 @@ This is a data-availability limitation, not an L FAIL and not permission to inve
 
 A future reusable historical-L fixture may replace NOT_EVALUABLE only when it pins a defensible PIT membership source, identity rules, decision date, constituent manifest checksum, OHLCV lineage, RS formula/version and producer identity. Such a fixture is isolated historical reconstruction data and must never advance production READY pointers.
 
+
+## Golden Case 001 — consolidated CAN SLIM v2 eligibility
+
+Decision date: 2020-11-04. This section evaluates the frozen production-v2 contract without changing any upstream evidence.
+
+| Frozen v2 gate | Reconstructed state | Eligibility effect |
+|---|---|---|
+| Watchlist C/A | NOT EVALUABLE AS QUALIFIED: C quarterly reference is documented, but required A annual evidence is not documented | WATCHLIST_NOT_QUALIFIED |
+| Pattern | expected source CWH; frozen engine does not recognize the source-faithful handle (BELOW_CUP_MIDPOINT) | PATTERN_NOT_RECOGNIZED |
+| Pivot | defined at 381.95999 and daily high crossed it | passes pivot-defined / pivot-crossed gates |
+| Breakout volume | reconstructed daily volume does not meet the frozen >=1.40 prior-50-volume confirmation rule | BREAKOUT_VOLUME_UNCONFIRMED |
+| L | NOT_EVALUABLE because no defensible PIT historical comparison universe is available | L_NOT_EVALUABLE |
+| M | FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS from the frozen historical index-only replay | passes M gate |
+
+Frozen v2 disposition: **NOT_ELIGIBLE**.
+
+Reason set: WATCHLIST_NOT_QUALIFIED; PATTERN_NOT_RECOGNIZED; BREAKOUT_VOLUME_UNCONFIRMED; L_NOT_EVALUABLE.
+
+M is not a blocker. Pivot definition/crossing are not blockers.
+
+This disposition must not be read as a claim that the documented O'Neil trade was invalid. It answers the separate production-adaptation question: the frozen USSY CAN SLIM v2 contract would not have produced an eligible candidate from the reconstructed evidence available here. The principal source-fidelity discrepancy remains the handle morphology gate; the reconstructed breakout-volume rule is an additional production-contract mismatch. Missing A/L evidence remains NOT_EVALUABLE rather than FAIL.
+
+The T+1 open of 390.00 therefore remains an execution observation only: no production fill is authorized because eligibility was false before the execution layer.
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -153,12 +177,12 @@ Preserve: case_id; symbol; decision/breakout date; authoritative source; source 
 | A annual reference | NOT YET DOCUMENTED | do not infer |
 | Cup with handle | VERIFIED oracle; cup/pivot reconstructed; final handle gate mismatch | frozen finding documented |
 | Pivot | VERIFIED 381.96; observed 381.95999 on oracle structure | MATCH |
-| Breakout | VERIFIED 2020-11-04; daily high crossed pivot | original-entry assessment in progress |
-| S / breakout volume | source context + OHLCV needed | freeze OHLCV |
+| Breakout | VERIFIED 2020-11-04; daily high crossed pivot | reconstruction complete |
+| S / breakout volume | reconstructed; frozen v2 volume confirmation not met | BREAKOUT_VOLUME_UNCONFIRMED |
 | L | NOT_EVALUABLE — PIT historical comparison universe unavailable | do not fabricate/back-project 2026 membership |
 | I | not frozen | source fact or NOT_DOCUMENTED |
 | N | not frozen | source fact or NOT_DOCUMENTED |
-| M | not reconstructed | after morphology replay |
+| M | FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS | reconstruction complete |
 | Original entry | daily crossing reconstructed; intraday timing unavailable; volume discrepancy preserved | source-fidelity adjudication needed |
 | T+1 adaptation | 2020-11-05 open 390.00; inside 5% buy zone | observation complete; eligibility boundary preserved |
 | Lifecycle | not reconstructed | causal future-bar replay |
@@ -177,4 +201,4 @@ Semantic changes to source, price basis, universe, decision date, methodology co
 
 CAN SLIM v2 engineering implementation remains 100% complete.
 
-Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction remains.
+Historical reconstruction progress is separate. LRCX source oracle, candidate OHLCV replay, price-basis audit, morphology/pivot diagnosis, breakout-day daily-bar observation, T+1 observation and historical M replay are complete. Historical L is explicitly NOT_EVALUABLE because a defensible PIT comparison universe is unavailable. Consolidated CAN SLIM v2 eligibility reconstruction is complete for LRCX: NOT_ELIGIBLE under the frozen v2 contract. Lifecycle reconstruction remains separate.

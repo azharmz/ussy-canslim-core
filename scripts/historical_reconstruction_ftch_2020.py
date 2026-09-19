@@ -58,7 +58,7 @@ def main():
                     frame["date"]=pd.to_datetime(frame["date"]).dt.tz_localize(None)
                     provider="Tiingo"
             except Exception as exc:
-                print("Tiingo candidate fallback failed:",type(exc).__name__,str(exc)[:200],file=sys.stderr)
+                print("Tiingo candidate fallback failed:",type(exc).__name__,str(exc)[:500],file=sys.stderr)
         if frame is None or frame.empty:
             twelve_key=os.environ.get("TWELVE_DATA_API_KEY") or os.environ.get("TWELVEDATA_API_KEY")
             if twelve_key:
@@ -74,7 +74,7 @@ def main():
                 except Exception as exc:
                     print("Twelve Data candidate fallback failed:",type(exc).__name__,str(exc)[:200],file=sys.stderr)
     if frame is None or frame.empty:
-        raise RuntimeError("FTCH historical OHLCV unavailable from Yahoo, Tiingo, and Twelve Data with configured credentials")
+        raise RuntimeError("FTCH historical OHLCV unavailable from Yahoo, Tiingo, and Twelve Data with configured credentials; do not retry without new provider evidence")
     print("candidate_ohlcv_provider="+provider)
     market_raw={}
     market_ids={"NASDAQ_COMPOSITE":"^IXIC","SP500":"^GSPC","DJIA":"^DJI"}

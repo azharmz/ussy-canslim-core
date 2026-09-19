@@ -119,17 +119,17 @@ def main():
     target_diag={"oracle_landmarks": ORACLE_LANDMARKS, "oracle_candidate_matches": []}
     # Compare emitted DOUBLE_BOTTOM candidates to the source-defined 2024 structure after generation.
     # This diagnoses segmentation/landmark fidelity without tuning any gate.
-    for a in observed.assessments:
-        if getattr(a, "pattern", None).value != "DOUBLE_BOTTOM":
+    for a in observed:
+        if str(getattr(getattr(a, "pattern", None), "value", getattr(a, "pattern", None))) != "DOUBLE_BOTTOM":
             continue
         sig=list(getattr(a, "structural_signature", ()) or ())
         if any("2024-04-19" in x or "2024-05-03" in x or "2024-05-10" in x for x in sig):
             target_diag["oracle_candidate_matches"].append({
-                "native_state": a.native_state,
+                "native_state": str(getattr(getattr(a, "native_state", None), "value", getattr(a, "native_state", None))),
                 "structural_signature": sig,
                 "pivot_level": a.pivot_level,
-                "pivot_source_date": a.pivot_source_date.isoformat() if a.pivot_source_date else None,
-                "faults": list(a.detector_faults),
+                "pivot_source_date": a.pivot_source_date.isoformat() if getattr(a, "pivot_source_date", None) else None,
+                "faults": [str(getattr(x, "value", x)) for x in getattr(a, "detector_faults", ())],
             })
     if target:
         seg=target[0]

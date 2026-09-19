@@ -1,10 +1,5 @@
 name: Historical golden replay — FTCH 2020
 on:
-  push:
-    branches: [validation/historical-golden-reconstruction-v1]
-    paths:
-      - scripts/historical_reconstruction_ftch_2020.py
-      - .github/workflows/historical-reconstruction-ftch-2020.yml
   workflow_dispatch:
 permissions:
   contents: read

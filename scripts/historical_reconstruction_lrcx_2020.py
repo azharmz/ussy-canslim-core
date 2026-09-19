@@ -33,7 +33,11 @@ def main():
     from oneil_patterns.landmarks.confirmed_window import extract_confirmed_window_landmarks
     from oneil_patterns.landmarks.fusion import fuse_landmark_sources
     from oneil_patterns.segmentation.segmenter import segment_base_candidates
-    from oneil_patterns.validation.structural_assembly import assemble_multiturn_segments
+    from oneil_patterns.validation.structural_assembly import assemble_multiturn_segments, assemble_handle_geometries
+    from oneil_patterns.morphology.cup_body import build_cup_body_geometry
+    from oneil_patterns.morphology.cup_body_detector import assess_cup_body
+    from oneil_patterns.morphology.cup_family import assess_handle
+    from oneil_patterns.validation.pivot_adapter import cup_with_handle_pivot
 
     frame=fetch_yfinance(SYMBOL,START,ASOF)
     raw_csv=ROOT/"ohlcv-yahoo-split-adjusted.csv"
@@ -63,7 +67,23 @@ def main():
     # oracle horizon. No thresholds are changed and no oracle fact is fed into
     # landmark/segmentation generation.
     cutoff=date(2020,7,1)
+    target=[x for x in (atomic+multi) if x.start_date==date(2020,8,3) and x.trough.price_date==date(2020,9,11) and x.recovery and x.recovery.price_date==date(2020,10,14)]
+    target_diag=None
+    if target:
+        seg=target[0]
+        cup=build_cup_body_geometry(contemporaneous,seg.start,seg.trough,seg.recovery)
+        body=assess_cup_body(cup)
+        handles=assemble_handle_geometries(contemporaneous,cup,fused,asof_date=ASOF)
+        target_diag={
+          "cup_geometry":{"left_rim":cup.left_rim.price_date.isoformat(),"trough":cup.trough.price_date.isoformat(),"right_rim":cup.right_rim.price_date.isoformat(),"duration_sessions":cup.duration_sessions,"depth_pct":cup.depth_pct,"right_rim_to_left_rim_ratio":cup.right_rim_to_left_rim_ratio,"sessions_within_5pct_of_trough":cup.sessions_within_5pct_of_trough,"sessions_within_10pct_of_trough":cup.sessions_within_10pct_of_trough,"max_bottom_run_10pct":cup.max_bottom_run_10pct},
+          "cup_assessment":{"state":body.state.value,"faults":[x.value for x in body.faults],"theory_gates_pass":body.theory_gates_pass,"research_bands_pass":body.research_bands_pass},
+          "handles":[]
+        }
+        for h in handles:
+            ha=assess_handle(h); pv=cup_with_handle_pivot(cup,h)
+            target_diag["handles"].append({"low":h.handle_low.price_date.isoformat(),"recovery":h.handle_recovery.price_date.isoformat(),"duration_sessions":h.duration_sessions,"depth_pct":h.depth_pct,"low_in_upper_half":h.low_in_upper_half,"state":ha.state.value,"faults":[x.value for x in ha.faults],"pivot":pv.pivot_level,"pivot_date":pv.pivot_source_date.isoformat()})
     diag={
+      "target_oracle_structure_diagnostic":target_diag,
       "primary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in primary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "auxiliary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in auxiliary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "fused_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in fused if x.price_date>=cutoff],

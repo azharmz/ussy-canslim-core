@@ -419,19 +419,20 @@ Authoritative source:
 
 Source facts frozen as oracle fields:
 - expected family: FLAT_BASE
-- prior peak / base high: 392.79 on April 4
+- prior peak / base high: 392.79 on 2023-04-04
 - source buy point: 392.79
 - base duration: six weeks
 - base trading range/depth characterization: tight 8% range
-- breakout date: May 18
+- breakout date: 2023-05-18
 - breakout move: gap up 8.7%
 - breakout volume: 163% above its 50-day average
 - source buy-zone upper bound: 412.43
 - prior context: an earlier cup-with-handle breakout occurred Feb. 1; this fact is context only and must not be used to force the flat-base detector
 
 Year resolution:
-- The source chronology is treated as the historical SNPS flat-base example whose April 4 peak and May 18 breakout are to be resolved against provider history before detector replay.
-- The replay script must fail closed if historical OHLCV cannot uniquely corroborate the 392.79 April-4 high / May-18 breakout chronology. Do not silently guess a year.
+- RESOLVED: 2023. Independent contemporaneous company evidence places the earnings release on 2023-05-17, immediately before the source-described May 18 breakout; the source chronology also references the May 25 buyback catalyst.
+- Replay decision date T is therefore frozen at 2023-05-18; T+1 is 2023-05-19.
+- Provider OHLCV must still fail closed if the 2023 fixture does not corroborate the source chronology/price neighborhood.
 
 Validation question:
 Does the frozen FLAT_BASE detector independently recover the source-labelled six-week structure and 392.79 pivot when supplied only historical bars through the resolved May-18 decision date?

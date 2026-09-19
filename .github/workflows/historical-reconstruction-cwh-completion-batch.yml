@@ -7,6 +7,7 @@ on:
       - .github/triggers/cwh-tsla-basis-v2
       - .github/triggers/cwh-tsla-basis-v3
       - .github/triggers/cwh-tsla-basis-v4
+      - .github/triggers/cwh-tsla-basis-v5
   workflow_dispatch:
 permissions:
   contents: read

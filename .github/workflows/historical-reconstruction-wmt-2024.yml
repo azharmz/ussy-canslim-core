@@ -31,3 +31,5 @@ jobs:
           path: |
             artifacts/historical-reconstruction/wmt-2024/
             replay.log
+
+# diagnostic replay trigger: WMT oracle-landmark comparison v1

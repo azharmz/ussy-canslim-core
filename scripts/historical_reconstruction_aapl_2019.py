@@ -51,7 +51,13 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # Yahoo historical OHLC for pre-2020 AAPL is adjusted for the 4-for-1 split.\n    # Restore contemporaneous 2019 price/volume basis before frozen-engine replay.\n    contemporaneous=frame.copy()\n    for col in [\"open\",\"high\",\"low\",\"close\",\"adj_close\"]:\n        if col in contemporaneous.columns:\n            contemporaneous[col]=contemporaneous[col]*SPLIT_FACTOR\n    contemporaneous[\"volume\"]=contemporaneous[\"volume\"]/SPLIT_FACTOR
+    # Yahoo historical OHLC for pre-2020 AAPL is adjusted for the 4-for-1 split.
+    # Restore contemporaneous 2019 price/volume basis before frozen-engine replay.
+    contemporaneous=frame.copy()
+    for col in ["open","high","low","close","adj_close"]:
+        if col in contemporaneous.columns:
+            contemporaneous[col]=contemporaneous[col]*SPLIT_FACTOR
+    contemporaneous["volume"]=contemporaneous["volume"]/SPLIT_FACTOR
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 
     csv=ROOT/"ohlcv-2019-provider-basis.csv"

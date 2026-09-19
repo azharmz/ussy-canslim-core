@@ -8,12 +8,12 @@ from pathlib import Path
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "SNPS"
-ASOF = date(2019,9,11)
-EXECUTION_END = date(2019,9,12)
-START = date(2019,1,1)
+ASOF = date(2023,5,18)
+EXECUTION_END = date(2023,5,19)
+START = date(2022,8,1)
 ORACLE = {"pattern":"FLAT_BASE","pivot":392.79,"breakout_date":"2023-05-18","source_base_high_date":"2023-04-04","source_base_duration":"six weeks","source_range_pct":8.0,"source_breakout_volume_above_avg_pct":163.0}
 SPLIT_FACTOR = 1.0
-ROOT=Path("artifacts/historical-reconstruction/snps-2019")
+ROOT=Path("artifacts/historical-reconstruction/snps-2023")
 ROOT.mkdir(parents=True,exist_ok=True)
 
 def main():
@@ -46,7 +46,7 @@ def main():
     market_raw={}
     market_ids={"NASDAQ_COMPOSITE":"^IXIC","SP500":"^GSPC","DJIA":"^DJI"}
     for index_id,ticker in market_ids.items():
-        market_raw[index_id]=fetch_yfinance(ticker,date(2019,3,1),ASOF)
+        market_raw[index_id]=fetch_yfinance(ticker,date(2022,11,1),ASOF)
     raw_csv=ROOT/"ohlcv-yahoo-split-adjusted.csv"
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
@@ -55,7 +55,7 @@ def main():
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 
-    csv=ROOT/"ohlcv-2019-provider-basis.csv"
+    csv=ROOT/"ohlcv-2023-provider-basis.csv"
     contemporaneous.to_csv(csv,index=False)
     sha=hashlib.sha256(csv.read_bytes()).hexdigest()
     observed=analyze_security("SNPS",SYMBOL,detector_frame,ASOF)
@@ -68,7 +68,7 @@ def main():
     # Diagnostic only: expose the frozen candidate vocabulary near the 13-week
     # oracle horizon. No thresholds are changed and no oracle fact is fed into
     # landmark/segmentation generation.
-    cutoff=date(2019,5,1)
+    cutoff=date(2023,3,1)
     target=[]  # SNPS oracle landmarks are not injected into detector selection; inspect emitted candidates first.
     target_diag=None
     if target:
@@ -135,7 +135,7 @@ def main():
       "production_use":"NEVER_PRODUCTION",
       "symbol":SYMBOL,"asof_date":ASOF.isoformat(),
       "source":{"provider":"Yahoo via yfinance","auto_adjust":False,"start":START.isoformat(),"end":EXECUTION_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"yahoo_split_adjusted_sha256":raw_sha},
-      "price_basis":{"classification":"DATA_ADAPTATION","corporate_action":"RESTORE_2020_4_FOR_1_SPLIT_TO_2019_CONTEMPORANEOUS_BASIS","factor":SPLIT_FACTOR,"price_transform":"multiply_4","volume_transform":"divide_4","contemporaneous_sha256":sha},
+      "price_basis":{"classification":"DATA_ADAPTATION","corporate_action":"NONE_DOCUMENTED_FOR_FIXTURE","factor":1.0,"price_transform":"identity","volume_transform":"identity","provider_basis_sha256":sha},
       "engine":{"repo":"azharmz/ussy-oneil-patterns","sha":ENGINE_SHA},
       "oracle":ORACLE,
       "candidate_diagnostics":diag,

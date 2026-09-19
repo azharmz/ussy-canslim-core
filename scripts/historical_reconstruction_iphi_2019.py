@@ -176,7 +176,7 @@ def main():
       "fixture_class":"HISTORICAL_RECONSTRUCTION_FIXTURE",
       "production_use":"NEVER_PRODUCTION",
       "symbol":SYMBOL,"asof_date":ASOF.isoformat(),
-      "source":{"provider":"Yahoo via yfinance","auto_adjust":False,"start":START.isoformat(),"end":EXECUTION_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"yahoo_split_adjusted_sha256":raw_sha},
+      "source":{"provider":provider,"auto_adjust":False if provider=="Yahoo/yfinance" else None,"start":START.isoformat(),"end":EXECUTION_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"raw_fixture_sha256":raw_sha},
       "price_basis":{"classification":"DATA_ADAPTATION","corporate_action":"NONE_APPLIED_FOR_GOLDEN_REPLAY","factor":SPLIT_FACTOR,"price_transform":"identity","volume_transform":"identity","contemporaneous_sha256":sha},
       "engine":{"repo":"azharmz/ussy-oneil-patterns","sha":ENGINE_SHA},
       "oracle":ORACLE,

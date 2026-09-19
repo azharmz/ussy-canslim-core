@@ -51,7 +51,11 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # AMD replay uses the provider historical basis unchanged.\n    contemporaneous=frame.copy()\n    detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()\n\n    csv=ROOT/"ohlcv-2019-provider-basis.csv"
+    # AMD replay uses the provider historical basis unchanged.
+    contemporaneous=frame.copy()
+    detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
+
+    csv=ROOT/"ohlcv-2019-provider-basis.csv"
     contemporaneous.to_csv(csv,index=False)
     sha=hashlib.sha256(csv.read_bytes()).hexdigest()
     observed=analyze_security("AMD",SYMBOL,detector_frame,ASOF)

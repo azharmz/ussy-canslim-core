@@ -8,7 +8,7 @@ from pathlib import Path
 ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "AMZN"
-ASOF = date(2023,11,21)
+ASOF = date(2023,11,20)
 EXECUTION_END = date(2023,11,21)
 START = date(2023,1,1)
 ORACLE = {"pattern":"CUP_WITHOUT_HANDLE","pivot":145.86,"breakout_date":"2023-11-20"}

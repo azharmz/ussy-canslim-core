@@ -50,7 +50,11 @@ def main():
     frame.to_csv(raw_csv,index=False)
     raw_sha=hashlib.sha256(raw_csv.read_bytes()).hexdigest()
 
-    # Yahoo historical TSLA bars are adjusted for the 2022 3-for-1 split.\n    # Restore the contemporaneous Nov-2020 post-2020-split / pre-2022-split price basis.\n    for c in ["open","high","low","close","adj_close"]:\n        if c in frame.columns: frame[c] = frame[c] * 3.0\n    if "volume" in frame.columns: frame["volume"] = frame["volume"] / 3.0
+    # Yahoo historical TSLA bars are adjusted for the 2022 3-for-1 split.
+    # Restore the contemporaneous Nov-2020 post-2020-split / pre-2022-split price basis.
+    for c in ["open","high","low","close","adj_close"]:
+        if c in frame.columns: frame[c] = frame[c] * 3.0
+    if "volume" in frame.columns: frame["volume"] = frame["volume"] / 3.0
     contemporaneous=frame.copy()
     detector_frame=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date <= ASOF].copy()
 
@@ -128,7 +132,8 @@ def main():
       "fused_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in fused if x.price_date>=cutoff],
       "segments":[{"start":x.start_date.isoformat(),"trough":x.trough.price_date.isoformat(),"recovery":x.recovery.price_date.isoformat() if x.recovery else None,"depth_pct":x.depth_pct,"assembly":x.evidence.get("assembly_mode","ATOMIC")} for x in (atomic+multi) if x.start_date>=cutoff],
     }
-    (ROOT/"candidate-diagnostics.json").write_text(json.dumps(diag,indent=2,default=str)+"\n")
+    (ROOT/"candidate-diagnostics.json").write_text(json.dumps(diag,indent=2,default=str)+"
+")
     payload={
       "fixture_class":"HISTORICAL_RECONSTRUCTION_FIXTURE",
       "production_use":"NEVER_PRODUCTION",
@@ -140,7 +145,8 @@ def main():
       "candidate_diagnostics":diag,
       "observed":[r.to_dict() if hasattr(r,"to_dict") else r.__dict__ for r in observed],
     }
-    (ROOT/"replay.json").write_text(json.dumps(payload,indent=2,default=str)+"\n")
+    (ROOT/"replay.json").write_text(json.dumps(payload,indent=2,default=str)+"
+")
     print(json.dumps(payload,indent=2,default=str))
 
 if __name__=="__main__":

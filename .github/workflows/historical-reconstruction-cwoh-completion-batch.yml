@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         case:
-          - nflx_2024
+          - jpm_2023
           - nvda_2023
     steps:
       - uses: actions/checkout@v4

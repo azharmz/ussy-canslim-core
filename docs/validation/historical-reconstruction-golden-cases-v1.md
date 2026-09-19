@@ -1214,3 +1214,81 @@ CUP_WITHOUT_HANDLE golden reconstruction is now **10/10 complete**:
 - completion tranche: JPM 2023, COST 2024, AX 2024, NFLX 2024, ALL 2024, NVDA 2023.
 
 The completion tranche materially improves the evidence balance: **JPM, COST, NFLX and ALL are source-target positive controls with practical-exact pivots**; AX isolates `FRAGMENTED_BOTTOM`; NVDA isolates a `TOO_SHORT` duration-semantics disagreement despite an exact pivot. No detector threshold or frozen engine code was changed to obtain these outcomes.
+
+
+# DOUBLE_BOTTOM completion tranche — cases 026–032
+
+Status: **COMPLETE / 10 OF 10 DOUBLE_BOTTOM GOLDEN CASES NOW PRESENT / NO ENGINE TUNING**.
+
+The seven cases below complete the DOUBLE_BOTTOM tranche. They use the frozen Pattern Engine at `c433cc1e35a5aa32a46f732cd8c5545935e36e40`. Oracle family/pivot values remain comparison evidence only and are never detector inputs. Corrected replay run **35474785663** is authoritative for this tranche. The replay boundary is the first completed daily close at or above the oracle pivot inside the source-bounded chronology window; this corrects the earlier intraday-high boundary and keeps the original/source layer distinct from USSY T+1 execution.
+
+## 026 LLY 2024 — DOUBLE_BOTTOM
+
+- Source oracle: DOUBLE_BOTTOM, pivot **793.67**.
+- Corrected daily crossing: **2024-05-21**; close **+1.1970%** versus oracle pivot.
+- Breakout volume: **1.6553x** prior-50-session mean.
+- Frozen engine emits a source-target DOUBLE_BOTTOM **RECOGNIZED** at pivot **793.66998291**, practical exact match. Nearby alternate DB lineages at 795.50 and 800.78 are preserved rather than substituted for the source target.
+- T+1 open: **+0.9236%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH**.
+
+## 027 FIS 2024 — DOUBLE_BOTTOM
+
+- Source oracle: stage-one DOUBLE_BOTTOM, pivot **77.83**.
+- Corrected daily crossing: **2024-08-13**; close **+0.5525%** versus oracle pivot.
+- Breakout volume: **1.2219x** prior-50-session mean.
+- Frozen engine does not emit the exact 77.83 source-target DB as RECOGNIZED at the corrected cutoff. The closest observed DB pivot is **78.73000336**, about **+1.156%** versus oracle, and remains AMBIGUOUS.
+- T+1 open: **+0.6553%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **DOUBLE_BOTTOM_FAMILY_CANDIDATE_PRESENT / SOURCE_PIVOT_NEAR_MATCH_1.16PCT / SOURCE_TARGET_NOT_RECOGNIZED / MORPHOLOGY_BOUNDARY_GAP**.
+
+## 028 CAG 2024 — DOUBLE_BOTTOM
+
+- Source oracle: DOUBLE_BOTTOM elements / entry **29.89**.
+- Corrected daily crossing: **2024-04-04**; close **+2.5092%** versus oracle pivot.
+- Breakout volume: **2.7902x** prior-50-session mean.
+- Frozen engine's closest source-relevant DB candidate uses pivot **30.69000053**, about **+2.676%** versus oracle, and is AMBIGUOUS.
+- T+1 open: **+2.7434%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **DOUBLE_BOTTOM_FAMILY_CANDIDATE_PRESENT / SOURCE_PIVOT_NEAR_MATCH_2.68PCT / SOURCE_TARGET_AMBIGUOUS / MORPHOLOGY_BOUNDARY_GAP**.
+
+## 029 STRL 2024 — DOUBLE_BOTTOM
+
+- Source oracle: first-stage DOUBLE_BOTTOM, pivot **130.89**.
+- Corrected daily crossing: **2024-09-18**; close **+3.0942%** versus oracle pivot.
+- Breakout volume: **1.3331x** prior-50-session mean.
+- Frozen engine emits source-target DOUBLE_BOTTOM **RECOGNIZED** at pivot **130.88999939**, practical exact match, with no need to substitute a neighboring lineage.
+- T+1 open: **+6.1884%** versus pivot, above the original 5% buy-zone ceiling.
+- Adjudication: **SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH / USSY_T1_EXTENDED_ABOVE_5PCT_ZONE**.
+
+## 030 URI 2024 — DOUBLE_BOTTOM
+
+- Source oracle: DOUBLE_BOTTOM, pivot **715.34**.
+- Corrected daily crossing: **2024-07-16**; close **+3.8681%** versus oracle pivot.
+- Breakout volume: **1.2151x** prior-50-session mean.
+- Frozen engine emits source-target DOUBLE_BOTTOM **RECOGNIZED** at pivot **715.34002686**, practical exact match. Alternate nearby lineages are retained as detector output but do not replace the source target.
+- T+1 open: **+2.2800%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH**.
+
+## 031 UBS 2024 — DOUBLE_BOTTOM
+
+- Source oracle: DOUBLE_BOTTOM, pivot **31.45**.
+- Corrected daily crossing: **2024-10-09**; close **+0.4134%** versus oracle pivot.
+- Breakout volume: **0.3699x** prior-50-session mean; volume confirmation is kept separate from morphology fidelity.
+- Frozen engine emits DOUBLE_BOTTOM **RECOGNIZED** at pivot **31.45499992**, only about **+0.016%** versus oracle and therefore a practical pivot match. Other nearby DB lineages remain visible.
+- T+1 open: **+0.4769%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_RECOGNIZED / PIVOT_PRACTICAL_MATCH**.
+
+## 032 NXPI 2024 — DOUBLE_BOTTOM
+
+- Source oracle: DOUBLE_BOTTOM, pivot **251.96**.
+- Corrected daily crossing: **2024-05-02**; close **+0.9128%** versus oracle pivot.
+- Breakout volume: **0.9718x** prior-50-session mean.
+- Frozen engine emits source-target DOUBLE_BOTTOM **RECOGNIZED** at pivot **251.96000671**, practical exact match. Ambiguous/rejected alternate lineages at the same pivot are preserved as cross-lineage evidence.
+- T+1 open: **+3.5879%** versus pivot, inside the original 5% buy zone.
+- Adjudication: **SOURCE_FIDELITY_MATCH / DOUBLE_BOTTOM_RECOGNIZED / PIVOT_PRACTICAL_EXACT_MATCH / MULTI_LINEAGE_STATE_OVERLAP_PRESENT**.
+
+## DOUBLE_BOTTOM tranche status after cases 026–032
+
+DOUBLE_BOTTOM golden reconstruction is now **10/10 complete**: the prior three cases plus LLY, FIS, CAG, STRL, URI, UBS and NXPI.
+
+The completion tranche provides five strong source-target pivot/family matches (LLY, STRL, URI, UBS, NXPI) and two informative source-target morphology/boundary gaps (FIS, CAG). These mismatches are retained as validation evidence and **do not authorize tuning** of the frozen detector. Breakout-volume observations and USSY T+1 observations remain separate layers and do not retroactively alter morphology adjudication.
+
+Overall golden reconstruction progress after this freeze: **32/40 = 80%**. CWH **10/10**, CWOH **10/10**, DOUBLE_BOTTOM **10/10**, FLAT_BASE **2/10**. Per batch governance, stop here before starting the FLAT_BASE completion tranche.

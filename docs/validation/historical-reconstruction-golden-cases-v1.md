@@ -255,6 +255,57 @@ Three-layer disposition:
 Historical L remains NOT_EVALUABLE under the same frozen governance as Cases 001-002. The frozen v2 contract also lacks pattern recognition and >=1.40 breakout-volume confirmation here, so this case must not be converted into an eligible production trade merely because the historical source labels it a valid O'Neil setup.
 
 
+## Golden Case 004 — AAPL 2019 — FLAT-BASE FIDELITY REPLAY VERIFIED
+
+Decision/breakout date: 2019-09-11 (source breakout week ending 2019-09-13).
+
+Frozen source oracle:
+- expected family: FLAT_BASE
+- pivot/buy point: 221.37
+- breakout observation date used for daily replay: 2019-09-11
+
+Replay identity:
+- successful run: 35417737472
+- producer commit: 0e5b80786fcee7d50138647ab65e8b2576023ee8
+- frozen Pattern Engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- Yahoo pre-2020 AAPL bars were restored to contemporaneous 2019 basis for the later 4-for-1 split: OHLC/adj_close x4, volume /4
+- detector cutoff remains 2019-09-11
+
+Source-fidelity morphology finding:
+- Frozen landmarks independently recover the exact oracle left high: 2019-07-31 at 221.369995.
+- Base low is 2019-08-05 at 192.580002, giving depth 13.0054%.
+- Frozen FLAT_BASE candidate therefore carries pivot 221.369995, effectively exact to oracle 221.37.
+- Confirmed-structure candidate is REJECTED with TOO_SHORT and WIDE_LOOSE; open-right-edge candidate through 2019-09-11 is AMBIGUOUS with WIDE_LOOSE.
+- Classification: MORPHOLOGY_FIDELITY_GAP / FLAT_BASE_GEOMETRY_GATE. No detector threshold is changed.
+
+Breakout-day observation:
+- 2019-09-11 OHLC: O 218.07 / H 223.71 / L 217.73 / C 223.59.
+- High and close exceed 221.37; close is +1.0028% versus pivot and remains in the 5% buy zone.
+- Volume 44,289,600 versus prior-50 completed-session mean 25,930,154: +70.8035%, ratio 1.7080.
+- The frozen USSY >=1.40 breakout-volume threshold therefore passes.
+
+Historical M:
+- FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS on 2019-09-11.
+- provenance: HISTORICAL_INDEX_ONLY_FROZEN_46_REPLAY.
+- M is not a blocker.
+
+USSY T+1 observation:
+- 2019-09-12 open: 224.80.
+- +1.5494% versus pivot and +0.5412% versus breakout close.
+- T+1 open remains inside the original 5% buy zone.
+- Therefore there is no extended-price execution-adaptation gap.
+
+Three-layer disposition:
+
+| Layer | Expected | Observed | Classification |
+|---|---|---|---|
+| O'Neil morphology | FLAT_BASE, pivot 221.37 | exact left-high/pivot recovered; candidate not RECOGNIZED because TOO_SHORT/WIDE_LOOSE or WIDE_LOOSE | MORPHOLOGY_FIDELITY_GAP |
+| Original breakout | price-volume breakout through 221.37 | high/close above pivot; prior-50 volume ratio 1.7080 | DAILY-BAR BREAKOUT CORROBORATION |
+| USSY adaptation | finalized T then T+1 Open | 224.80, +1.55% vs pivot, inside 5% zone | NO EXTENDED-PRICE GAP; pattern gate prevents production eligibility |
+
+Historical L remains NOT_EVALUABLE under frozen governance. This case completes first-pass coverage of all four frozen core morphology families without tuning the detector.
+
+
 ## Required data by component
 
 | Component | Reconstruction input |
@@ -312,7 +363,7 @@ Preserve: case_id; symbol; decision/breakout date; authoritative source; source 
 | T+1 adaptation | 2020-11-05 open 390.00; inside 5% buy zone | observation complete; eligibility boundary preserved |
 | Lifecycle | not reconstructed | causal future-bar replay |
 | DOUBLE_BOTTOM | IPHI 2019 structural neighborhood/pivot reproduced; frozen engine AMBIGUOUS on NO_SECOND_TROUGH_UNDERCUT; failed-trade lifecycle causally corroborated | COVERED / FIDELITY GAP CASE |
-| FLAT_BASE | uncovered | authoritative case needed |
+| FLAT_BASE | AAPL 2019 exact oracle pivot recovered; frozen engine fails geometry gates (TOO_SHORT/WIDE_LOOSE) while breakout volume and T+1 are corroborated | COVERED / FIDELITY GAP CASE |
 | CUP_WITHOUT_HANDLE | AMD 2019 source-faithful candidate RECOGNIZED; pivot 35.549999 vs oracle 35.55; breakout volume ratio 1.6855 | COVERED / POSITIVE FIDELITY CASE |
 
 ## Recovery boundary

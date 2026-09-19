@@ -36,3 +36,5 @@ jobs:
 # trigger after verified line-level EW initialization repair
 
 # trigger after stale-template audit and cleanup
+
+# trigger after EW contemporaneous price-basis normalization

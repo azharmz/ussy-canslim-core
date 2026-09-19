@@ -12,7 +12,7 @@ ASOF = date(2019,7,24)
 EXECUTION_END = date(2019,7,25)
 START = date(2018,7,1)
 ORACLE = {"pattern":"CUP_WITH_HANDLE","pivot":195.10,"breakout_date":"2019-07-24","source_depth_pct":16.3,"source":"IBD Top Stocks 2019"}
-# EW replay uses the provider historical basis unchanged for the 2019 source comparison.\nSPLIT_FACTOR = 1.0
+# EW replay uses the provider historical basis unchanged for the 2019 source comparison.
 ROOT=Path("artifacts/historical-reconstruction/ew-2019")
 ROOT.mkdir(parents=True,exist_ok=True)
 

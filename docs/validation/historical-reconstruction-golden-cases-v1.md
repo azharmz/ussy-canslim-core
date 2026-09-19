@@ -792,3 +792,39 @@ CWOH adjudication checkpoint:
 - AMD remains the clean source-fidelity positive control.
 - AVTR shows that recognizing some CWOH structures on the same security is not sufficient: source-target base selection/assembly can still miss the authoritative base.
 - No detector tuning is authorized from this single discrepancy; continue the planned 10-case CWOH tranche.
+
+
+## Golden Case 011 — SE 2019 — CWOH REPLICATION
+
+Status: **FROZEN VALIDATION EVIDENCE / NO ENGINE CHANGE AUTHORIZED**.
+
+Source oracle: IBD Top Stocks 2019 identifies Sea Limited (SE) as a cup-without-handle base with 38.10 buy point and states the stock moved into the buy range on 2019-11-20. This is treated as an intraday pivot-cross event; the daily replay must not silently reinterpret it as a close-confirmed breakout.
+
+Replay identity:
+- successful run: 35439712313
+- producer commit: 957ea5bc19dd231dd473a9c824d7df98a4349bea
+- frozen engine: c433cc1e35a5aa32a46f732cd8c5545935e36e40 / oneil-pattern-output-v2 / 33-core-p8-frozen-v1
+- provider historical basis retained unchanged.
+
+Source-fidelity morphology finding:
+- The frozen engine recognizes an open-right-edge CUP_WITHOUT_HANDLE through the oracle date with LEFT_RIM 2019-08-19, CUP_LOW 2019-10-21, pivot 36.90000153, depth 28.428188%, and no detector faults.
+- IBD oracle pivot is 38.10, so the family is recognized but pivot/base geometry does not exactly reproduce the source-labelled structure.
+- Classification: **MORPHOLOGY_FIDELITY_GAP / CWOH_PIVOT_GEOMETRY_MISMATCH**.
+
+Breakout-day reconstruction (2019-11-20):
+- O 37.02 / H 38.98 / L 36.69 / C 37.27; volume 4,860,100.
+- High crossed the 38.10 oracle pivot, but close finished 2.1785% below pivot; therefore this is consistent with an intraday pivot cross that faded by the close, not a close-confirmed breakout.
+- Prior-50-session average volume 4,004,580; volume +21.36% (1.2136x), below the USSY >=1.40 confirmation threshold.
+- Daily-bar limitation: INTRADAY_ENTRY_TIMING_NOT_RECONSTRUCTED.
+
+USSY T+1 observation (2019-11-21):
+- open 37.28; 2.1522% below oracle pivot and therefore not in the original buy zone at the open.
+- State: **T1_OPEN_BELOW_PIVOT / NOT_EXTENDED**.
+
+Historical M reconstruction: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NOT_EVALUABLE under the frozen cross-sectional-universe boundary.
+
+CWOH checkpoint after AMD + AVTR + SE:
+- AMD: clean source-fidelity positive control.
+- AVTR: source-target base not reconstructed despite generic CWOH recognition.
+- SE: source family recognized, but engine pivot geometry differs from the authoritative 38.10 source pivot.
+- Continue the planned 10-case CWOH tranche; no detector tuning is authorized from these cases alone.

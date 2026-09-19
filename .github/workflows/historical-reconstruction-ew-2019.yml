@@ -30,3 +30,5 @@ jobs:
             replay.log
 
 # replacement replay trigger after provider-basis initialization fix
+
+# replacement replay trigger after literal-newline repair

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from datetime import date
-import hashlib, json, subprocess, sys
+import hashlib, json, subprocess, sys, os, urllib.parse, urllib.request
 from pathlib import Path
 
 
@@ -42,7 +42,49 @@ def main():
     from canslim_research.market_state_v1 import IndexBar
     from canslim_research.historical_market_adapter import replay_historical_market, decision_on
 
-    frame=fetch_yfinance(SYMBOL,START,EXECUTION_END)
+    # Candidate OHLCV provider cascade for a delisted symbol. Yahoo remains
+    # first for consistency, then existing project providers Tiingo and Twelve Data.
+    # Successful candidate data is frozen into this reconstruction artifact.
+    provider = "Yahoo/yfinance"
+    try:
+        frame=fetch_yfinance(SYMBOL,START,EXECUTION_END)
+    except Exception:
+        frame=None
+    if frame is None or frame.empty:
+        tiingo_key=os.environ.get("TIINGO_API_KEY") or os.environ.get("TIINGO_TOKEN")
+        if tiingo_key:
+            url=("https://api.tiingo.com/tiingo/daily/"+SYMBOL+"/prices?"
+                 +urllib.parse.urlencode({"startDate":START.isoformat(),"endDate":EXECUTION_END.isoformat(),"token":tiingo_key}))
+            try:
+                with urllib.request.urlopen(url,timeout=30) as resp:
+                    rows=json.load(resp)
+                if rows:
+                    frame=pd.DataFrame(rows).rename(columns={"date":"date","open":"open","high":"high","low":"low","close":"close","volume":"volume","adjClose":"adj_close"})
+                    frame["date"]=pd.to_datetime(frame["date"]).dt.tz_localize(None)
+                    provider="Tiingo"
+            except Exception as exc:
+                print("Tiingo candidate fallback failed:",type(exc).__name__,str(exc)[:200],file=sys.stderr)
+        if frame is None or frame.empty:
+            twelve_key=os.environ.get("TWELVE_DATA_API_KEY") or os.environ.get("TWELVEDATA_API_KEY")
+            if twelve_key:
+                params=urllib.parse.urlencode({"symbol":SYMBOL,"interval":"1day","start_date":START.isoformat(),"end_date":EXECUTION_END.isoformat(),"outputsize":5000,"apikey":twelve_key})
+                try:
+                    with urllib.request.urlopen("https://api.twelvedata.com/time_series?"+params,timeout=30) as resp:
+                        payload=json.load(resp)
+                    vals=payload.get("values") or []
+                    if vals:
+                        frame=pd.DataFrame(vals).rename(columns={"datetime":"date"})
+                        for col in ["open","high","low","close","volume"]:
+                            frame[col]=pd.to_numeric(frame[col],errors="coerce")
+                        frame["date"]=pd.to_datetime(frame["date"])
+                        frame=frame.sort_values("date").reset_index(drop=True)
+                        frame["adj_close"]=frame["close"]
+                        provider="Twelve Data"
+                except Exception as exc:
+                    print("Twelve Data candidate fallback failed:",type(exc).__name__,str(exc)[:200],file=sys.stderr)
+    if frame is None or frame.empty:
+        raise RuntimeError("IPHI historical OHLCV unavailable from Yahoo, Tiingo, and Twelve Data with configured credentials")
+    print("candidate_ohlcv_provider="+provider)
     market_raw={}
     market_ids={"NASDAQ_COMPOSITE":"^IXIC","SP500":"^GSPC","DJIA":"^DJI"}
     for index_id,ticker in market_ids.items():

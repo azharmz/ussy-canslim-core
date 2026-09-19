@@ -4,6 +4,7 @@ on:
     branches: [validation/historical-golden-reconstruction-v1]
     paths:
       - .github/triggers/cwh-completion-batch-v1
+      - .github/triggers/cwh-tsla-basis-v2
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,13 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         case:
-          - oled_2019
           - tsla_2020
-          - tol_2024
-          - urbn_2025
-          - shop_2025
-          - rblx_2025
-          - duol_2024
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

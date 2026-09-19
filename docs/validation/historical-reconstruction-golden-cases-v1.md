@@ -1376,3 +1376,31 @@ The oracle-to-engine pivot delta is only **-0.10 (-0.2625%)**. Therefore the ear
 The breakout-day evidence remains distinct: the daily high **38.98** crossed the oracle pivot **38.10**, while the close **37.27** finished below it. This corroborates the source's intraday pivot-cross description without converting it into a close-confirmed breakout. T+1 open **37.28** remained below the oracle pivot and is an execution-layer observation only.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_NEAR_STRUCTURE_FOUND / PIVOT_NEAR_MATCH_0.26PCT / RECOGNIZED_NO_FAULTS / INTRADAY_ORACLE_BREAKOUT_CROSS_CORROBORATED**.
+
+
+## CWOH numeric audit 004 — AMZN 2023
+
+Status: **AUDITED / PRIOR SOURCE-TARGET-NOT-RECONSTRUCTED CLASSIFICATION SUPERSEDED / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from replay run **35439948453**. The oracle remains CWOH with buy point **145.86**; the daily-bar replay identifies the first actual oracle-pivot cross on **2023-11-20**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 145.86 | 145.86000061 | +0.00000061 / **~+0.00000042%**; practical exact match |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2023-09-14 / CUP_LOW 2023-10-26 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 18.860553% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | source-near structure present through oracle date | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | source identifies CWOH | AMBIGUOUS | **downstream morphology-state gap** |
+| Faults | source accepts structure | SHARP_V; FRAGMENTED_BOTTOM | **bottom-shape semantics gap** |
+| Breakout | first daily oracle-pivot cross 2023-11-20 | H 146.63 / C 146.13 above 145.86 | **daily crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 0.7554x prior-50 / -24.46% | separate breakout evidence; not morphology-scored |
+| T+1 open | n/a to source morphology | 143.91 = -1.3369% vs pivot | below pivot; operationalization only |
+
+All frozen CWOH candidates were inspected. Crucially, the frozen engine does contain a source-near candidate with **LEFT_RIM 2023-09-14**, **CUP_LOW 2023-10-26**, and pivot **145.86000061**. Its pivot is a practical exact match to the **145.86** oracle. The candidate is not RECOGNIZED, however: it is **AMBIGUOUS** because of **SHARP_V** and **FRAGMENTED_BOTTOM**. Other CWOH candidates at 143.63000488, 134.47999573, 114.00 and 110.86000061 are alternate structures and must not be substituted for this source-target candidate.
+
+This materially supersedes the earlier `SOURCE_TARGET_BASE_NOT_RECONSTRUCTED` diagnosis, which arose from highlighting the recognized 110.86 structure. The source-target pivot and structure are in fact present; the disagreement occurs at morphology-state gating after candidate construction.
+
+The breakout layer remains separate. On 2023-11-20 both high and close crossed 145.86, with close +0.1851% above pivot and inside the original 5% zone, but volume was only about **0.7554x** the prior-50 mean. T+1 open **143.91** fell back below the oracle pivot; that is a USSY execution observation, not an O'Neil morphology failure.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / SHARP_V_AND_FRAGMENTED_BOTTOM_SEMANTICS_GAP**.

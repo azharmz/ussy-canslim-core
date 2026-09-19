@@ -10,6 +10,7 @@ ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "IPHI"
 ASOF = date(2019,10,15)
 EXECUTION_END = date(2019,10,16)
+LIFECYCLE_END = date(2019,12,31)
 START = date(2019,1,1)
 ORACLE = {"pattern":"DOUBLE_BOTTOM","pivot":64.85,"breakout_date":"2019-10-15"}
 SPLIT_FACTOR = 1.0
@@ -47,14 +48,14 @@ def main():
     # Successful candidate data is frozen into this reconstruction artifact.
     provider = "Yahoo/yfinance"
     try:
-        frame=fetch_yfinance(SYMBOL,START,EXECUTION_END)
+        frame=fetch_yfinance(SYMBOL,START,LIFECYCLE_END)
     except Exception:
         frame=None
     if frame is None or frame.empty:
         tiingo_key=os.environ.get("TIINGO_API_KEY") or os.environ.get("TIINGO_TOKEN")
         if tiingo_key:
             url=("https://api.tiingo.com/tiingo/daily/"+SYMBOL+"/prices?"
-                 +urllib.parse.urlencode({"startDate":START.isoformat(),"endDate":EXECUTION_END.isoformat(),"token":tiingo_key}))
+                 +urllib.parse.urlencode({"startDate":START.isoformat(),"endDate":LIFECYCLE_END.isoformat(),"token":tiingo_key}))
             try:
                 with urllib.request.urlopen(url,timeout=30) as resp:
                     rows=json.load(resp)
@@ -67,7 +68,7 @@ def main():
         if frame is None or frame.empty:
             twelve_key=os.environ.get("TWELVE_DATA_API_KEY") or os.environ.get("TWELVEDATA_API_KEY")
             if twelve_key:
-                params=urllib.parse.urlencode({"symbol":SYMBOL,"interval":"1day","start_date":START.isoformat(),"end_date":EXECUTION_END.isoformat(),"outputsize":5000,"apikey":twelve_key})
+                params=urllib.parse.urlencode({"symbol":SYMBOL,"interval":"1day","start_date":START.isoformat(),"end_date":LIFECYCLE_END.isoformat(),"outputsize":5000,"apikey":twelve_key})
                 try:
                     with urllib.request.urlopen("https://api.twelvedata.com/time_series?"+params,timeout=30) as resp:
                         payload=json.load(resp)
@@ -85,6 +86,8 @@ def main():
     if frame is None or frame.empty:
         raise RuntimeError("IPHI historical OHLCV unavailable from Yahoo, Tiingo, and Twelve Data with configured credentials")
     print("candidate_ohlcv_provider="+provider)
+    # Preserve the detector boundary at T while retaining post-T bars only for
+    # causal lifecycle observation. Future bars are never passed to morphology.
     market_raw={}
     market_ids={"NASDAQ_COMPOSITE":"^IXIC","SP500":"^GSPC","DJIA":"^DJI"}
     for index_id,ticker in market_ids.items():
@@ -161,10 +164,39 @@ def main():
       "open_vs_breakout_close_pct":float(bar_t1["open"])/float(bar_t["close"])-1,
       "in_original_5pct_buy_zone_at_open":bool(pivot <= float(bar_t1["open"]) <= pivot*1.05)
     }
+    # Original O'Neil loss-cut reference layer. This is an observation against
+    # the documented 7%-8% maximum-loss discipline, not a USSY production exit.
+    post_entry=contemporaneous[pd.to_datetime(contemporaneous["date"]).dt.date >= EXECUTION_END].copy()
+    original_entry_price=pivot
+    loss_cut_levels={"minus_7pct":pivot*0.93,"minus_8pct":pivot*0.92}
+    lifecycle_events=[]
+    for _,r in post_entry.iterrows():
+        d=pd.Timestamp(r["date"]).date().isoformat()
+        low=float(r["low"]); close=float(r["close"])
+        event={"date":d,"low":low,"close":close}
+        if low <= loss_cut_levels["minus_7pct"]: event["low_breached_minus_7pct"]=True
+        if low <= loss_cut_levels["minus_8pct"]: event["low_breached_minus_8pct"]=True
+        if close <= loss_cut_levels["minus_7pct"]: event["close_breached_minus_7pct"]=True
+        if close <= loss_cut_levels["minus_8pct"]: event["close_breached_minus_8pct"]=True
+        if len(event)>3: lifecycle_events.append(event)
+    original_lifecycle={
+      "classification":"ORIGINAL",
+      "reference_entry_basis":"ORACLE_PIVOT",
+      "reference_entry_price":original_entry_price,
+      "loss_cut_levels":loss_cut_levels,
+      "observation_end":LIFECYCLE_END.isoformat(),
+      "daily_bar_limitation":"INTRADAY_STOP_TIMING_NOT_RECONSTRUCTED",
+      "breach_events":lifecycle_events,
+      "first_low_minus_7pct":next((e for e in lifecycle_events if e.get("low_breached_minus_7pct")),None),
+      "first_low_minus_8pct":next((e for e in lifecycle_events if e.get("low_breached_minus_8pct")),None),
+      "first_close_minus_7pct":next((e for e in lifecycle_events if e.get("close_breached_minus_7pct")),None),
+      "first_close_minus_8pct":next((e for e in lifecycle_events if e.get("close_breached_minus_8pct")),None)
+    }
     diag={
       "target_oracle_structure_diagnostic":target_diag,
       "breakout_day_assessment":breakout,
       "ussy_t1_execution_observation":t1,
+      "original_oneil_loss_cut_observation":original_lifecycle,
       "historical_M_reconstruction":{"classification":"DATA_ADAPTATION","decision":{"asof_date":m_on_t.asof_date,"market_state":m_on_t.market_state,"M_entry_state":m_on_t.M_entry_state,"classifier_reason":m_on_t.classifier_reason,"entry_reason":m_on_t.entry_reason,"provenance":m_on_t.provenance,"version":m_on_t.version},"input_lineage":market_lineage,"limitation":"index-only frozen historical adapter; leadership/weakening booleans and correction-reset evidence are not fabricated"},
       "primary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in primary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
       "auxiliary_landmarks":[{"type":x.type.value,"price_date":x.price_date.isoformat(),"confirmed_date":x.confirmed_date.isoformat(),"price":x.price} for x in auxiliary if x.price_date>=cutoff and x.confirmed_date<=ASOF],
@@ -176,7 +208,7 @@ def main():
       "fixture_class":"HISTORICAL_RECONSTRUCTION_FIXTURE",
       "production_use":"NEVER_PRODUCTION",
       "symbol":SYMBOL,"asof_date":ASOF.isoformat(),
-      "source":{"provider":provider,"auto_adjust":False if provider=="Yahoo/yfinance" else None,"start":START.isoformat(),"end":EXECUTION_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"raw_fixture_sha256":raw_sha},
+      "source":{"provider":provider,"auto_adjust":False if provider=="Yahoo/yfinance" else None,"start":START.isoformat(),"end":LIFECYCLE_END.isoformat(),"detector_asof":ASOF.isoformat(),"rows":len(frame),"raw_fixture_sha256":raw_sha},
       "price_basis":{"classification":"DATA_ADAPTATION","corporate_action":"NONE_APPLIED_FOR_GOLDEN_REPLAY","factor":SPLIT_FACTOR,"price_transform":"identity","volume_transform":"identity","contemporaneous_sha256":sha},
       "engine":{"repo":"azharmz/ussy-oneil-patterns","sha":ENGINE_SHA},
       "oracle":ORACLE,

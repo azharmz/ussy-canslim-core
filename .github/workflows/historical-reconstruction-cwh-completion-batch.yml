@@ -5,6 +5,7 @@ on:
     paths:
       - .github/triggers/cwh-completion-batch-v1
       - .github/triggers/cwh-tsla-basis-v2
+      - .github/triggers/cwh-tsla-basis-v3
   workflow_dispatch:
 permissions:
   contents: read

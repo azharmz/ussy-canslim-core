@@ -939,6 +939,28 @@ Batch replay: run 35441720017 (OLED, TOL, URBN, SHOP, RBLX, DUOL; all jobs SUCCE
 ### 013 OLED 2019
 IBD oracle: second-stage CUP_WITH_HANDLE, pivot 177.05, breakout 2019-06-18. Daily replay: O 176.08 / H 186.31 / L 175.94 / C 184.70; volume 1,028,500 vs prior50 743,744 (~1.383x). T+1 2019-06-19 open 185.80, +4.9421% vs pivot, still inside 5% zone. Frozen engine does not reproduce the source-target 177.05 CWH; emitted CWH candidates are faulted (including DEEP_HANDLE_EXCEPTIONAL / BELOW_CUP_MIDPOINT). Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 
+
+## CWH numeric audit 004 — OLED 2019
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | second-stage CUP_WITH_HANDLE | CWH candidates emitted, but no source-target 177.05 structure | family vocabulary present; target assembly mismatch |
+| Pivot | 177.05 | no source-target CWH pivot emitted | **not numerically scoreable as a final target pivot** |
+| Base depth | no numeric depth frozen in oracle | no source-target geometry emitted | not scored |
+| Base/handle landmarks | no numeric landmarks frozen in oracle | emitted candidates carry DEEP_HANDLE_EXCEPTIONAL / BELOW_CUP_MIDPOINT | not scored against absent oracle |
+| Breakout date | 2019-06-18 | daily high 186.31 and close 184.70 crossed 177.05 | **breakout chronology corroborated** |
+| Breakout close vs pivot | breakout | +4.3208% | inside 5% buy zone |
+| Breakout volume | no numeric source ratio frozen | ~1.383x prior-50 | below USSY 1.40 by ~0.017x; not a morphology-oracle mismatch |
+| T+1 open vs pivot | n/a to source morphology | +4.9421% | inside 5% zone |
+
+Numeric adjudication: the frozen OLED oracle currently supplies a precise pivot and breakout date, but **does not contain source-published numeric depth, duration, or handle landmarks**. Therefore it would be incorrect to call those dimensions numeric mismatches. The daily market data strongly corroborates the oracle's 177.05 breakout level/date: the 2019-06-18 bar trades through the pivot and closes 4.3208% above it.
+
+Unlike LRCX, EW, and NVO, the frozen engine does not emit a source-target CWH whose pivot/geometry can be compared directly to 177.05. It emits other CWH candidates with handle-related faults. The defensible discrepancy is therefore target structure selection/assembly, not a demonstrated error in a particular oracle depth or landmark.
+
+Audit conclusion: **ORACLE_PIVOT_AND_BREAKOUT_CORROBORATED / SOURCE_TARGET_CWH_NOT_ASSEMBLED / NUMERIC_GEOMETRY_NOT_SCOREABLE_FROM_CURRENT_ORACLE**.
+
 ### 014 TSLA 2020
 IBD oracle: off-kilter CUP_WITH_HANDLE, pivot 466.00, breakout 2020-11-18. Yahoo current history is adjusted for the later 2022 3-for-1 split; replay restores contemporaneous Nov-2020 basis by multiplying OHLC by 3 and dividing volume by 3. Corrected breakout: O 448.35 / H 496.00 / L 443.50 / C 486.64; volume 78,044,000 vs prior50 48,526,294 (~1.608x); close +4.4292% vs pivot and inside 5% zone. T+1 open 492.00, +5.5794%, above the 5% zone: **MISSED_EXTENDED / T1_OPEN_ABOVE_5PCT_BUY_ZONE**. Engine's representative CWH is AMBIGUOUS with pivot 358.998 and DEEP_HANDLE_EXCEPTIONAL, not the source-target structure. Classification: **MORPHOLOGY_FIDELITY_GAP / SOURCE_TARGET_CWH_NOT_RECONSTRUCTED**.
 

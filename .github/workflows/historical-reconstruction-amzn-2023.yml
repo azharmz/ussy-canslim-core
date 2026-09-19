@@ -1,5 +1,9 @@
 name: Historical golden replay — AMZN 2023
 on:
+  push:
+    branches: [validation/historical-golden-reconstruction-v1]
+    paths:
+      - scripts/historical_reconstruction_amzn_2023.py
   workflow_dispatch:
 permissions:
   contents: read

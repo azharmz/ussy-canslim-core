@@ -10,6 +10,7 @@ ENGINE_REPO = "https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA = "c433cc1e35a5aa32a46f732cd8c5545935e36e40"
 SYMBOL = "EW"
 ASOF = date(2019,7,24)
+PRICE_FACTOR = 3.0  # DATA_ADAPTATION: restore 2019 contemporaneous pre-2020 3-for-1 split basis
 EXECUTION_END = date(2019,7,25)
 START = date(2018,7,1)
 ORACLE = {"pattern":"CUP_WITH_HANDLE","pivot":195.10,"breakout_date":"2019-07-24","source_depth_pct":16.3,"source":"IBD Top Stocks 2019"}

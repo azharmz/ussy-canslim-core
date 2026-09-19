@@ -732,6 +732,26 @@ Historical M: FOLLOW_THROUGH_CONFIRMED / ALLOW_NEW_BUYS. Historical L remains NO
 CWH adjudication after LRCX + EW: two authoritative CWH examples now show source-fidelity discrepancies, but not the same terminal gate. LRCX is an explicit handle midpoint-gate rejection; EW preserves the source-like cup body yet fails to assemble/recognize the source-target CWH. This supports continued targeted CWH replication and component-level diagnostics, not a family-wide rule change.
 
 
+
+## CWH numeric audit 002 — EW 2019
+
+Status: **AUDITED / SOURCE-FIDELITY DECOMPOSED / NO ENGINE CHANGE**.
+
+| Field | Source oracle | Frozen reconstruction | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITH_HANDLE | source-near cup body found; source-target CWH not assembled | categorical mismatch downstream of cup body |
+| Pivot | 195.10 | no source-target CWH pivot emitted | **not reconstructed as final CWH pivot** |
+| Base depth | 16.3% | 16.25897% | -0.04103 percentage point; practical exact match |
+| Cup left/high area | source summary does not publish exact landmark | 2019-03-18 / 197.85999 | engine-only landmark; not scored against absent oracle |
+| Cup low | source summary does not publish exact landmark | 2019-05-29 / 165.689999 | engine-only landmark; not scored against absent oracle |
+| Atomic cup segment | valid CWH implied by source | source-near cup body discovered | **geometry evidence present** |
+| Handle geometry | valid handle implied by source label | no source-target handle/CWH diagnostic emitted | **true assembly/handle gap** |
+| Breakaway confirmation | strong-volume gap 2019-07-24 | volume 2.77797x prior-50; close +10.14% vs pivot | strong daily confirmation corroborated |
+
+Numeric adjudication: **EW's cup depth is essentially exact**: 16.25897% versus the source's rounded 16.3%, a difference of only 0.041 percentage point. The engine also independently finds the high/low landmarks that generate this source-like cup body. The failure occurs after cup-body discovery: it does not assemble/recognize the source-target handle and therefore emits no final CWH pivot matching 195.10.
+
+Audit conclusion: **CUP_DEPTH_MATCH / CUP_BODY_GEOMETRY_PRESENT / CWH_ASSEMBLY_OR_HANDLE_GAP**. The 195.10 pivot cannot be scored as an engine numeric miss because the source-target final CWH candidate itself is absent; it is better classified as a downstream assembly/recognition absence rather than a wrong emitted pivot.
+
 ## Targeted replication checkpoint — BRP 2020 CWH suitability
 
 Status: **SOURCE-ORACLE SUITABILITY REVIEWED / NOT PROMOTED TO COMPLETED-BREAKOUT GOLDEN CASE**.

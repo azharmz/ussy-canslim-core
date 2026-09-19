@@ -116,6 +116,23 @@ def main():
     # landmark/segmentation generation.
     cutoff=date(2024,1,1)
     target=[]  # Oracle landmarks remain diagnostic-only; never injected into detector generation.
+    # Boundary diagnostic: inspect whether the source-target dates exist in each upstream vocabulary.
+    def _lm_rows(items):
+        out=[]
+        for x in items:
+            pdx=getattr(x,"price_date",None)
+            cdx=getattr(x,"confirmed_date",None)
+            if (pdx and date(2024,4,1) <= pdx <= ASOF) or (cdx and date(2024,4,1) <= cdx <= ASOF):
+                out.append({"type":str(getattr(getattr(x,"kind",None),"value",getattr(x,"kind",None))),"price_date":pdx.isoformat() if pdx else None,"confirmed_date":cdx.isoformat() if cdx else None,"price":getattr(x,"price",None)})
+        return out
+    boundary_diag={"primary_apr_may_2024":_lm_rows(primary),"auxiliary_apr_may_2024":_lm_rows(auxiliary),"fused_apr_may_2024":_lm_rows(fused),"atomic_apr_may_2024":[],"multiturn_apr_may_2024":[]}
+    for name,items in [("atomic_apr_may_2024",atomic),("multiturn_apr_may_2024",multi)]:
+        for x in items:
+            vals=[]
+            for attr in ("start","trough","recovery","end","left_high","trough_1","middle_peak","trough_2"):
+                v=getattr(x,attr,None); d=getattr(v,"price_date",v if isinstance(v,date) else None)
+                if d: vals.append((attr,d.isoformat()))
+            if any("2024-04-" in d or "2024-05-" in d for _,d in vals): boundary_diag[name].append({"dates":vals,"repr":repr(x)[:800]})
     target_diag={"oracle_landmarks": ORACLE_LANDMARKS, "oracle_candidate_matches": []}
     # Compare emitted DOUBLE_BOTTOM candidates to the source-defined 2024 structure after generation.
     # This diagnoses segmentation/landmark fidelity without tuning any gate.
@@ -209,6 +226,7 @@ def main():
     }
     diag={
       "target_oracle_structure_diagnostic":target_diag,
+      "wmt_landmark_segmentation_boundary_diagnostic":boundary_diag,
       "breakout_day_assessment":breakout,
       "ussy_t1_execution_observation":t1,
       "original_oneil_loss_cut_observation":original_lifecycle,

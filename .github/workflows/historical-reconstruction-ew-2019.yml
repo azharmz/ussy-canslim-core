@@ -38,3 +38,5 @@ jobs:
 # trigger after stale-template audit and cleanup
 
 # trigger after EW contemporaneous price-basis normalization
+
+# trigger after explicit static preflight pass

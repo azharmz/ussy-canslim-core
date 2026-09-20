@@ -13,7 +13,7 @@ CASES={
  "now_2024":("NOW",850.33,date(2024,8,30),date(2024,9,10),5.0,"IBD 2024-09-03 flat-base breakout Aug 30 at 850.33; later 5-for-1 split restored"),
  "deck_2023":("DECK",568.47,date(2023,10,23),date(2023,11,10),6.0,"IBD 2024-03-22 retrospective flat base 568.47, breakout week ending Oct 27; later 6-for-1 split restored"),
  "crox_2021":("CROX",109.91,date(2021,6,14),date(2021,6,30),1.0,"MarketSmith Stock Guide Q4 2021 flat base 109.91, breakout June 15"),
- "cprt_2020":("CPRT",92.51,date(2019,12,26),date(2020,1,10),2.0,"IBD Top Stocks 2019 five-week flat base 92.51, breakout Thursday Jan 2; later 2-for-1 split restored"),
+ "cprt_2020":("CPRT",92.51,date(2019,12,26),date(2020,1,10),4.0,"IBD Top Stocks 2019 five-week flat base 92.51, breakout Thursday Jan 2; later 2-for-1 split restored"),
  "amzn_2020":("AMZN",3344.39,date(2020,8,3),date(2020,9,15),20.0,"IBD Top Stocks 2020 five-week flat base 3344.39; later 20-for-1 split restored"),
  "kkr_2024":("KKR",103.48,date(2024,5,10),date(2024,7,15),1.0,"IBD 2024-05-10 stage-three flat base 103.48 buy point"),
 }

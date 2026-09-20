@@ -3,7 +3,6 @@ from __future__ import annotations
 import json, subprocess, sys
 from datetime import date, timedelta
 from pathlib import Path
-import pandas as pd
 
 ENGINE_REPO="https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
@@ -20,6 +19,7 @@ CASES={
 "KKR":(103.48,date(2024,5,15),1.0),
 }
 def norm(frame,f):
+    import pandas as pd
     frame=frame.copy()
     if f!=1:
         for c in ("open","high","low","close","adj_close"):
@@ -38,6 +38,7 @@ def metrics(frame,r):
             "tight":nr<=.03 and cd<=.01,
             "wide_loose":nr>=.07 or cd>=.03}
 def main():
+    import pandas as pd
     eng=Path(".tmp/ussy-oneil-patterns")
     if not eng.exists():
         eng.parent.mkdir(exist_ok=True); subprocess.run(["git","clone","--quiet",ENGINE_REPO,str(eng)],check=True)

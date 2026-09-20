@@ -376,3 +376,50 @@ Before viewing the holdout results, the following questions are frozen:
 R1-D status: **COMPLETE / HYPOTHESIS FROZEN**.
 
 Next stage: **R1-E independent validation set construction**. Collect new source-backed Flat Base cases absent from the original 40-case golden reconstruction, freeze their source evidence and oracle fields before running the detector, then evaluate H1-H5 exactly as specified above.
+
+
+## R1-E — independent Flat Base holdout closure
+
+Status: **COMPLETE — 7 evaluable / 8 preregistered cases; no threshold tuning**.
+
+The holdout registry was frozen before replay. Audit order was TRV, TSM, KNTK, EQT, MELI, TOST, ULS, BK.
+
+### Case disposition
+
+| Case | Source pivot | Reconstruction | Structural/morphology disposition |
+|---|---:|---|---|
+| TRV 2024 | 269.56 | practical-exact | STRUCTURALLY_ELIGIBLE; frozen TIGHT=false / WIDE_LOOSE |
+| TSM 2024 | 212.60 | practical-exact | STRUCTURALLY_ELIGIBLE; frozen TIGHT=false / WIDE_LOOSE |
+| KNTK 2025 | 62.55 | practical-exact | STRUCTURALLY_ELIGIBLE by week semantics; frozen TIGHT=false / WIDE_LOOSE |
+| EQT 2025 | 48.02 | practical-exact | STRUCTURALLY_ELIGIBLE by week semantics; frozen TIGHT=false / WIDE_LOOSE |
+| MELI 2025 | 2635.88 | practical-exact | 5 trading weeks / 20 sessions; frozen TOO_SHORT + WIDE_LOOSE |
+| TOST 2025 | 45.56 | practical-exact | 6 trading weeks / 24 sessions; frozen TOO_SHORT + WIDE_LOOSE |
+| ULS 2025 | 72.81 | nearest 59.231 (-18.65%) | UPSTREAM_PIVOT_MISS; target morphology NOT SCORED |
+| BK 2025 | 110.87 | not authoritative | EXCLUDED — canonical adjusted-basis replay unavailable in this R1-E execution |
+
+BK's Yahoo acquisition failed. A Twelve Data recovery probe successfully returned raw `adjust=none` OHLCV and is retained only as diagnostic evidence. Because the canonical production-ready R2 contract uses an adjusted price basis, the raw Twelve Data replay is not substituted into the authoritative holdout denominator and is not used to classify BK morphology.
+
+### Answers to the six preregistered questions
+
+1. **Pivot reconstruction:** 6/7 evaluable cases (85.7%) reconstruct the source pivot within the pre-existing practical-near criterion. ULS is the upstream miss. BK is excluded rather than counted as a miss.
+2. **Source-minimum structural eligibility:** 6/6 source-pivot-reconstructed cases satisfy the preregistered >=5 trading-week and <=15% depth interpretation.
+3. **25-session disagreement:** MELI (5 weeks / 20 sessions) and TOST (6 weeks / 24 sessions) directly show that explicit week semantics are not equivalent to a hard 25-session minimum: 2/6 primary reconstructed source-target cases.
+4. **Weekly descriptors:** all five H2 descriptors were measured without selecting pass/fail cutoffs. Across the six reconstructed source-target cases, observed ranges were: weekly_close_span_pct 7.11%-9.21%; weekly_median_range_pct 3.23%-6.39%; weekly_close_change_abs_median 1.77%-4.93%; weekly_direction_changes 1-4; late_base_contraction_ratio 0.772-1.038. These are descriptive holdout observations, not proposed thresholds.
+5. **Frozen TIGHT gate:** 6/6 reconstructed source-backed cases have `TIGHT=false` despite satisfying the source-minimum duration/depth interpretation. Removing WIDE_LOOSE alone would therefore not produce clean recognition under the frozen state machine.
+6. **Upstream vs morphology:** ULS is a direct upstream landmark/boundary/pivot reconstruction failure. Its unrelated engine lineage must not be used to tune Flat Base tightness.
+
+### R1-E interpretation
+
+The independent holdout reproduces the defect classes seen in the golden diagnostic without authorizing a parameter change:
+
+- source duration expressed in weeks is not safely equivalent to `duration_sessions >= 25`;
+- whole-base `normalized_range <= 3%` plus `close_dispersion <= 1%` is not supported as a positive Flat Base recognition requirement by these source-backed holdout cases;
+- upstream pivot/boundary reconstruction remains a separate failure axis and cannot be repaired by relaxing morphology thresholds.
+
+No H2 threshold is selected from R1-E. The frozen production O'Neil engine remains unchanged.
+
+### Next development decision
+
+R1-E is consumed as validation evidence and must not become a tuning set. Any quantitative vNext weekly-quality rule must be developed on a **new, separately frozen development set** that excludes both the original 40-case golden reconstruction and all R1-E holdout cases. After development, the resulting rule must be frozen and evaluated on another untouched validation set before any production-engine change is considered.
+
+R1-E status: **COMPLETE**.

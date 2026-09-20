@@ -1,8 +1,5 @@
 name: Flat Base R1-E independent holdout
 on:
-  push:
-    branches: [research/oneil-morphology-vnext]
-    paths: [scripts/flat_base_r1e_holdout.py, .github/workflows/flat-base-r1e-holdout.yml]
   workflow_dispatch:
 jobs:
   validate:

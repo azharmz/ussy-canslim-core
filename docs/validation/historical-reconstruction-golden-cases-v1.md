@@ -2047,3 +2047,18 @@ On **2020-01-02**, replay high was **93.57** and close **93.48**, exactly corrob
 Audit conclusion: **FLAT_BASE_FAMILY_ORACLE / SOURCE_PIVOT_92.51_NOT_RECONSTRUCTED / SOURCE_DURATION_FIVE_WEEKS / NEAREST_ENGINE_PIVOT_83.70_MINUS_9.52PCT / NEAREST_STRUCTURE_NOT_ORACLE_STRUCTURE / UPSTREAM_BOUNDARY_LANDMARK_PIVOT_GAP / SOURCE_BREAKOUT_2020-01-02_CONFIRMED / SOURCE_CLOSE_93.48_EXACTLY_CORROBORATED / BREAKOUT_VOLUME_1.482X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_CUMULATIVE_X4_VALIDATED**.
 
 Numeric-audit progress after this freeze: **38/40 = 95% overall**; FLAT_BASE **8/10 = 80%**.
+
+
+## FLAT_BASE numeric audit #009 — AMZN 2020
+
+Frozen IBD Top Stocks oracle identifies Amazon (AMZN) as a **five-week FLAT_BASE** with **3344.39** buy point. Historical comparison explicitly restores the pre-2022-split basis using **x20** prices and inverse volume normalization.
+
+Full-candidate inspection of authoritative replay **35497962478** independently reconstructs the source pivot. The CONFIRMED_STRUCTURE starts/pivots **2020-07-13**, ends **2020-07-21**, pivot **3344.28985596**, engine-measured depth **12.739921%**, status **REJECTED**, faults **TOO_SHORT + WIDE_LOOSE**. The OPEN_RIGHT_EDGE representation uses the same 2020-07-13 pivot and **3344.28985596** level, extends through replay as-of **2020-08-25**, measures depth **13.643853%**, and is **AMBIGUOUS** under **WIDE_LOOSE**. No source-target FLAT_BASE reaches RECOGNIZED.
+
+The pivot difference is **-$0.10014404**, approximately **-0.002995%**, a near-exact reconstruction. The oracle explicitly states **five weeks**, whereas the engine's confirmed representation of the source-pivot lineage is rejected as **TOO_SHORT**. This is direct evidence of a duration-semantics gap, analogous to SNPS/TW, while the engine depth values are observational because no authoritative source numeric depth/range is frozen.
+
+The replay's first daily close >= oracle pivot is **2020-08-25**: high **3357.40**, close **3346.49**, only **+0.0628%** above the 3344.39 pivot. Replay volume is **0.8414x prior-50** (-15.86%), so this close-crossing does **not** show strong volume confirmation under common O'Neil-style breakout-volume expectations; no source-equivalent numeric volume is frozen, so it remains an execution observation rather than an oracle mismatch. T+1 on **2020-08-26** opened **3351.11**, **+0.2009%** above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_NEAR_EXACT_MATCH_0.003PCT / SOURCE_DURATION_FIVE_WEEKS / CONFIRMED_STRUCTURE_TOO_SHORT_DURATION_SEMANTICS_GAP / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / REPLAY_CLOSE_CROSSING_2020-08-25 / BREAKOUT_VOLUME_0.841X_WEAK_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X20_VALIDATED**.
+
+Numeric-audit progress after this freeze: **39/40 = 97.5% overall**; FLAT_BASE **9/10 = 90%**.

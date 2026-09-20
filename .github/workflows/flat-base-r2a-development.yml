@@ -1,5 +1,8 @@
 name: Flat Base vNext R2-A development replay
 on:
+  push:
+    branches: [research/oneil-morphology-vnext]
+    paths: [scripts/flat_base_r2a_development.py, .github/workflows/flat-base-r2a-development.yml]
   workflow_dispatch:
 jobs:
   replay:

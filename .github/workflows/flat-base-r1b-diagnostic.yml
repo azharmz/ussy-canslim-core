@@ -1,0 +1,25 @@
+name: Flat Base R1-B diagnostic
+on:
+  push:
+    branches: [research/oneil-morphology-vnext]
+    paths:
+      - scripts/flat_base_r1b_diagnostic.py
+      - .github/workflows/flat-base-r1b-diagnostic.yml
+  workflow_dispatch:
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Start diagnostic
+        run: echo "R1-B start — 10 Flat Base cases, frozen engine, no tuning"
+      - name: Run diagnostic replay
+        run: python scripts/flat_base_r1b_diagnostic.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flat-base-r1b-diagnostic
+          path: artifacts/research/flat-base-r1b.json

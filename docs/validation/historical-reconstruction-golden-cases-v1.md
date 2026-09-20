@@ -1985,3 +1985,18 @@ Source chronology and replay execution observation are deliberately separated. I
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_NEAR_EXACT_MATCH_0.0037PCT / SOURCE_DURATION_SIX_WEEKS / CONFIRMED_STRUCTURE_TOO_SHORT_DURATION_SEMANTICS_GAP / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / SOURCE_BREAKOUT_2024-11-20_INTRADAY / REPLAY_CLOSE_CROSSING_2024-11-26 / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
 
 Numeric-audit progress after this freeze: **34/40 = 85% overall**; FLAT_BASE **4/10 = 40%**.
+
+
+## FLAT_BASE numeric audit #005 — NOW 2024
+
+Frozen oracle identifies ServiceNow (NOW) as a **FLAT_BASE** with **850.33** pivot and **2024-08-30** breakout. Full-candidate inspection of authoritative replay **35497962478** shows a materially different failure mode from AAPL, SNPS, META, and TW: the frozen engine does **not** emit a FLAT_BASE candidate at or near the source pivot.
+
+The nearest emitted FLAT_BASE pivot is **815.31997681**, about **-$35.0100 / -4.117%** below the 850.33 oracle. That lineage is REJECTED in multiple confirmed structures: depth **21.7497%** with **TOO_DEEP + WIDE_LOOSE**, depth **10.4008%** with **TOO_SHORT + WIDE_LOOSE**, and depth **16.1200%** with **TOO_DEEP + WIDE_LOOSE**. A later chronology candidate beginning **2024-07-05** has pivot **806.52000427**, depth **9.5832%**, and is AMBIGUOUS under **WIDE_LOOSE**; its confirmed representation is REJECTED under **TOO_SHORT + WIDE_LOOSE**. None reconstructs 850.33.
+
+Therefore this case must not be classified as the recurring “source pivot recovered but geometry gate blocks recognition” pattern. The source-target pivot itself is absent from FLAT_BASE output, so the discrepancy occurs **upstream at boundary/landmark/pivot construction** before final recognition gating. Oracle numeric left boundary, duration, and depth/range are not available in the frozen source evidence and are **NOT SCORED**.
+
+Historical-price comparison uses an explicit **x5** pre-split normalization. This is necessary because ServiceNow's later 5-for-1 split became effective in December 2025; the 2024 oracle is on the pre-split basis. On the source breakout date **2024-08-30**, replay high was **857.25** and close **855.00**, +0.5492% above the 850.33 pivot. Replay volume was **1.4729x prior-50** (+47.29%); no source-equivalent numeric volume is frozen, so volume is observational rather than scored. T+1 operationalization on **2024-09-03** opened **856.40**, +0.7138% above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_ORACLE / SOURCE_PIVOT_NOT_RECONSTRUCTED / NEAREST_ENGINE_PIVOT_815.32_MINUS_4.12PCT / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / UPSTREAM_BOUNDARY_LANDMARK_PIVOT_GAP / BREAKOUT_2024-08-30_CONFIRMED / BREAKOUT_VOLUME_1.473X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X5_VALIDATED**.
+
+Numeric-audit progress after this freeze: **35/40 = 87.5% overall**; FLAT_BASE **5/10 = 50%**.

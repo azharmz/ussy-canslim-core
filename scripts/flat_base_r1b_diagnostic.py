@@ -48,6 +48,7 @@ def main():
     from oneil_patterns.production.engine import analyze_security
     out=[]
     for sym,(pivot,asof,factor) in CASES.items():
+        print(f"R1-B case start: {sym} asof={asof} factor={factor:g}", flush=True)
         frame=norm(fetch_yfinance(sym,asof-timedelta(days=650),asof+timedelta(days=3)),factor)
         detector=frame[frame.date.dt.date<=asof].copy()
         obs=[x.to_dict() if hasattr(x,"to_dict") else x.__dict__ for x in analyze_security(sym,sym,detector,asof)]

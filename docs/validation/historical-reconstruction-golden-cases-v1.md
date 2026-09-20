@@ -1868,3 +1868,31 @@ Audit conclusion: **DOUBLE_BOTTOM_FAMILY_CAPABILITY_PRESENT / SOURCE_TARGET_STRU
 ### DOUBLE_BOTTOM numeric-audit closure
 
 All **10/10** frozen DOUBLE_BOTTOM golden cases now have full-candidate numeric adjudication. The tranche contains both clean practical-exact source-pivot reconstructions and localized fidelity gaps at different layers: some cases reach DOUBLE_BOTTOM morphology but remain ambiguous under trough/rebound semantics, while WMT fails earlier at landmark generation. These outcomes do not support collapsing all discrepancies into one universal DOUBLE_BOTTOM gate failure, and no detector tuning or frozen-engine modification is authorized by this audit tranche.
+
+
+## FLAT_BASE numeric audit 001 — AAPL 2019
+
+Status: **AUDITED / SOURCE PIVOT EXACTLY RECOVERED / FLAT-BASE GEOMETRY-GATE GAP / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen FLAT_BASE candidate set from authoritative replay run **35417737472**, job **105829518703**.
+
+| Field | Source oracle | Frozen source-near candidates | Delta / result |
+|---|---:|---:|---|
+| Pattern family | FLAT_BASE | FLAT_BASE | **family exact match** |
+| Pivot | 221.37 | 221.36999512 | -0.00000488 / **~-0.0000022%**; practical exact match |
+| Source-target landmarks | source numeric base-low not frozen | LEFT_HIGH 2019-07-31 / BASE_LOW 2019-08-05 | left-high/pivot exact; remaining geometry not independently scoreable |
+| Depth | source numeric depth not frozen | 13.005373% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | documented flat base | REJECTED confirmed structure; AMBIGUOUS open-right-edge form | **morphology-state gap** |
+| Faults | source accepts structure | TOO_SHORT + WIDE_LOOSE; alternate same structure WIDE_LOOSE | **duration/tightness geometry gap** |
+| Breakout | source week ending 2019-09-13; daily replay 2019-09-11 | H 223.71 / C 223.59 | **daily crossing corroborated** |
+| Breakout volume | source breakout | **1.7080x prior-50 / +70.80%** | strong corroboration |
+| T+1 open | n/a to source morphology | 224.80 = **+1.5494%** vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous 2019 basis | later AAPL 4-for-1 split restored: OHLC x4 / volume ÷4 | **basis normalized to oracle period** |
+
+All emitted FLAT_BASE candidates were inspected. The source-target cluster is unmistakable: pivot **221.36999512**, LEFT_HIGH **2019-07-31**, BASE_LOW **2019-08-05**, depth **13.0054%**. The confirmed-structure candidate is REJECTED under `TOO_SHORT` + `WIDE_LOOSE`; the open-right-edge variant of the same structure is AMBIGUOUS under `WIDE_LOOSE`. Therefore the engine recovers the family neighborhood and oracle pivot essentially exactly, but its frozen duration/tightness geometry gates do not promote the source-labelled flat base to RECOGNIZED.
+
+Other FLAT_BASE candidates are materially different structures: pivot **215.30999756** is REJECTED under `TOO_DEEP` + `WIDE_LOOSE`; older **158.8500061** structures are AMBIGUOUS under `WIDE_LOOSE` with one also carrying `BOUNDARY_CONTEXT`. None supersedes the exact source-pivot structure.
+
+The replay explicitly restores AAPL's later 2020 4-for-1 split to contemporaneous 2019 basis before comparison. On 2019-09-11 the normalized bar reached **223.71** and closed **223.59**, +1.0028% above the 221.37 oracle pivot. Volume was **1.7080x** prior-50. T+1 open **224.80** was +1.5494% above pivot and inside the original 5% zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_VOLUME_STRONG**.

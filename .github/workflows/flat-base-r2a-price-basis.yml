@@ -1,8 +1,5 @@
 name: Flat Base R2-A price-basis audit
 on:
-  push:
-    branches: [research/oneil-morphology-vnext]
-    paths: [.github/workflows/flat-base-r2a-price-basis.yml, scripts/flat_base_r2a_price_basis.py]
   workflow_dispatch:
 permissions:
   contents: read

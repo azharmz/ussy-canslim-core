@@ -1610,3 +1610,31 @@ The oracle-to-engine pivot delta is effectively zero. Because the source evidenc
 The corrected replay uses the first daily **close** >= oracle pivot inside the source-bounded chronology window, yielding 2024-05-21. Close **803.17** is +1.1970% above pivot and volume is **1.6553x** the prior-50 mean. T+1 open **801.00** is +0.9236% above pivot and inside the original 5% zone.
 
 Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.
+
+
+## DOUBLE_BOTTOM numeric audit 002 — FIS 2024
+
+Status: **AUDITED / FAMILY PRESENT / SOURCE-NEAR PIVOT / SOURCE-TARGET REMAINS AMBIGUOUS / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen DOUBLE_BOTTOM candidate set from corrected authoritative replay run **35474785663**, job **105982053823**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM | **family present** |
+| Pivot | 77.83 | 78.73000336 | +0.90000336 / **+1.1564%**; near match |
+| Source-target landmarks | source numeric landmarks not frozen | nearest lineage includes MIDDLE_PEAK 2024-05-20 / TROUGH_2 2024-08-05; multiple left-side alternatives | **NOT SCORED / SOURCE NUMERIC LANDMARKS NOT AVAILABLE** |
+| Depth | source numeric depth not frozen | multiple candidate depths for the 78.73 lineage | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | source accepts stage-one double bottom | AMBIGUOUS | **morphology-state gap** |
+| Faults | source accepts structure | NO_SECOND_TROUGH_UNDERCUT | **double-bottom trough semantics gap** |
+| Breakout | source-bounded first close >= 77.83 | 2024-08-13 H 78.37 / C 78.26 | **daily close crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 1.2219x prior-50 | separate breakout evidence |
+| T+1 open | n/a to source morphology | 78.34 = +0.6553% vs oracle pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | Yahoo, auto_adjust=false | **common basis** |
+
+All emitted DOUBLE_BOTTOM candidates were inspected. There is **no exact 77.83 engine pivot**. The closest family-consistent cluster is pivot **78.73000336**, only **+1.1564%** above the oracle. Multiple lineages share this pivot and the same right-side MIDDLE_PEAK **2024-05-20** / TROUGH_2 **2024-08-05**, but all are AMBIGUOUS because of `NO_SECOND_TROUGH_UNDERCUT`. Their left-side choices differ, so no single engine lineage should be promoted as an exact oracle geometry match without source numeric landmark evidence.
+
+A second cluster at pivot **74.75** is farther from the oracle and is likewise AMBIGUOUS with `NO_SECOND_TROUGH_UNDERCUT`. Other lower-pivot candidates mainly carry `WEAK_MIDDLE_REBOUND`. Thus full-candidate inspection confirms rather than overturns the earlier coarse diagnosis: the engine detects the DOUBLE_BOTTOM family and constructs a source-near pivot, but its second-trough undercut semantics prevent source-target recognition.
+
+The corrected source-bounded breakout reconstruction is 2024-08-13: close **78.26** is +0.5525% above oracle pivot **77.83**, with volume **1.2219x** prior-50. T+1 open **78.34** is +0.6553% above the oracle pivot and remains inside the original 5% zone.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_PRESENT / SOURCE_NEAR_PIVOT_1.16PCT / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / NO_SECOND_TROUGH_UNDERCUT_SEMANTICS_GAP**.

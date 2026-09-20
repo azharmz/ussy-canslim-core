@@ -1836,3 +1836,35 @@ Other DOUBLE_BOTTOM candidates do not overturn that adjudication. The **66.56** 
 The breakout daily bar on 2019-10-15 reached **66.20** and closed **64.99**, +0.2159% above the oracle pivot. Volume was **1.1462x** prior-50, below the frozen USSY 1.40 confirmation threshold. T+1 open **65.06** was +0.3238% above the oracle pivot and remained inside the original 5% zone. The separately frozen lifecycle evidence later corroborates the documented failed-breakout character; it does not change the morphology adjudication.
 
 Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_NEAR_STRUCTURE_FOUND / PIVOT_NEAR_MATCH_0.15PCT / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / NO_SECOND_TROUGH_UNDERCUT_SEMANTICS_GAP**.
+
+
+## DOUBLE_BOTTOM numeric audit 010 — WMT 2024
+
+Status: **AUDITED / SOURCE-TARGET STRUCTURE NOT EMITTED / LANDMARK-GENERATION MISS / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen DOUBLE_BOTTOM candidate set from authoritative diagnostic replay run **35428260263**, job **105857943569**.
+
+| Field | Source oracle | Frozen engine | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM exists only for an older unrelated structure | **family capability present, source-target absent** |
+| Pivot | 60.89 | 56.64666748 (older unrelated candidate) | **NOT SCORED as source-near pivot** |
+| Source landmarks | TROUGH_1 2024-04-19 / MIDDLE_PEAK 2024-05-03 / TROUGH_2 2024-05-10; source lows 58.88 / 58.55 | no source-target candidate; oracle_candidate_matches=[] | **source-target landmark-generation miss** |
+| Depth | source numeric depth not frozen | older candidate 9.834184% | **NOT SCORED / unrelated structure** |
+| Final source-target state | documented 2024 double bottom | no emitted source-target candidate | **upstream fidelity gap** |
+| Faults | source accepts structure | no source-target morphology candidate exists to fault | **morphology gate not reached** |
+| Breakout | source 2024-05-16 | H 64.42 / C 64.01 | crossing corroborated, but already extended |
+| Breakout volume | source breakout | **3.9813x prior-50 / +298.13%** | very strong; separate evidence |
+| T+1 open | n/a to source morphology | 64.24 = **+5.5017%** vs pivot | above original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | identity transform; no corporate-action transform | **common basis** |
+
+Full-candidate inspection is decisive. The frozen replay emits only one DOUBLE_BOTTOM structure: LEFT_HIGH **2023-09-13**, TROUGH_1 **2023-10-06**, MIDDLE_PEAK **2023-11-15**, TROUGH_2 **2023-12-11**, pivot **56.64666748**, RECOGNIZED with no faults. This is an older unrelated structure and must not be substituted for the source-labelled April-May 2024 double bottom.
+
+The oracle comparison layer explicitly records TROUGH_1 **2024-04-19**, MIDDLE_PEAK **2024-05-03**, TROUGH_2 **2024-05-10**, and `oracle_candidate_matches=[]`. The separately frozen boundary diagnosis already localizes the failure upstream: primary, auxiliary, and fused landmark vocabularies contain no April-May 2024 source-target landmarks, leaving downstream segmentation empty. Therefore this case does **not** test `NO_SECOND_TROUGH_UNDERCUT`; there is no source-target morphology candidate on which that gate could operate.
+
+On 2024-05-16 the bar opened **64.22**, reached **64.42**, and closed **64.01**, which is **+5.1240%** above the 60.89 oracle pivot and slightly beyond the conventional 5% zone. Volume was **3.9813x** prior-50. T+1 open **64.24** was **+5.5017%** above pivot and also beyond the 5% zone. These strong breakout observations do not repair the upstream morphology miss.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_CAPABILITY_PRESENT / SOURCE_TARGET_STRUCTURE_NOT_EMITTED / SOURCE_TARGET_PIVOT_NOT_SCOREABLE / LANDMARK_GENERATION_MISS / BREAKOUT_VOLUME_VERY_STRONG / T1_ABOVE_ORIGINAL_5PCT_ZONE**.
+
+### DOUBLE_BOTTOM numeric-audit closure
+
+All **10/10** frozen DOUBLE_BOTTOM golden cases now have full-candidate numeric adjudication. The tranche contains both clean practical-exact source-pivot reconstructions and localized fidelity gaps at different layers: some cases reach DOUBLE_BOTTOM morphology but remain ambiguous under trough/rebound semantics, while WMT fails earlier at landmark generation. These outcomes do not support collapsing all discrepancies into one universal DOUBLE_BOTTOM gate failure, and no detector tuning or frozen-engine modification is authorized by this audit tranche.

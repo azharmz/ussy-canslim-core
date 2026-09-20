@@ -281,3 +281,98 @@ vNext must preserve the distinction between:
 Any quantitative tightness metric proposed in R1-D must be justified as an explicit operationalization, must not be presented as an O'Neil threshold, and must be frozen before independent holdout validation.
 
 R1-C status: **COMPLETE**.
+
+
+## R1-D — vNext hypothesis specification (frozen before holdout)
+
+Status: **FROZEN HYPOTHESIS — not production code**.
+
+This specification is intentionally written before collecting/evaluating the independent holdout. The 40 golden cases motivated the defect class but are not used to select numeric parameters below.
+
+### H1 — remove circular total-range tightness from the positive recognition gate
+
+The frozen detector uses total base high-low range both as a morphology descriptor and, through the TIGHT band, as the decisive positive recognition criterion. R1-B showed this is structurally entangled with base depth.
+
+vNext hypothesis:
+
+> Once a Flat Base satisfies source-backed duration and depth constraints, total base high-low range should not be required to be <=3% for clean recognition.
+
+The source-backed maximum correction remains a separate depth gate.
+
+### H2 — operationalize “tight/sideways” as local weekly behavior, not whole-base depth
+
+Candidate vNext quality representation will be **descriptive first**, with no pass/fail numeric threshold in the first holdout evaluation.
+
+For each candidate, aggregate daily bars into completed trading weeks and emit:
+
+1. `weekly_close_span_pct`: (max weekly close - min weekly close) / max weekly close;
+2. `weekly_median_range_pct`: median of weekly (high-low)/high;
+3. `weekly_close_change_abs_median`: median absolute week-to-week close return;
+4. `weekly_direction_changes`: sign changes in week-to-week close returns;
+5. `late_base_contraction_ratio`: median weekly range over the final two completed weeks divided by median weekly range over the preceding completed weeks, when enough weeks exist.
+
+These are research operationalizations, **not O'Neil/IBD thresholds**.
+
+Rationale: they separate sideways/tight trading behavior from the already-measured maximum correction of the entire base and allow the holdout to reveal whether source-labelled Flat Bases exhibit useful local contraction/rangebound structure.
+
+### H3 — provisional recognition state machine for holdout comparison
+
+Two outputs must be evaluated side-by-side:
+
+**A. Source-minimum structural classifier**
+
+```text
+duration >= 5 trading weeks
+AND depth <= 15%
+AND valid Flat Base pivot/boundary construction
+-> STRUCTURALLY_ELIGIBLE
+```
+
+This is not automatically the final production `RECOGNIZED` definition.
+
+**B. Quality annotation**
+
+Attach the H2 weekly descriptors without allowing them to change A's eligibility during the first holdout pass.
+
+This prevents threshold fitting on the golden set and prevents the independent holdout from being consumed immediately as a parameter-search set.
+
+### H4 — calendar/week semantics must be tested explicitly
+
+The frozen engine approximates five weeks as `duration_sessions >= 25`. Source descriptions are expressed in weeks. vNext holdout must retain both:
+
+- elapsed trading-session count;
+- distinct trading-week count / source week span.
+
+No equivalence between “25 sessions” and “5 weeks” is assumed until independently checked. Holiday weeks and boundary placement can otherwise create false TOO_SHORT outcomes.
+
+### H5 — upstream reconstruction remains a separate axis
+
+NOW/CPRT-type failures must not be repaired by Flat Base tightness changes. Holdout reporting must classify failures into:
+
+1. source pivot/boundary not reconstructed;
+2. structural duration/depth ineligible;
+3. structurally eligible with quality descriptors;
+4. downstream breakout/execution observations.
+
+### Pre-registered R1-E acceptance questions
+
+Before viewing the holdout results, the following questions are frozen:
+
+1. What fraction of source-backed holdout Flat Bases have their source pivot reconstructed within the pre-existing practical-near criterion?
+2. Among source-pivot-reconstructed cases, what fraction satisfy >=5 trading weeks and <=15% depth?
+3. How often does `25 sessions` disagree with explicit week semantics?
+4. What are the distributions of the five H2 weekly quality descriptors for source-backed Flat Bases?
+5. Does the frozen 3%/1% TIGHT gate reject source-backed holdout cases that otherwise satisfy source duration/depth and pivot geometry?
+6. Are any apparent morphology failures actually upstream landmark/boundary failures?
+
+### Anti-tuning rules
+
+- No H2 pass/fail cutoff may be chosen from the original 40 golden cases.
+- R1-E source-backed holdout is for evaluating the frozen H1-H5 hypotheses; it must not be repeatedly optimized against.
+- If R1-E reveals that a quantitative quality threshold is necessary, threshold development must use a **separate development set**, followed by another untouched validation set.
+- No production engine change occurs in R1-D or R1-E.
+- Existing CWOH/DB/CWH behavior is outside the scope of this Flat Base hypothesis and must remain regression-protected in any later implementation.
+
+R1-D status: **COMPLETE / HYPOTHESIS FROZEN**.
+
+Next stage: **R1-E independent validation set construction**. Collect new source-backed Flat Base cases absent from the original 40-case golden reconstruction, freeze their source evidence and oracle fields before running the detector, then evaluate H1-H5 exactly as specified above.

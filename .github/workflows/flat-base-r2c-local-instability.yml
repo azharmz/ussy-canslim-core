@@ -1,8 +1,5 @@
 name: Flat Base vNext R2-C local-instability replay
 on:
-  push:
-    branches: [research/oneil-morphology-vnext]
-    paths: [.github/workflows/flat-base-r2c-local-instability.yml, scripts/flat_base_r2c_local_instability.py]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

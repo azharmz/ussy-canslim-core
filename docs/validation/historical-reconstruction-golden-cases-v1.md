@@ -1808,3 +1808,31 @@ The source does not freeze numeric landmark dates or depth, so the audit does no
 On 2024-05-10 the daily bar opened **147.22**, reached **150.50**, and closed **149.26**, so high and close both cleared 148.43; close was **+0.5592%** above pivot. Volume was **23,671,400** versus prior-50 mean **16,163,340**, or **1.4645x / +46.45%**. T+1 open on 2024-05-13 was **148.02**, **-0.2762%** below pivot. The frozen replay labels its strict original-buy-zone-at-open boolean false because open was below the pivot; this is an execution-layer observation, not a morphology failure.
 
 Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / CLEAN_RECOGNIZED_EXACT_PIVOT_LINEAGE_PRESENT / SOURCE_LANDMARK_BOUNDARY_NOT_SCOREABLE / BREAKOUT_VOLUME_STRONG**.
+
+
+## DOUBLE_BOTTOM numeric audit 009 — IPHI 2019
+
+Status: **AUDITED / SOURCE-NEAR STRUCTURE FOUND / PIVOT NEAR MATCH / SECOND-TROUGH SEMANTICS GAP / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen DOUBLE_BOTTOM candidate set from authoritative lifecycle replay run **35413742554**, job **105818216871**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM | **family present** |
+| Pivot | 64.85 | 64.75 | -0.10 / **-0.1542%**; near match |
+| Source-target landmarks | source numeric landmarks not separately frozen | LEFT_HIGH 2019-08-08 / TROUGH_1 2019-08-28 / MIDDLE_PEAK 2019-09-20 / TROUGH_2 2019-10-02 | source-near structural neighborhood; exact landmark scoring unavailable |
+| Depth | source numeric depth not frozen | 11.688702% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | documented double bottom | AMBIGUOUS | **morphology-state gap** |
+| Faults | source accepts structure | NO_SECOND_TROUGH_UNDERCUT | **second-trough semantics gap** |
+| Breakout | source 2019-10-15 | H 66.20 / C 64.99 | **daily crossing corroborated** |
+| Breakout volume | source numeric volume oracle not frozen | 1.1462x prior-50 / +14.62% | below frozen USSY 1.40 threshold; separate evidence |
+| T+1 open | n/a to source morphology | 65.06 = +0.3238% vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | Tiingo fallback; identity transform; no corporate-action transform | **common basis** |
+
+All emitted DOUBLE_BOTTOM candidates were inspected. The source-nearest candidate is unambiguous among the emitted structures: pivot **64.75**, only **-0.1542%** from the oracle 64.85, with LEFT_HIGH **2019-08-08**, TROUGH_1 **2019-08-28**, MIDDLE_PEAK **2019-09-20**, and TROUGH_2 **2019-10-02**. It is AMBIGUOUS solely under `NO_SECOND_TROUGH_UNDERCUT`.
+
+Other DOUBLE_BOTTOM candidates do not overturn that adjudication. The **66.56** cluster is also AMBIGUOUS under `NO_SECOND_TROUGH_UNDERCUT` and represents older/wider structures; the **51.83** candidate is REJECTED as `TOO_SHORT`. No clean RECOGNIZED candidate near the 64.85 source pivot exists.
+
+The breakout daily bar on 2019-10-15 reached **66.20** and closed **64.99**, +0.2159% above the oracle pivot. Volume was **1.1462x** prior-50, below the frozen USSY 1.40 confirmation threshold. T+1 open **65.06** was +0.3238% above the oracle pivot and remained inside the original 5% zone. The separately frozen lifecycle evidence later corroborates the documented failed-breakout character; it does not change the morphology adjudication.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_NEAR_STRUCTURE_FOUND / PIVOT_NEAR_MATCH_0.15PCT / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / NO_SECOND_TROUGH_UNDERCUT_SEMANTICS_GAP**.

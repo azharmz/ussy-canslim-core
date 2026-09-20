@@ -1582,3 +1582,31 @@ Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PR
 ### CWOH numeric-audit closure
 
 All **10/10** reconstructed CUP_WITHOUT_HANDLE golden cases have now received full-candidate numeric adjudication. The audit repeatedly showed that representative-candidate shorthand can materially misclassify source fidelity; full candidate inspection is required before declaring a source-target structure absent. The CWOH numeric-audit tranche is therefore **CLOSED** without tuning or modifying the frozen engine.
+
+
+## DOUBLE_BOTTOM numeric audit 001 — LLY 2024
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH / NO ENGINE CHANGE**.
+
+This begins the one-by-one numeric adjudication of the already-frozen DOUBLE_BOTTOM reconstruction tranche. It re-inspects the complete frozen DOUBLE_BOTTOM candidate set from corrected authoritative replay run **35474785663**, job **105982053877**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM | **family exact match** |
+| Pivot | 793.67 | 793.66998291 | -0.00001709 / **~-0.0000022%**; practical exact match |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_HIGH 2024-03-04 / TROUGH_1 2024-03-11 / MIDDLE_PEAK 2024-03-28 / TROUGH_2 2024-04-25 | **NOT SCORED / SOURCE NUMERIC LANDMARKS NOT AVAILABLE** |
+| Depth | source numeric depth not frozen | 10.299962% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid double bottom | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | source-bounded first close >= pivot | 2024-05-21 H 816.61 / C 803.17 | **daily close crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 1.6553x prior-50 | separate breakout evidence |
+| T+1 open | n/a to source morphology | 801.00 = +0.9236% vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | Yahoo, auto_adjust=false; no replay transform indicated | **common basis** |
+
+All emitted DOUBLE_BOTTOM candidates were inspected. The source-nearest candidate is **RECOGNIZED**, with LEFT_HIGH **2024-03-04**, TROUGH_1 **2024-03-11**, MIDDLE_PEAK **2024-03-28**, TROUGH_2 **2024-04-25**, pivot **793.66998291**, depth **10.299962%**, and no detector faults. The engine also emits alternate lineages near 795.50 and 800.78 that are AMBIGUOUS/REJECTED because of `NO_SECOND_TROUGH_UNDERCUT` (and in one case `TOO_SHORT`), but these do not displace the clean oracle-pivot lineage.
+
+The oracle-to-engine pivot delta is effectively zero. Because the source evidence frozen for this case does not provide numeric trough/peak dates or source depth, those geometry dimensions remain NOT SCORED rather than inferred from the engine.
+
+The corrected replay uses the first daily **close** >= oracle pivot inside the source-bounded chronology window, yielding 2024-05-21. Close **803.17** is +1.1970% above pivot and volume is **1.6553x** the prior-50 mean. T+1 open **801.00** is +0.9236% above pivot and inside the original 5% zone.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.

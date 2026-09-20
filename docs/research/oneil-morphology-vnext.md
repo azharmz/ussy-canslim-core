@@ -481,3 +481,81 @@ Local daily instability provides some directional signal (FICO is higher on medi
 Therefore **R2-C does not authorize a numeric recognition cutoff**. This closes the attempt to derive a reliable tight/wide-loose gate from the current tiny development cohort. The evidence supports retaining duration/depth/pivot geometry as the source-backed core and treating tightness quality as evidence/ambiguity until a materially larger source-backed development set exists.
 
 No production engine change is made from R2-C.
+
+
+## R2-D — candidate vNext Flat Base state semantics
+
+Status: **CANDIDATE SEMANTICS FROZEN BEFORE UNTOUCHED VALIDATION**
+
+This is a research candidate only. Frozen production remains unchanged.
+
+### Candidate structural contract
+
+A candidate can be cleanly structurally eligible only when all of the following are true:
+
+1. pattern family assembly yields a Flat Base candidate with valid source-aligned pivot/boundary geometry;
+2. duration is **at least 5 distinct trading weeks** (not a hard-coded 25-session surrogate);
+3. depth/correction is **<=15%**;
+4. no independent upstream landmark/pivot fault invalidates source-target morphology scoring.
+
+### Candidate state mapping
+
+```text
+invalid/missing pivot or boundary geometry
+    -> REJECTED / upstream structural fault
+
+trading_weeks < 5
+    -> REJECTED: TOO_SHORT
+
+depth_pct > 15%
+    -> REJECTED: TOO_DEEP
+
+structural gates pass
+    -> RECOGNIZED
+       + morphology-quality evidence fields
+       + optional AMBIGUITY flag only when a separately validated
+         quality rule exists
+```
+
+The frozen 3% total-range + 1% close-dispersion TIGHT gate is **removed from the candidate positive-recognition requirement**. The frozen >=7% total-range / >=3% close-dispersion WIDE_LOOSE rule is **not carried forward as a recognition blocker**.
+
+This does not claim that tightness is irrelevant. It means current research has not established a quantitative tightness formula with enough source-backed discrimination to override otherwise valid Flat Base geometry.
+
+### Evidence fields retained
+
+vNext candidate should continue emitting morphology evidence rather than discarding it:
+
+- normalized_range;
+- close_dispersion;
+- weekly_close_span_pct;
+- weekly_median_range_pct;
+- weekly_close_change_abs_median;
+- weekly_direction_changes;
+- late_base_contraction_ratio;
+- daily_abs_return_median / p90;
+- large_move_fraction_1pct / 2pct;
+- max_abs_daily_return;
+- daily_true_range_pct_median / p90;
+- late_vs_early_daily_range_ratio.
+
+These are research/diagnostic evidence, not O'Neil thresholds.
+
+### Validation contract
+
+R2-D is now frozen. No threshold/state change may be made after seeing the untouched validation results.
+
+The next phase must assemble a **new source-backed untouched Flat Base validation cohort** that excludes:
+- all original Golden Flat Base cases;
+- all R1-E cases;
+- all R2-A development cases;
+- all R2-B controls.
+
+Validation must score separately:
+1. upstream pivot/boundary reconstruction;
+2. five-trading-week duration semantics;
+3. <=15% depth;
+4. candidate vNext final state.
+
+Any source case with unreconstructed pivot/boundary remains upstream-unscored for morphology and cannot be counted as a vNext morphology failure/success.
+
+Production promotion is prohibited until untouched validation and regression against all four core pattern families are complete.

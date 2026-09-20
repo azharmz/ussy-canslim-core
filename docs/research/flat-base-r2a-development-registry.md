@@ -33,7 +33,9 @@ R2-A is a **development set**, so candidate metrics/rules may be explored here. 
 
 ## Data-basis contract
 
-R2-A replay is **fail-closed on canonical input**. It accepts only the frozen engine development router's R2 source. Yahoo/Tiingo fallback output may be logged diagnostically but MUST NOT enter morphology development statistics. This prevents a repeat of the BK raw/unadjusted comparability problem.
+R2-A replay is **fail-closed on canonical price basis**, not on provider identity. The frozen router may use R2, Yahoo, or Tiingo, but a case enters morphology-development statistics only when raw OHLC plus adj_close are available and the replay constructs adjusted OHLC with the same contract used by ussy-data PREBACKTEST-GATE: factor = adj_close / close, applied to open/high/low/close; volume unchanged. Provider and fallback lineage remain explicit. Missing/invalid adj_close fails closed.
+
+This supersedes the pre-replay provider-only wording above; the correction was made before any vNext morphology threshold was selected.
 
 ## Development questions
 
@@ -44,3 +46,32 @@ R2-A replay is **fail-closed on canonical input**. It accepts only the frozen en
 5. Can a candidate vNext rule be specified without using R1-E or Golden cases for parameter selection?
 
 R2-A is positive-case development only. Before selecting a final morphology rule, a negative/control development cohort must be frozen so the rule is not optimized only for recall.
+
+
+## R2-A replay disposition
+
+Authoritative adjusted-basis replay: Actions run `35514101081`, artifact `10606406123`.
+
+Corporate-action price-basis audit: Actions run `35514292277`.
+
+| Case | Oracle pivot | Engine pivot | Disposition |
+| --- | ---: | ---: | --- |
+| ANET | 292.66 | 73.16500092 | **SOURCE-ALIGNED after 2024-12-04 4-for-1 split normalization**. 292.66 / 4 = 73.165. Morphology evaluable. |
+| HUBS | 660.00 | 660.00 | **SOURCE-ALIGNED exact**. Morphology evaluable. |
+| MSFT | 430.82 | 422.59487524 | **NEAR / BOUNDARY REVIEW** (-1.91%). Do not use for threshold selection until source-boundary geometry is reconciled. |
+| BRK.B | 430.00 | 373.33999634 | **UPSTREAM RECONSTRUCTION MISS** (-13.18%). Morphology not scored. |
+| ARES | 139.48 | 102.14952292 | **UPSTREAM RECONSTRUCTION MISS** (-26.76%). Morphology not scored. |
+| ALL | 168.05 | 130.62487813 | **UPSTREAM RECONSTRUCTION MISS** (-22.27%). Morphology not scored. |
+| TDG | 542.20 | 426.06556352 | **UPSTREAM RECONSTRUCTION MISS** (-21.42%). Morphology not scored. |
+
+ANET source-aligned open-right-edge evidence: 24 sessions / 5 trading weeks, depth 13.52%, frozen `TOO_SHORT + WIDE_LOOSE`, TIGHT=false.
+
+HUBS source-aligned open-right-edge evidence: 25 sessions / 6 trading weeks, depth 12.42%, frozen `WIDE_LOOSE`, TIGHT=false.
+
+### MSFT boundary review
+
+MSFT is deliberately **not promoted to a clean morphology-development positive**. The nearest frozen-engine lineage starts 2024-03-21 and uses pivot 422.59487524; the source oracle is 430.82. The resulting 52-session/12-week open-edge window therefore is not the source-defined Flat Base boundary. The shorter confirmed lineage is 25 sessions/6 trading weeks but retains the same 422.59 pivot. With no corporate-action factor explaining the 1.91% delta, this is a boundary/pivot reconstruction discrepancy, not evidence for choosing a morphology threshold.
+
+Accordingly, the clean positive morphology-development cohort from R2-A is **ANET + HUBS (2 cases)**. MSFT is retained as an upstream/boundary diagnostic case. BRK.B, ARES, ALL, and TDG are upstream misses and are not scored for source-target morphology.
+
+No vNext threshold is selected from this positive-only cohort.

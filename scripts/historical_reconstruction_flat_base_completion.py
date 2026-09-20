@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 ENGINE_REPO="https://github.com/azharmz/ussy-oneil-patterns.git"
 ENGINE_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
-CASES={
+# Source registry: IBD/MarketSurge primary evidence frozen in validation notes; corporate-action factors are explicit fixture adaptations.\nCASES={
  "meta_2024":("META",602.95,date(2024,12,3),date(2024,12,10),1.0,"IBD 2024-12-03 flat-base breakout 602.95"),
  "tw_2024":("TW",136.13,date(2024,11,20),date(2024,12,10),1.0,"IBD 2024-12-27 retrospective stage-two flat base 136.13, breakout Nov 20"),
  "now_2024":("NOW",850.33,date(2024,8,30),date(2024,9,10),5.0,"IBD 2024-09-03 flat-base breakout Aug 30 at 850.33; later 5-for-1 split restored"),

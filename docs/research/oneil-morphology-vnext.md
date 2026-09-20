@@ -457,3 +457,27 @@ These are operational descriptors, not claimed IBD thresholds. The 1%/2% labels 
 ### Anti-overfit rule
 
 Golden and R1-E remain excluded from parameter selection. R2-A positives and R2-B controls may be used to inspect descriptor behavior. No production rule is selected until the development cohort contains enough source-backed positive and negative/control cases to show repeatable separation. Any eventual candidate rule must be frozen before a new untouched validation set.
+
+
+## R2-C first local-instability replay
+
+Actions run `35514902286` completed successfully.
+
+| Metric | ANET positive | HUBS positive | FICO wide/loose control |
+| --- | ---: | ---: | ---: |
+| median abs daily return | 1.44% | 1.36% | 1.77% |
+| P90 abs daily return | 4.53% | 4.07% | 4.75% |
+| >=1% move fraction | 56.5% | 58.3% | 66.7% |
+| >=2% move fraction | 34.8% | 33.3% | 33.3% |
+| max abs daily return | 5.61% | 4.59% | 5.75% |
+| median daily true range | 2.80% | 2.87% | 2.67% |
+| P90 daily true range | 5.09% | 5.04% | 6.27% |
+| late/early median range ratio | 0.913 | 0.736 | 0.739 |
+
+### R2-C disposition
+
+Local daily instability provides some directional signal (FICO is higher on median/P90 absolute return, >=1% move fraction, and P90 true range), but overlap remains substantial and several descriptors do not separate the source-backed control from positives at all.
+
+Therefore **R2-C does not authorize a numeric recognition cutoff**. This closes the attempt to derive a reliable tight/wide-loose gate from the current tiny development cohort. The evidence supports retaining duration/depth/pivot geometry as the source-backed core and treating tightness quality as evidence/ambiguity until a materially larger source-backed development set exists.
+
+No production engine change is made from R2-C.

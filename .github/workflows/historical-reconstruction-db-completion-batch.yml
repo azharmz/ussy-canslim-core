@@ -1,5 +1,6 @@
 name: Historical golden replay — DB completion batch
-on:\n  workflow_dispatch:
+on:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

@@ -1,8 +1,5 @@
 name: Flat Base vNext R2-B control replay
 on:
-  push:
-    branches: [research/oneil-morphology-vnext]
-    paths: [.github/workflows/flat-base-r2b-control.yml, scripts/flat_base_r2b_control.py]
   workflow_dispatch:
 permissions:
   contents: read

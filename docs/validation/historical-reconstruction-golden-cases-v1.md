@@ -1489,3 +1489,33 @@ Therefore AX cleanly separates candidate construction from final morphology gati
 The source's 2024-05-06 move above the buy point is corroborated as an intraday cross by H **60.23**, while C **59.68** finishes below the pivot. T+1 open **59.80** also remains below pivot. Neither observation changes the morphology classification.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / FRAGMENTED_BOTTOM_SEMANTICS_GAP**.
+
+
+## CWOH numeric audit 008 — NFLX 2024
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH AFTER EXPLICIT BASIS NORMALIZATION / REPLAY-DIAGNOSTIC BASIS DEFECT FOUND / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35471986323**, job **105974484601**. NFLX requires special handling because current Yahoo history is on the later 2025 10-for-1 split basis while the 2024 oracle is pre-split.
+
+| Field | Source oracle | Frozen output / normalized comparison | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 697.49 pre-split | engine 69.74900055 split-adjusted = **697.4900055 x10** | **practical exact match after basis normalization** |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2024-07-05 / CUP_LOW 2024-08-05 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 15.835355% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout 2024-08-20 | pivot 697.49 | raw Yahoo H 71.133 / C 69.853996; normalized H **711.33** / C **698.53996** | **high and close above oracle after x10 normalization** |
+| Breakout volume | source numeric oracle not frozen | ratio **1.4374x prior-50**; ratio invariant to /10 volume normalization | separate breakout evidence |
+| T+1 open | n/a to source morphology | raw 69.699997; normalized **696.99997**, about **-0.0703%** vs pivot | slightly below pivot; operationalization only |
+| Price basis | contemporaneous 2024 pre-split | metadata declares `LATER_10_FOR_1_SPLIT_RESTORED`, x10 OHLC / ÷10 volume | **declared adaptation is correct, but diagnostics remain on raw provider basis** |
+
+All frozen CWOH candidates were inspected. The source-nearest structure is unambiguous: LEFT_RIM **2024-07-05**, CUP_LOW **2024-08-05**, raw split-adjusted pivot **69.74900055**, depth **15.835355%**, status **RECOGNIZED**, no faults. Applying the replay's own declared x10 price-basis normalization yields **697.4900055**, a practical exact match to oracle **697.49**. Other CWOH pivots (63.90000153, 37.94300079, 34.97999954) are alternate structures.
+
+The audit also finds an important replay-evidence defect. The run metadata correctly declares `price_transform: x10` and `volume_transform: /10`, but `breakout_day_assessment` and `ussy_t1_execution_observation` were calculated from the raw split-adjusted Yahoo OHLC while compared directly with the pre-split oracle pivot. Consequently the frozen diagnostic fields incorrectly report roughly **-90%** versus pivot and false crossing/buy-zone booleans. These diagnostic percentages/booleans must **not** be used as-is for NFLX.
+
+On a common pre-split basis, 2024-08-20 becomes approximately O **688.86**, H **711.33**, L **688.25**, C **698.54**; both high and close clear 697.49. T+1 open normalizes to about **697.00**, only **-0.0703%** below pivot. The volume ratio remains **1.4374x** because the same volume transform applies to both numerator and historical average.
+
+This is an evidence-pipeline basis-application defect, not a frozen pattern-engine morphology failure. The source-target CWOH remains a source-fidelity match after explicit basis normalization.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH_AFTER_BASIS_NORMALIZATION / RECOGNIZED_NO_FAULTS / REPLAY_DIAGNOSTIC_PRICE_BASIS_APPLICATION_DEFECT**.

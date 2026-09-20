@@ -217,3 +217,67 @@ Because the frozen `normalized_range = (max(high)-min(low))/max(high)` is struct
 No detector change is authorized from R1-B. R1-C must establish source-backed Flat Base semantics before any replacement metric or threshold is proposed.
 
 R1-B status: **COMPLETE — 10/10 diagnostic cases**.
+
+
+## R1-C — source-backed Flat Base semantics (complete)
+
+Research date: 2026-09-20.
+
+### Primary/source-aligned findings
+
+IBD's own educational material gives the core Flat Base contract as:
+
+- **minimum length: 5 weeks**;
+- **base depth: 15% or less**;
+- it is a milder correction than cup-with-handle/double-bottom;
+- the buy point is above the prior/peak high within the base.
+
+A historical IBD educational booklet adds that the price range will **usually remain fairly tight throughout the pattern**, but it does not define that statement as a universal 3% total high-low range or 1% population standard deviation of closes. It also describes Flat Base as commonly occurring after a prior advance / earlier base.
+
+A later IBD Investors Corner explanation is consistent: Flat Base depth does not exceed 15%, can form in as little as five weeks, should show rangebound action, and tighter trading is preferable to erratic wide-and-loose swings. Again, the source does not supply the frozen engine's 3% total-range + 1% close-dispersion formula as the recognition definition.
+
+### Important semantic distinction: Flat Base vs Three-Weeks-Tight
+
+IBD separately defines a **three-weeks-tight** pattern using weekly closes that remain within roughly 1.5% of one another. That is a different pattern/concept from the five-week-minimum Flat Base.
+
+Therefore a very narrow percentage test on closes must not be imported into Flat Base merely because both are described as “tight.” The source-backed Flat Base constraints available here are primarily duration, maximum correction/depth, sideways/rangebound character, prior advance/context, and pivot geometry; “tighter is better” is qualitative unless a source supplies a specific Flat Base metric.
+
+### Source-backed examples relevant to the golden set
+
+IBD's Apple 2019 retrospective identifies the 221.37 Flat Base buy point and describes the base as the constructive pause after the earlier advance. IBD's Top Stocks 2020 material explicitly identifies AMZN as a **five-week flat base** with a 3,344.39 buy point.
+
+These source examples reinforce the R1-B observation that valid source-labelled Flat Bases need not satisfy the frozen detector's <=3% total high-low range.
+
+### R1-C conclusion
+
+The following can be treated as source-backed Flat Base constraints for vNext research:
+
+1. minimum duration of about **5 weeks**;
+2. correction/depth **no more than 15%**;
+3. generally sideways/rangebound and comparatively mild/tight price action;
+4. pivot/buy point at the prior/peak high of the base (historical source convention may state ten cents above it);
+5. context after a prior uptrend / often following an earlier base is relevant.
+
+The following are **NOT established by the reviewed O'Neil/IBD sources as official Flat Base recognition thresholds**:
+
+- total high-low range <=3%;
+- population standard deviation of closes <=1%;
+- WIDE_LOOSE defined as total high-low range >=7%;
+- WIDE_LOOSE defined as close dispersion >=3%.
+
+Those are frozen-engine research operationalizations, not source rules.
+
+### Design implication
+
+R1-C does **not** authorize replacing the research bands with 15%. The 15% source rule is a maximum base correction/depth rule, not automatically a definition of tightness.
+
+vNext must preserve the distinction between:
+
+- **depth/correction**: source-backed <=15%;
+- **duration**: source-backed >=5 weeks;
+- **tight/sideways quality**: source-backed qualitative morphology that still needs an independently specified operationalization;
+- **pivot geometry/context**: separate structural requirements.
+
+Any quantitative tightness metric proposed in R1-D must be justified as an explicit operationalization, must not be presented as an O'Neil threshold, and must be frozen before independent holdout validation.
+
+R1-C status: **COMPLETE**.

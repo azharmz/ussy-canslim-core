@@ -1722,3 +1722,33 @@ Because source numeric landmark dates and depth are not frozen, the audit does n
 The corrected source-bounded breakout reconstruction is 2024-07-16: close **743.01** is +3.8681% above pivot, with volume **1.2151x** prior-50. T+1 open **731.65** is +2.2800% above pivot and remains inside the original 5% zone.
 
 Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / CLEAN_RECOGNIZED_SAME_PIVOT_LINEAGE_PRESENT / SOURCE_LANDMARK_BOUNDARY_NOT_SCOREABLE**.
+
+
+## DOUBLE_BOTTOM numeric audit 006 — UBS 2024
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH AT PIVOT LEVEL / MULTIPLE SAME-PIVOT LINEAGES / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen DOUBLE_BOTTOM candidate set from corrected authoritative replay run **35474785663**, job **105982053825**.
+
+| Field | Source oracle | Frozen source-near candidates | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM | **family exact match** |
+| Pivot | 31.45 | 31.45499992 | +0.00499992 / **+0.0159%**; practical exact match |
+| Source-target landmarks | source numeric landmarks not frozen | exact/near-pivot cluster contains multiple boundary choices | **NOT SCORED / SOURCE NUMERIC LANDMARKS NOT AVAILABLE** |
+| Depth | source numeric depth not frozen | clean 31.45499992 lineages span about 9.76%-14.81% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid double bottom | multiple RECOGNIZED 31.45499992 lineages | **categorical match exists** |
+| Faults | source accepts structure | clean lineages have none; alternate same-pivot lineages carry NO_SECOND_TROUGH_UNDERCUT | **clean source-pivot lineage exists** |
+| Breakout | source-bounded first close >= 31.45 | 2024-10-09 H 31.59 / C 31.58 | **daily close crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 0.3699x prior-50 | weak volume; separate breakout evidence |
+| T+1 open | n/a to source morphology | 31.60 = +0.4769% vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | Yahoo, auto_adjust=false | **common basis** |
+
+All emitted DOUBLE_BOTTOM candidates were inspected. The closest cluster is **31.45499992**, only **+0.0159%** above the 31.45 oracle. Crucially, this cluster contains several **RECOGNIZED, fault-free** lineages, not merely ambiguous candidates. Clean examples use TROUGH_1 **2024-06-26** / MIDDLE_PEAK **2024-07-16**, with TROUGH_2 **2024-08-05** or **2024-09-10** and varying left-high boundaries. Other same-pivot lineages use a later TROUGH_1 **2024-08-05** / MIDDLE_PEAK **2024-08-27** and are AMBIGUOUS under `NO_SECOND_TROUGH_UNDERCUT`.
+
+Because the source does not freeze numeric landmark dates, the audit cannot identify which same-pivot lineage is the unique oracle geometry. But the prior shorthand that focused on ambiguity is too coarse: at the supported fidelity level, the engine has both the correct family and a practical-exact pivot with clean RECOGNIZED structures.
+
+Nearby **31.39500046** and **31.94499969** clusters are ambiguous and do not supersede the cleaner 31.45499992 cluster.
+
+The corrected source-bounded breakout reconstruction is 2024-10-09: close **31.58** is +0.4134% above oracle pivot. Volume is only **0.3699x** prior-50, so breakout-volume evidence is weak and remains separate from morphology. T+1 open **31.60** is +0.4769% above pivot and inside the original 5% zone.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH_0.016PCT / CLEAN_RECOGNIZED_SAME_PIVOT_LINEAGE_PRESENT / SOURCE_LANDMARK_BOUNDARY_NOT_SCOREABLE / BREAKOUT_VOLUME_WEAK**.

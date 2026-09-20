@@ -1955,3 +1955,18 @@ Corporate-action normalization is explicit where required: NOW **x5**, DECK **x6
 ### Historical reconstruction closure — 40/40
 
 The historical golden reconstruction target is now **40/40 COMPLETE**: CUP_WITH_HANDLE 10/10, CUP_WITHOUT_HANDLE 10/10, DOUBLE_BOTTOM 10/10, FLAT_BASE 10/10. The eight new FLAT_BASE fixtures complete reconstruction coverage; they do not authorize detector tuning. Full one-by-one numeric adjudication remains complete for the original 32 fixtures and should proceed separately for FLAT_BASE cases 033–040 if required.
+
+
+## FLAT_BASE numeric audit #003 — META 2024
+
+Oracle evidence identifies META as a FLAT_BASE with **602.95** buy point and a 2024-12-03 breakout. The primary source also describes the setup as a new base/base-on-base, but the evidence frozen for this case does **not** provide an authoritative numeric base depth/range, exact left-boundary date, or duration value. Those dimensions are therefore **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** rather than inferred from the oracle.
+
+Full-candidate inspection of frozen replay **35497962478** finds the source-target FLAT_BASE independently. The confirmed candidate has structural start/pivot-source date **2024-10-07**, structural end/base low **2024-11-21**, pivot **602.95001221**, depth **8.939385%**, status **AMBIGUOUS**, and sole fault **WIDE_LOOSE**. An open-right-edge representation of the same source-target structure also carries pivot **602.95001221**, depth **8.939385%**, and **WIDE_LOOSE**. No source-target FLAT_BASE at this pivot reaches RECOGNIZED.
+
+The pivot difference is only **+0.00001221** dollars, approximately **+0.0000020%**, so this is a practical exact pivot reconstruction. The engine-measured 8.9394% depth is retained as an observation only; it is not scored against the source because no authoritative source numeric depth/range was recovered for this case. Likewise, the 2024-10-07 left boundary and duration are engine observations, not oracle matches.
+
+The replay breakout bar on **2024-12-03** opened **595.00**, reached **614.20**, and closed **613.65**, **+1.7746%** above the 602.95 pivot. Volume was **1.2524x** the replay prior-50 average, or about **+25.24%**. The primary IBD breakout report likewise describes volume about **25% above average**; this is close corroboration, while averaging definitions are not assumed identical. T+1 on **2024-12-04** opened **612.96**, **+1.6602%** above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_VOLUME_NEAR_SOURCE_25PCT / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
+
+Numeric-audit progress after this freeze: **33/40 = 82.5% overall**; FLAT_BASE **3/10 = 30%**.

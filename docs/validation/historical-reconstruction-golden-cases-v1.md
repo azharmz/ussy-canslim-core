@@ -1460,3 +1460,32 @@ The pivot delta from oracle **787.08** is only **+0.00001709**, a practical exac
 The 2024-05-10 daily high and close both clear the oracle pivot, but volume is only **0.7905x** the prior-50 mean. This is a breakout-volume observation separate from morphology fidelity. The later May 16 renewed breakout noted in the source does not change the morphology adjudication of the initial clearance.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.
+
+
+## CWOH numeric audit 007 — AX 2024
+
+Status: **AUDITED / SOURCE-TARGET STRUCTURE FOUND BUT AMBIGUOUS / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35471986323**, job **105974484640**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 60.00 | 60.00 | **exact match** |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2024-01-31 / CUP_LOW 2024-04-16 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 19.200001% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | source-target lineage through oracle date | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | source identifies CWOH | AMBIGUOUS | **morphology-state gap** |
+| Faults | source accepts structure | FRAGMENTED_BOTTOM | **bottom-shape semantics gap** |
+| Breakout | 2024-05-06 intraday clearance | H 60.23 > 60.00; C 59.68 < 60.00 | **intraday daily-bar cross corroborated; close below pivot** |
+| Breakout volume | source numeric oracle not frozen | 1.2360x prior-50 / +23.60% | separate breakout evidence |
+| T+1 open | n/a to source morphology | 59.80 = -0.3333% vs pivot | below pivot; operationalization only |
+| Price basis | contemporaneous oracle basis | provider basis unchanged; identity transform | **no corporate-action transform applied** |
+
+All frozen CWOH candidates were inspected. The source-target candidate is explicit: LEFT_RIM **2024-01-31**, CUP_LOW **2024-04-16**, pivot **60.00 exactly**, depth **19.200001%**. It is **AMBIGUOUS** solely from `FRAGMENTED_BOTTOM`. Other same-era CWOH candidates at 57.11999893 and 55.63999939 are also ambiguous from `FRAGMENTED_BOTTOM`; a shorter structure at 54.63999939 is RECOGNIZED without faults but is not substituted for the oracle-pivot structure.
+
+Therefore AX cleanly separates candidate construction from final morphology gating: the engine finds the oracle family and exact oracle pivot, but its bottom-shape semantics do not accept the source-target structure as RECOGNIZED.
+
+The source's 2024-05-06 move above the buy point is corroborated as an intraday cross by H **60.23**, while C **59.68** finishes below the pivot. T+1 open **59.80** also remains below pivot. Neither observation changes the morphology classification.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_AMBIGUOUS / FRAGMENTED_BOTTOM_SEMANTICS_GAP**.

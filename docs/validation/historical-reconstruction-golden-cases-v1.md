@@ -1519,3 +1519,32 @@ On a common pre-split basis, 2024-08-20 becomes approximately O **688.86**, H **
 This is an evidence-pipeline basis-application defect, not a frozen pattern-engine morphology failure. The source-target CWOH remains a source-fidelity match after explicit basis normalization.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH_AFTER_BASIS_NORMALIZATION / RECOGNIZED_NO_FAULTS / REPLAY_DIAGNOSTIC_PRICE_BASIS_APPLICATION_DEFECT**.
+
+
+## CWOH numeric audit 009 — ALL 2024
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35471986323**, job **105974484898**.
+
+| Field | Source oracle | Frozen source-near candidate | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 168.05 | 168.05000305 | +0.00000305 / **~+0.0000018%**; practical exact match |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2024-02-08 / CUP_LOW 2024-03-04 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 8.437969% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Duration | source comparable numeric duration not frozen | source-near lineage through oracle date | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout | 2024-04-18 | H 169.53 / C 169.11 above 168.05 | **daily crossing confirmed** |
+| Breakout volume | source numeric oracle not frozen | 1.1833x prior-50 / +18.33% | separate breakout evidence |
+| T+1 open | n/a to source morphology | 170.01 = +1.1663% vs pivot | inside original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | provider basis unchanged; identity transform | **no corporate-action transform applied** |
+
+All frozen CWOH candidates were inspected. The 2024 source-target lineage is unique and clean: LEFT_RIM **2024-02-08**, CUP_LOW **2024-03-04**, pivot **168.05000305**, depth **8.437969%**, status **RECOGNIZED**, with no detector faults. The only other CWOH candidates are older 2023 structures at pivots 114.97000122 and 114.08999634, both recognized but unrelated to the oracle target.
+
+The oracle-to-engine pivot delta is effectively zero. No competing same-era lineage or morphology fault complicates the source-target adjudication. Source numeric depth, exact landmark boundaries, and comparable duration are unavailable, so those dimensions remain NOT SCORED.
+
+On 2024-04-18 both high and close clear the oracle pivot; close is +0.6308% above it and inside the original 5% zone. Volume is 1.1833x the prior-50 mean, retained as separate breakout evidence. T+1 open 170.01 is +1.1663% above pivot and remains inside the 5% zone.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.

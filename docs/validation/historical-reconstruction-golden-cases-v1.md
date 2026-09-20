@@ -2000,3 +2000,18 @@ Historical-price comparison uses an explicit **x5** pre-split normalization. Thi
 Audit conclusion: **FLAT_BASE_FAMILY_ORACLE / SOURCE_PIVOT_NOT_RECONSTRUCTED / NEAREST_ENGINE_PIVOT_815.32_MINUS_4.12PCT / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / UPSTREAM_BOUNDARY_LANDMARK_PIVOT_GAP / BREAKOUT_2024-08-30_CONFIRMED / BREAKOUT_VOLUME_1.473X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X5_VALIDATED**.
 
 Numeric-audit progress after this freeze: **35/40 = 87.5% overall**; FLAT_BASE **5/10 = 50%**.
+
+
+## FLAT_BASE numeric audit #006 — DECK 2023
+
+Frozen oracle identifies Deckers Outdoor (DECK) as a **FLAT_BASE** with **568.47** pivot and breakout in the week ending **2023-10-27**. Historical comparison uses explicit **x6** normalization to restore the pre-split price basis.
+
+Full-candidate inspection of authoritative replay **35497962478** independently recovers the source pivot. The source-nearest FLAT_BASE is an OPEN_RIGHT_EDGE candidate with structural/pivot-source date **2023-08-08**, as-of end **2023-10-27**, pivot **568.47001648**, engine-measured depth **14.855670%**, status **AMBIGUOUS**, and sole fault **WIDE_LOOSE**. No source-target FLAT_BASE at 568.47 reaches RECOGNIZED. The next-nearest lineage pivots at **562.96998596** and is either AMBIGUOUS WIDE_LOOSE or REJECTED TOO_SHORT + WIDE_LOOSE, so it does not supersede the exact source-pivot lineage.
+
+The pivot difference is only **+$0.00001648**, approximately **+0.0000029%**, a practical exact reconstruction. The retrieved source evidence does not freeze an authoritative numeric left boundary, duration, or base depth/range for this case, so those dimensions are **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE**. Engine depth **14.8557%** is therefore observational only.
+
+On **2023-10-27**, the replay bar opened **545.19**, reached **585.00**, and closed **576.37**, **+1.3897%** above the 568.47 pivot. Replay volume was **5.1891x prior-50** (+418.91%), a very strong breakout observation; no source-equivalent numeric volume is frozen, so it is not scored as an oracle match. T+1 on **2023-10-30** opened **580.20**, **+2.0634%** above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_WEEK_ENDING_2023-10-27_CONFIRMED / BREAKOUT_VOLUME_5.189X_STRONG_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X6**.
+
+Numeric-audit progress after this freeze: **36/40 = 90% overall**; FLAT_BASE **6/10 = 60%**.

@@ -1931,3 +1931,27 @@ Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH 
 ### Current FLAT_BASE numeric-audit boundary
 
 Both currently reconstructed FLAT_BASE golden cases now have full-candidate numeric adjudication. AAPL and SNPS independently recover the source pivot essentially exactly, yet neither source-target structure reaches RECOGNIZED because of frozen duration/tightness geometry gates. SNPS is the stronger duration diagnostic because its oracle explicitly states **six weeks**, while the engine still produces a confirmed candidate with `TOO_SHORT`. This is validation evidence only; no threshold change or detector tuning is authorized.
+
+
+## FLAT_BASE completion tranche — cases 033–040
+
+Authoritative batch replay: **35497962478** — **8/8 SUCCESS**. Frozen engine SHA remains `c433cc1e35a5aa32a46f732cd8c5545935e36e40`. These fixtures are source-fidelity evidence only; oracle values were comparison inputs and were not passed to the detector.
+
+| Case | Oracle pivot | Source-nearest frozen FLAT_BASE | Frozen adjudication |
+|---|---:|---|---|
+| 033 META 2024 | 602.95 | 602.95001221, AMBIGUOUS, depth 8.9394%, WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_PRACTICAL_EXACT / WIDE_LOOSE_GAP |
+| 034 TW 2024 | 136.13 | 136.13499451, AMBIGUOUS, depth 8.0618%, WIDE_LOOSE; same structure also REJECTED TOO_SHORT+WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_NEAR_EXACT_0.0037PCT / DURATION_TIGHTNESS_GAP |
+| 035 NOW 2024 | 850.33 | nearest 815.31997681 REJECTED; nearer chronology candidate 806.52000427 AMBIGUOUS WIDE_LOOSE | SOURCE_TARGET_PIVOT_NOT_RECONSTRUCTED / BOUNDARY_OR_LANDMARK_GAP |
+| 036 DECK 2023 | 568.47 | 568.47001648, AMBIGUOUS, depth 14.8557%, WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_PRACTICAL_EXACT / WIDE_LOOSE_GAP |
+| 037 CROX 2021 | 109.91 | 109.91000366, AMBIGUOUS WIDE_LOOSE; same pivot confirmed candidate REJECTED TOO_SHORT+WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_PRACTICAL_EXACT / DURATION_TIGHTNESS_GAP |
+| 038 CPRT 2020 | 92.51 | no source-near pivot; nearest emitted 83.69999695 AMBIGUOUS/REJECTED | SOURCE_TARGET_PIVOT_NOT_RECONSTRUCTED / BOUNDARY_OR_LANDMARK_GAP |
+| 039 AMZN 2020 | 3344.39 | 3344.28985596, AMBIGUOUS WIDE_LOOSE; same pivot confirmed candidate REJECTED TOO_SHORT+WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_NEAR_MATCH_0.003PCT / DURATION_TIGHTNESS_GAP |
+| 040 KKR 2024 | 103.48 | 103.48000336, AMBIGUOUS WIDE_LOOSE; same structure also REJECTED TOO_SHORT+WIDE_LOOSE | SOURCE_TARGET_FOUND / PIVOT_PRACTICAL_EXACT / DURATION_TIGHTNESS_GAP |
+
+Breakout/T+1 evidence is kept separate from morphology. The source-bounded daily replay confirms the oracle-pivot close crossing for all eight fixtures. Breakout prior-50 volume ratios were approximately: META **1.2524x**, TW **1.0369x**, NOW **1.4729x**, DECK **5.1891x**, CROX **1.4620x**, CPRT **1.4822x**, AMZN **0.8414x**, KKR **1.3333x**. T+1 opens remained within the original 0–5% pivot zone for all eight replay fixtures.
+
+Corporate-action normalization is explicit where required: NOW **x5**, DECK **x6**, CPRT **x4**, and AMZN **x20** for historical-price comparison, with inverse volume transforms. META, TW, CROX, and KKR use identity transforms.
+
+### Historical reconstruction closure — 40/40
+
+The historical golden reconstruction target is now **40/40 COMPLETE**: CUP_WITH_HANDLE 10/10, CUP_WITHOUT_HANDLE 10/10, DOUBLE_BOTTOM 10/10, FLAT_BASE 10/10. The eight new FLAT_BASE fixtures complete reconstruction coverage; they do not authorize detector tuning. Full one-by-one numeric adjudication remains complete for the original 32 fixtures and should proceed separately for FLAT_BASE cases 033–040 if required.

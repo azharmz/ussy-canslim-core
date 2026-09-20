@@ -159,3 +159,53 @@ The Cup body has separate research proxies (`SHARP_V`, `FRAGMENTED_BOTTOM`, weak
 The engine has enough OHLCV in the input frame to calculate causal handle-region descriptors, but the current `HandleGeometry` discards that path information. A vNext representation can add evidence fields without oracle inputs and without changing landmark generation. The first development change should therefore be **additive measurement**, not immediate state remapping.
 
 R1-D preregistration should freeze the descriptors and validation questions before any Golden replay is used to judge them.
+
+
+## R1-D — preregistered CWH vNext development hypotheses
+
+Status: **PREREGISTERED / GOLDEN LOCKED / READY FOR INDEPENDENT DEVELOPMENT COHORT**
+
+No numeric recognition threshold is selected in this phase.
+
+### H1 — additive handle-region evidence
+
+For every causally observable handle interval from right rim through as-of/recovery, persist path-level descriptors before changing states:
+- handle session count;
+- peak-to-low depth (existing);
+- median close position within the cup range;
+- fraction of handle closes at/above cup midpoint;
+- minimum close position within the cup range;
+- linear slope of handle closes normalized by right-rim price and session count;
+- median handle volume / preceding-20-session median volume when sufficient history exists.
+
+These are evidence fields, not recognition cutoffs.
+
+### H2 — upper-half semantics
+
+Test whether authoritative positive CWH examples are better represented by **handle-region placement** than by the current single absolute-low boolean. Development may compare descriptors, but Golden 10 may not select a cutoff.
+
+A state change is permitted only after a source-backed operational definition is frozen using non-Golden development/control evidence.
+
+### H3 — depth semantics
+
+Retain 12% as a normal-handle quality reference. Test >12% as context/quality evidence rather than assuming it is a universal categorical ambiguity rule. Do not select a replacement maximum from Golden positives.
+
+### H4 — assembly is independent
+
+For each development case, report whether source-near cup/right-rim geometry exists before scoring handle morphology. A source-target assembly miss remains an assembly/boundary failure and cannot be converted into a morphology pass by a downstream rule.
+
+### H5 — cup-body faults remain visible
+
+`SHARP_V`, `FRAGMENTED_BOTTOM`, `WEAK_RIGHT_RIM_RECOVERY`, duration, and depth remain independently reported. No CWH candidate may suppress Cup-body evidence.
+
+### Development/validation protocol
+
+1. Freeze a new source-backed DEVELOPMENT positive cohort not present in Golden CWH 10.
+2. Freeze negative/control cases, including malformed or lower-half/deep handles where authoritative evidence is available.
+3. Add measurement-only instrumentation first.
+4. Replay development/control cohort.
+5. Freeze candidate state semantics before untouched holdout.
+6. Select untouched positive/negative CWH cases not used in Golden or development.
+7. Promote only if source-target fidelity improves without collapsing negative controls and all four-core regressions remain green.
+
+Golden CWH 10 remains diagnosis-only throughout.

@@ -1,11 +1,6 @@
 name: Historical golden replay — Flat Base completion batch
 on:
   workflow_dispatch:
-  push:
-    branches: [validation/historical-golden-reconstruction-v1]
-    paths:
-      - "scripts/historical_reconstruction_flat_base_completion.py"
-      - ".github/workflows/historical-reconstruction-flat-base-completion-batch.yml"
 permissions:
   contents: read
 jobs:

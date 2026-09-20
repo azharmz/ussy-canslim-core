@@ -1780,3 +1780,31 @@ Because source numeric landmarks and depth are not frozen, the audit does not ch
 The corrected source-bounded breakout reconstruction is 2024-05-02: close **254.26** is +0.9128% above pivot. Volume is **0.9718x** prior-50, approximately average and not strong confirmation. T+1 open **261.00** is +3.5879% above pivot and remains inside the original 5% zone.
 
 Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / CLEAN_RECOGNIZED_EXACT_PIVOT_LINEAGE_PRESENT / SOURCE_LANDMARK_BOUNDARY_NOT_SCOREABLE / BREAKOUT_VOLUME_NEAR_AVERAGE**.
+
+
+## DOUBLE_BOTTOM numeric audit 008 — TSM 2024
+
+Status: **AUDITED / SOURCE-FIDELITY MATCH / EXACT-PIVOT CLEAN LINEAGES PRESENT / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen DOUBLE_BOTTOM candidate set from authoritative replay run **35420754613**, job **105837873681**.
+
+| Field | Source oracle | Frozen source-near candidates | Delta / result |
+|---|---:|---:|---|
+| Pattern family | DOUBLE_BOTTOM | DOUBLE_BOTTOM | **family exact match** |
+| Pivot | 148.43 | 148.42999268 | -0.00000732 / **~-0.0000049%**; practical exact match |
+| Source-target landmarks | source numeric landmarks not frozen | exact-pivot candidates share TROUGH_1 2024-03-19 / MIDDLE_PEAK 2024-04-10 / TROUGH_2 2024-04-22; alternate LEFT_HIGH 2024-02-09 or 2024-03-08 | **NOT SCORED / SOURCE NUMERIC LANDMARKS NOT AVAILABLE** |
+| Depth | source numeric depth not frozen | clean exact-pivot candidates include **6.946807%** and **20.593432%** | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid double bottom | RECOGNIZED clean exact-pivot lineages present | **categorical match** |
+| Faults | source accepts structure | clean lineages none; one alternate exact-pivot candidate is REJECTED TOO_SHORT | **clean source-pivot lineage exists** |
+| Breakout | source 2024-05-10 | H 150.50 / C 149.26 | **daily breakout corroborated** |
+| Breakout volume | source contemporaneously reports breakout | **1.4645x prior-50** | strong corroboration |
+| T+1 open | n/a to source morphology | 148.02 = **-0.2762%** vs pivot | below pivot; operationalization only |
+| Price basis | contemporaneous oracle basis | Yahoo/yfinance, auto_adjust=false; identity transform | **common basis** |
+
+All emitted DOUBLE_BOTTOM candidates were inspected. The oracle-pivot cluster at **148.42999268** contains two clean **RECOGNIZED** lineages. Both share TROUGH_1 **2024-03-19**, MIDDLE_PEAK **2024-04-10**, and TROUGH_2 **2024-04-22**; their LEFT_HIGH boundary differs (**2024-02-09** versus **2024-03-08**). A third exact-pivot candidate using the latter boundary is REJECTED as `TOO_SHORT`, showing boundary-sensitive duration adjudication, but a fault-free candidate with the same geometry/pivot is also emitted.
+
+The source does not freeze numeric landmark dates or depth, so the audit does not select a unique oracle boundary between the clean exact-pivot alternatives. Other clusters at **158.3999939** and **135.16999817** are mostly AMBIGUOUS under `NO_SECOND_TROUGH_UNDERCUT`; they are different structures and do not displace the exact-pivot source-near cluster.
+
+On 2024-05-10 the daily bar opened **147.22**, reached **150.50**, and closed **149.26**, so high and close both cleared 148.43; close was **+0.5592%** above pivot. Volume was **23,671,400** versus prior-50 mean **16,163,340**, or **1.4645x / +46.45%**. T+1 open on 2024-05-13 was **148.02**, **-0.2762%** below pivot. The frozen replay labels its strict original-buy-zone-at-open boolean false because open was below the pivot; this is an execution-layer observation, not a morphology failure.
+
+Audit conclusion: **DOUBLE_BOTTOM_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / CLEAN_RECOGNIZED_EXACT_PIVOT_LINEAGE_PRESENT / SOURCE_LANDMARK_BOUNDARY_NOT_SCOREABLE / BREAKOUT_VOLUME_STRONG**.

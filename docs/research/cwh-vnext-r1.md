@@ -64,3 +64,49 @@ R1-C: inspect assembly/boundary mechanics independently of numeric handle gates.
 R1-D: preregister candidate semantics, if source evidence supports a change.
 
 Only after R1-D may a new development cohort and untouched holdout be selected. Golden 10 remains locked against tuning.
+
+
+## R1-B — source-semantics audit
+
+Status: **SOURCE SEMANTICS REVIEWED / IMPLEMENTATION MISMATCH IDENTIFIED / NO THRESHOLD TUNING**
+
+Authoritative/near-primary evidence reviewed after R1-A:
+
+- IBD educational material defines Cup-with-Handle as a seven-week-minimum base with typical base depth 15–30%.
+- An Investor's Business Daily review of Cup-with-Handle anatomy states that handles are at least five days and usually more than one or two weeks, and that the **handle's midpoint** should be in the upper half of the entire base.
+- IBD's proper-handle discussion likewise states that the handle should form in the upper half of the overall base and emphasizes a downward drift with quieter volume.
+- O'Neil book excerpts describe proper-handle declines around 8–12% in normal bull markets, while explicitly allowing deeper exceptional handles in unusual market/bear-market conditions.
+
+### Contract comparison
+
+Current engine semantics are not identical to those source statements:
+
+1. **Duration**
+   - Engine: >=5 sessions.
+   - Source: at least five days / commonly 1–2+ weeks.
+   - Finding: broadly source-aligned; no R1 evidence supports changing this gate.
+
+2. **Upper-half rule**
+   - Engine: `handle_low >= cup_midpoint`; if the absolute handle low crosses below the midpoint, hard `REJECTED`.
+   - Source wording located in IBD: the **handle's midpoint** should be in the upper half / handle should form in the upper half.
+   - Finding: the engine operationalization is stricter than the located wording. It equates one extreme low with the placement of the handle as a whole. This is a concrete semantics mismatch and is a candidate explanation for `BELOW_CUP_MIDPOINT` Golden disagreements.
+
+3. **Handle depth**
+   - Engine: >12% => `AMBIGUOUS / DEEP_HANDLE_EXCEPTIONAL`.
+   - Source: 8–12% is a normal-bull-market guideline, but deeper exceptions are explicitly described.
+   - Finding: 12% is defensible as a quality/evidence band, but the source does not support treating every >12% handle as universally non-recognizable. Market/base context matters. Therefore the current universal ambiguity mapping requires independent validation before promotion.
+
+4. **Handle direction/volume**
+   - Source repeatedly describes a gentle downward drift and quiet/subsiding volume.
+   - Current handle state machine does not encode these as primary handle-quality evidence.
+   - Finding: this is a representation omission, but Golden 10 must not be used to invent numerical slope/volume cutoffs.
+
+### R1-B frozen conclusions
+
+- Keep >=5-session minimum unchanged.
+- Do **not** relax 12% numerically from Golden failures.
+- Test a representation change for upper-half placement: distinguish **handle placement/midpoint** from **absolute handle-low excursion**.
+- Treat >12% initially as quality/context evidence rather than assuming a universal categorical veto; this remains a hypothesis until independent controls.
+- Do not add slope/volume thresholds without separately preregistered source-backed definitions.
+
+R1-C must now inspect whether existing landmarks contain enough information to calculate a causal handle-level placement statistic without oracle inputs, and whether assembly selection itself creates the apparent deep/midpoint faults.

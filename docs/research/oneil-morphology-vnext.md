@@ -173,3 +173,47 @@ No threshold has been changed. Frozen production behavior remains untouched.
 R1-A status: **COMPLETE**.
 
 Next stage: **R1-B diagnostic replay** — capture, for all 10 Flat Base golden cases, the exact duration, depth, normalized range, close dispersion, tight/wide-loose booleans, candidate semantics, and state at the source-target/nearest-source lineage. This is diagnostic extraction only; no detector change.
+
+
+## R1-B — 10-case diagnostic replay (complete)
+
+Authoritative diagnostic run: `35504278574`, job `106061322494`, artifact `flat-base-r1b-diagnostic` (artifact id `10603332294`).
+
+The replay recomputed the frozen Flat Base gate inputs on the oracle-nearest pivot lineage without changing detector behavior.
+
+| Case | Nearest pivot vs oracle | Confirmed sessions | Confirmed range | Confirmed close dispersion | Confirmed state | Open-edge sessions | Open-edge range | Open-edge close dispersion | Open-edge state |
+| --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | --- |
+| AAPL 2019 | practical exact | 4 | 13.01% | 3.56% | REJECTED: TOO_SHORT + WIDE_LOOSE | 30 | 13.92% | 3.00% | AMBIGUOUS: WIDE_LOOSE |
+| SNPS 2023 | practical exact | 15 | 8.25% | 1.15% | REJECTED: TOO_SHORT + WIDE_LOOSE | 32 | 12.30% | 2.20% | AMBIGUOUS: WIDE_LOOSE |
+| META 2024 | practical exact | 34 | 8.94% | 1.96% | AMBIGUOUS: WIDE_LOOSE | 41 | 10.61% | 2.18% | AMBIGUOUS: WIDE_LOOSE |
+| TW 2024 | +0.0037% | 17 | 8.06% | 2.00% | REJECTED: TOO_SHORT + WIDE_LOOSE | 31 | 9.47% | 2.18% | AMBIGUOUS: WIDE_LOOSE |
+| NOW 2024 | -4.12% | 101* | 21.75%* | 4.37%* | REJECTED: TOO_DEEP + WIDE_LOOSE | 141* | 25.58%* | 5.21%* | REJECTED: TOO_DEEP + WIDE_LOOSE |
+| DECK 2023 | practical exact | — | — | — | — | 58 | 17.26% | 4.27% | AMBIGUOUS: WIDE_LOOSE |
+| CROX 2021 | practical exact | 13 | 13.64% | 2.72% | REJECTED: TOO_SHORT + WIDE_LOOSE | 25 | 17.73% | 3.21% | AMBIGUOUS: WIDE_LOOSE |
+| CPRT 2020 | -9.52% | 13* | 8.78%* | 1.99%* | REJECTED: TOO_SHORT + WIDE_LOOSE | 75* | 18.40%* | 4.60%* | AMBIGUOUS: WIDE_LOOSE |
+| AMZN 2020 | -0.0030% | 7 | 12.74% | 2.54% | REJECTED: TOO_SHORT + WIDE_LOOSE | 32 | 14.56% | 3.31% | AMBIGUOUS: WIDE_LOOSE |
+| KKR 2024 | practical exact | 21 | 11.17% | 2.71% | REJECTED: TOO_SHORT + WIDE_LOOSE | 39 | 14.84% | 3.25% | AMBIGUOUS: WIDE_LOOSE |
+
+`*` NOW and CPRT are nearest-engine lineages, not oracle-pivot reconstructions, so their morphology metrics must not be interpreted as measurements of the source Flat Base.
+
+### R1-B findings
+
+1. **No oracle-nearest lineage is TIGHT under the frozen research band.** Every measured lineage has normalized range above the 3% TIGHT ceiling; therefore none can become clean `RECOGNIZED` under the current state machine even if WIDE_LOOSE were merely removed as a fault.
+2. For the eight cases whose pivot is practical-exact/near-exact, **all eight source-nearest lineages are classified WIDE_LOOSE**. This is primarily driven by normalized high-low range >=7%; close dispersion is not required to trigger the fault.
+3. The positive TIGHT gate and negative WIDE_LOOSE band leave a large semantics gap relative to the source-backed examples. Several source examples have engine-measured ranges around 8–15% while still being identified by the source as Flat Bases.
+4. Confirmed-structure `TOO_SHORT` and open-right-edge behavior are materially different. AAPL, SNPS, TW, CROX, AMZN, and KKR lose TOO_SHORT once the observation extends to the as-of date, yet remain AMBIGUOUS because of WIDE_LOOSE/non-TIGHT morphology.
+5. META is especially diagnostic: its confirmed structure already passes the 25-session duration gate (34 sessions) and <=15% depth, but remains AMBIGUOUS solely because the research tightness semantics classify its 8.94% range as WIDE_LOOSE.
+6. NOW and CPRT remain upstream reconstruction problems and must not be used to infer a replacement tightness threshold.
+
+### R1-B disposition
+
+The evidence narrows the vNext question. A simple threshold tweak is not justified. The current implementation conflates at least two concepts:
+
+- total base depth/range over the structural interval; and
+- the notion of price action being “tight” enough for a Flat Base.
+
+Because the frozen `normalized_range = (max(high)-min(low))/max(high)` is structurally close to total base depth, using a 3% positive TIGHT ceiling makes clean recognition incompatible with the audited source examples whose valid base ranges are substantially larger.
+
+No detector change is authorized from R1-B. R1-C must establish source-backed Flat Base semantics before any replacement metric or threshold is proposed.
+
+R1-B status: **COMPLETE — 10/10 diagnostic cases**.

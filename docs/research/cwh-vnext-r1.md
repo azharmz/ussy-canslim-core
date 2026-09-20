@@ -110,3 +110,52 @@ Current engine semantics are not identical to those source statements:
 - Do not add slope/volume thresholds without separately preregistered source-backed definitions.
 
 R1-C must now inspect whether existing landmarks contain enough information to calculate a causal handle-level placement statistic without oracle inputs, and whether assembly selection itself creates the apparent deep/midpoint faults.
+
+
+## R1-C — assembly and representation audit
+
+Status: **COMPLETE / REPRESENTATION GAP LOCALIZED / NO ENGINE CHANGE**
+
+Current engine code was inspected against the frozen Golden diagnosis.
+
+### Confirmed-handle representation
+
+`build_handle_geometry()` persists only:
+- right-rim as `handle_high`;
+- one `handle_low`;
+- one later `handle_recovery`;
+- duration, peak-to-low depth, cup midpoint, boolean `low_in_upper_half`, and recovery/right-rim ratio.
+
+The upper-half verdict is therefore derived from one extreme:
+`handle_low.price >= cup_midpoint`.
+
+The representation does **not** persist the handle price path, handle midpoint/central tendency, fraction of handle sessions in the upper half, slope of lows, or handle-volume contraction. Consequently the current state machine cannot distinguish:
+- a handle predominantly formed in the upper half with a brief shakeout below midpoint; from
+- a handle structurally residing in the lower half.
+
+That is a representation limitation, not evidence for a new numeric cutoff.
+
+### Open-right-edge representation
+
+`observe_open_right_edge_handle()` has the same limitation. It measures the right-rim to selected low and evaluates the same absolute-low midpoint boolean. Thus confirmed and open-right-edge paths share the same semantics mismatch; fixing only one path would create contract divergence.
+
+### Assembly selection
+
+The Golden cases also show that source-target misses cannot all be repaired by changing the final handle gate:
+- EW has source-like cup depth/landmarks but no source-target CWH assembly.
+- RBLX recognizes another CWH on the same security while the source-near structure remains ambiguous.
+- DUOL reconstructs the source pivot essentially exactly but has alternate handle lineages with different terminal faults.
+
+Therefore CWH vNext requires two separable hypotheses:
+- **H-placement:** represent where the handle as a region forms, rather than equating placement with its single lowest price.
+- **H-assembly:** independently test candidate/lineage selection around the source-near right rim and post-rim pullback. Do not let a relaxed final gate conceal boundary-selection errors.
+
+### Existing cup-body interaction
+
+The Cup body has separate research proxies (`SHARP_V`, `FRAGMENTED_BOTTOM`, weak recovery). Those must remain separately observable. CWH vNext must not silently erase Cup-body ambiguity merely to recover source CWH labels.
+
+### R1-C conclusion
+
+The engine has enough OHLCV in the input frame to calculate causal handle-region descriptors, but the current `HandleGeometry` discards that path information. A vNext representation can add evidence fields without oracle inputs and without changing landmark generation. The first development change should therefore be **additive measurement**, not immediate state remapping.
+
+R1-D preregistration should freeze the descriptors and validation questions before any Golden replay is used to judge them.

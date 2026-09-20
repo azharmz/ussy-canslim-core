@@ -1970,3 +1970,18 @@ The replay breakout bar on **2024-12-03** opened **595.00**, reached **614.20**,
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_VOLUME_NEAR_SOURCE_25PCT / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
 
 Numeric-audit progress after this freeze: **33/40 = 82.5% overall**; FLAT_BASE **3/10 = 30%**.
+
+
+## FLAT_BASE numeric audit #004 — TW 2024
+
+Primary IBD/MarketSurge evidence identifies Tradeweb Markets (TW) as a **six-week FLAT_BASE** with **136.13** buy point. A later IBD retrospective states that TW broke out from this **stage-two flat base** on **2024-11-20**. The daily replay uses a stricter close-crossing observation rule, so its first close >= pivot occurs later on 2024-11-26; that operational date must not overwrite the source breakout date.
+
+Full-candidate inspection of frozen replay **35497962478** independently recovers the source-target pivot. The source-nearest OPEN_RIGHT_EDGE FLAT_BASE starts/pivots at **2024-10-15**, ends at replay as-of **2024-11-26**, pivot **136.13499451**, depth **8.061844%**, status **AMBIGUOUS**, sole fault **WIDE_LOOSE**. The corresponding CONFIRMED_STRUCTURE uses the same **2024-10-15** pivot and **136.13499451** level, ends/base-low at **2024-11-06**, has the same measured depth **8.061844%**, and is **REJECTED** under **TOO_SHORT + WIDE_LOOSE**.
+
+The pivot difference is **+$0.00499451**, about **+0.00367%**, a near-exact reconstruction. IBD explicitly calls the base **six weeks**, while the frozen confirmed structure is rejected as **TOO_SHORT**. This is therefore a direct duration-semantics discrepancy, analogous to SNPS rather than an inference from unavailable oracle data. The engine depth 8.0618% is retained as an observation only because the retrieved source does not provide an equivalent numeric depth/range.
+
+Source chronology and replay execution observation are deliberately separated. IBD says the breakout occurred **2024-11-20**, including intraday clearance of the 136.13 buy point; the frozen replay's first **daily close >= pivot** is **2024-11-26**, when high was **136.96** and close **136.32**, +0.1396% above pivot. Replay volume was **1.0369x prior-50** (+3.69%). T+1 after the replay close-crossing observation opened **137.45**, +0.9697% above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_NEAR_EXACT_MATCH_0.0037PCT / SOURCE_DURATION_SIX_WEEKS / CONFIRMED_STRUCTURE_TOO_SHORT_DURATION_SEMANTICS_GAP / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / SOURCE_BREAKOUT_2024-11-20_INTRADAY / REPLAY_CLOSE_CROSSING_2024-11-26 / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
+
+Numeric-audit progress after this freeze: **34/40 = 85% overall**; FLAT_BASE **4/10 = 40%**.

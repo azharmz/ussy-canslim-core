@@ -423,3 +423,37 @@ No H2 threshold is selected from R1-E. The frozen production O'Neil engine remai
 R1-E is consumed as validation evidence and must not become a tuning set. Any quantitative vNext weekly-quality rule must be developed on a **new, separately frozen development set** that excludes both the original 40-case golden reconstruction and all R1-E holdout cases. After development, the resulting rule must be frozen and evaluated on another untouched validation set before any production-engine change is considered.
 
 R1-E status: **COMPLETE**.
+
+
+## R2-C — morphology representation decision (pre-threshold)
+
+Status: **FROZEN DESIGN DIRECTION — NO NUMERIC THRESHOLD**
+
+R2-A/R2-B showed that weekly aggregate descriptors alone do not cleanly distinguish source-aligned constructive Flat Bases (ANET/HUBS) from the source-labelled wide/loose FICO control. Therefore vNext will not select a cutoff from weekly median range, weekly close span, median absolute weekly close change, direction changes, or late-base contraction ratio at this stage.
+
+### Source-backed qualitative target
+
+IBD's Flat Base description distinguishes constructive rangebound action from erratic wide-and-loose swings and explicitly discusses both daily and weekly charts. The FICO source control further describes routinely >=1% daily swings and a 5.6% one-day drop as evidence of erratic action.
+
+Accordingly, the next representation family is **local daily bar/return instability**, kept separate from source-backed hard geometry:
+
+A. source-backed structural eligibility:
+- explicit trading-week duration >=5;
+- depth <=15%;
+- source-aligned pivot/boundary geometry.
+
+B. research-only local quality descriptors (measure first; no cutoff):
+- daily_abs_return_median;
+- daily_abs_return_p90;
+- large_move_fraction_1pct;
+- large_move_fraction_2pct;
+- max_abs_daily_return;
+- daily_true_range_pct_median;
+- daily_true_range_pct_p90;
+- late_vs_early_daily_range_ratio.
+
+These are operational descriptors, not claimed IBD thresholds. The 1%/2% labels are measurement bins only; they are not recognition gates.
+
+### Anti-overfit rule
+
+Golden and R1-E remain excluded from parameter selection. R2-A positives and R2-B controls may be used to inspect descriptor behavior. No production rule is selected until the development cohort contains enough source-backed positive and negative/control cases to show repeatable separation. Any eventual candidate rule must be frozen before a new untouched validation set.

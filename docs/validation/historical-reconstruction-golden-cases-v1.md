@@ -1896,3 +1896,38 @@ Other FLAT_BASE candidates are materially different structures: pivot **215.3099
 The replay explicitly restores AAPL's later 2020 4-for-1 split to contemporaneous 2019 basis before comparison. On 2019-09-11 the normalized bar reached **223.71** and closed **223.59**, +1.0028% above the 221.37 oracle pivot. Volume was **1.7080x** prior-50. T+1 open **224.80** was +1.5494% above pivot and inside the original 5% zone.
 
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_VOLUME_STRONG**.
+
+
+## FLAT_BASE numeric audit 002 — SNPS 2023
+
+Status: **AUDITED / SOURCE PIVOT AND LEFT BOUNDARY EXACTLY RECOVERED / FLAT-BASE GEOMETRY-GATE GAP / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen FLAT_BASE candidate set from authoritative corrected replay run **35418641005**, job **105832029466**.
+
+| Field | Source oracle | Frozen source-near candidates | Delta / result |
+|---|---:|---:|---|
+| Pattern family | FLAT_BASE | FLAT_BASE | **family exact match** |
+| Pivot | 392.79 | 392.79000854 | +0.00000854 / **~+0.0000022%**; practical exact match |
+| Source left boundary | 2023-04-04 | LEFT_HIGH 2023-04-04 | **exact match** |
+| Source duration | six weeks | source-target candidate present, but confirmed form fails TOO_SHORT while open-right-edge form does not | **duration adjudication gap** |
+| Source range/depth | 8.0% | 8.253778% | **+0.2538 pp; near numeric match** |
+| Final source-near state | documented flat base | REJECTED confirmed structure; AMBIGUOUS open-right-edge form | **morphology-state gap** |
+| Faults | source accepts structure | TOO_SHORT + WIDE_LOOSE; alternate same structure WIDE_LOOSE | **duration/tightness geometry gap** |
+| Breakout | 2023-05-18 | H 410.91 / C 409.71 | **daily crossing corroborated** |
+| Breakout volume | source +163% above average | replay **+171.63% / 2.7163x prior-50** | **strong, directionally close but averaging definitions may differ** |
+| T+1 open | n/a to source morphology | 413.03 = **+5.1529%** vs pivot | above original 5% zone; operationalization only |
+| Price basis | contemporaneous oracle basis | identity transform; no corporate action documented for fixture | **common provider basis** |
+
+All emitted FLAT_BASE candidates were inspected. The source-target structure is explicit: LEFT_HIGH **2023-04-04**, BASE_LOW **2023-04-25**, pivot **392.79000854**, depth **8.253778%**. This independently recovers the source's 2023-04-04 base high and 392.79 pivot essentially exactly, while the measured depth/range is only **+0.2538 percentage points** from the source-reported 8.0%.
+
+As with AAPL, the source-target structure is not promoted to RECOGNIZED. The confirmed-structure candidate is REJECTED under `TOO_SHORT` + `WIDE_LOOSE`; the open-right-edge representation of the same structure is AMBIGUOUS under `WIDE_LOOSE`. This is particularly informative because the source explicitly calls the base **six weeks**, so the `TOO_SHORT` result is a direct duration-semantics discrepancy rather than merely an unavailable oracle dimension.
+
+Other emitted FLAT_BASE structures do not supersede the source-target candidate: **391.17001343** structures are much deeper and REJECTED under `TOO_DEEP` + `WIDE_LOOSE`; **379.76000977**, **363.98999023**, **350.45001221**, **326.10998535**, and **304.80999756** represent different historical bases and mostly carry `WIDE_LOOSE` and/or depth/duration faults.
+
+On 2023-05-18 the bar reached **410.91** and closed **409.71**, +4.3076% above pivot and still inside the original 5% zone. Replay volume was **2.7163x prior-50**, or **+171.63%**, versus the source's reported **+163%**; both strongly corroborate the breakout, while the exact difference should not be overinterpreted because the averaging definitions are not proven identical. T+1 open **413.03** was **+5.1529%** above pivot, just outside the original 5% zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_EXACT_MATCH / SOURCE_DEPTH_NEAR_MATCH_0.25PP / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_VOLUME_STRONG / T1_ABOVE_ORIGINAL_5PCT_ZONE**.
+
+### Current FLAT_BASE numeric-audit boundary
+
+Both currently reconstructed FLAT_BASE golden cases now have full-candidate numeric adjudication. AAPL and SNPS independently recover the source pivot essentially exactly, yet neither source-target structure reaches RECOGNIZED because of frozen duration/tightness geometry gates. SNPS is the stronger duration diagnostic because its oracle explicitly states **six weeks**, while the engine still produces a confirmed candidate with `TOO_SHORT`. This is validation evidence only; no threshold change or detector tuning is authorized.

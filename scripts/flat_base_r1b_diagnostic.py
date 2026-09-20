@@ -28,6 +28,7 @@ def norm(frame,f):
     frame["date"]=pd.to_datetime(frame["date"])
     return frame
 def metrics(frame,r):
+    import pandas as pd
     s=pd.Timestamp(r["structural_start"]).date(); e=pd.Timestamp(r["structural_end"]).date()
     d=frame["date"].dt.date
     z=frame[(d>=s)&(d<=e)]

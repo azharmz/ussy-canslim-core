@@ -2077,3 +2077,43 @@ On **2024-05-15**, replay high was **107.94** and close **107.67**, +4.0491% abo
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_STAGE_THREE_CONTEXT_PRESERVED_NOT_SCORED / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_OBSERVATIONAL_ONLY / WIDE_LOOSE_GEOMETRY_GAP / REPLAY_CLOSE_CROSSING_2024-05-15 / BREAKOUT_VOLUME_1.333X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_IDENTITY**.
 
 With this case, the deep numeric audit is complete: **40/40 = 100% overall** and FLAT_BASE **10/10 = 100%**.
+
+
+# Golden reconstruction deep numeric audit — closure
+
+Status: **CLOSED — 40/40 deep numeric audits complete (100%)**.
+
+This closure records source-fidelity evidence for the frozen O'Neil Pattern Engine at `c433cc1e35a5aa32a46f732cd8c5545935e36e40`. It is **not** a strategy backtest, does not validate expected returns, and must not be used as a tuning set for changing detector thresholds.
+
+| Core family | Deep audits | Closure finding |
+| --- | ---: | --- |
+| CUP_WITH_HANDLE | 10/10 | Source-near cup/pivot geometry is often present, but handle assembly, handle depth/midpoint, bottom morphology, and boundary semantics are the recurring disagreement layer. |
+| CUP_WITHOUT_HANDLE | 10/10 | Strongest source-fidelity family in this set: **8/10** source-target/near-target cases reach clean `RECOGNIZED`; two are held by bottom-morphology semantics. Separate replay diagnostic price-basis defects were exposed in split-normalized cases and are not morphology failures. |
+| DOUBLE_BOTTOM | 10/10 | **6/10** cases contain clean recognized source-pivot/near-source-pivot lineages; three expose trough/rebound semantics gaps, while WMT is an upstream landmark-generation miss. |
+| FLAT_BASE | 10/10 | Source pivot is practical-exact/near-exact in **8/10**, but **0/10** source-target cases reach clean `RECOGNIZED`. `WIDE_LOOSE` is the dominant final gate; `TOO_SHORT` is a proven source-duration semantics discrepancy where the oracle supplies duration. NOW and CPRT are different: their source pivots are not reconstructed, indicating an upstream boundary/landmark/pivot gap. |
+
+## Cross-family interpretation
+
+The 40-case evidence does **not** support a single blanket statement that the frozen engine “cannot find O'Neil patterns.” The failure location is family-dependent. CWOH and several DOUBLE_BOTTOM cases demonstrate exact or near-exact source reconstruction through clean recognition. CWH frequently reconstructs substantial source geometry but diverges at handle/bottom/boundary semantics. FLAT_BASE frequently reconstructs the source pivot but systematically fails final recognition in this golden set, while two cases fail earlier at pivot construction.
+
+Therefore future engineering diagnosis must preserve these layers:
+
+1. **landmark / boundary / pivot generation**;
+2. **family assembly / morphology semantics**;
+3. **final recognition gates**;
+4. **breakout execution diagnostics**;
+5. **price-basis / corporate-action diagnostics**.
+
+A mismatch at a later layer must not be rewritten as a failure at an earlier layer. Likewise, dimensions absent from source evidence remain `NOT SCORED` rather than being inferred from engine output.
+
+## Frozen validation disposition
+
+The historical reconstruction workstream is now **complete for evidence collection**. The frozen engine remains frozen. These golden cases may be used to document and classify fidelity gaps, but **must not be used to tune thresholds or select detector parameters**. Any future detector change motivated by these findings requires a separate development/research track and independent validation data.
+
+Completion:
+- reconstruction availability: **40/40 = 100%**
+- deep one-by-one numeric audit: **40/40 = 100%**
+- CUP_WITH_HANDLE: **10/10**
+- CUP_WITHOUT_HANDLE: **10/10**
+- DOUBLE_BOTTOM: **10/10**
+- FLAT_BASE: **10/10**

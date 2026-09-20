@@ -1,10 +1,5 @@
 name: Flat Base R1-B diagnostic
 on:
-  push:
-    branches: [research/oneil-morphology-vnext]
-    paths:
-      - scripts/flat_base_r1b_diagnostic.py
-      - .github/workflows/flat-base-r1b-diagnostic.yml
   workflow_dispatch:
 jobs:
   diagnose:

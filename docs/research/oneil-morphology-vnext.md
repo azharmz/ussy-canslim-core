@@ -65,3 +65,111 @@ CWOH is the strongest fidelity family in the closed set. Preserve it as a regres
 ## First deliverable
 
 The next executable task is **R1-A only**: inspect the frozen `ussy-oneil-patterns` SHA and document the exact FLAT_BASE pipeline and the formulas/thresholds that produce `WIDE_LOOSE` and `TOO_SHORT`. No production modification and no threshold change.
+
+
+## R1-A — frozen-code anatomy (complete)
+
+Inspected frozen engine SHA `c433cc1e35a5aa32a46f732cd8c5545935e36e40`.
+
+### Exact Flat Base decision path
+
+The frozen confirmed-structure assessor is `src/oneil_patterns/morphology/flat_base.py::assess_flat_base`.
+
+Hard gates:
+
+```text
+MIN_DURATION_SESSIONS = 25
+MAX_DEPTH_PCT = 0.15
+
+duration_gate = segment.duration_sessions >= 25
+depth_gate    = segment.depth_pct <= 0.15
+```
+
+A failure of either hard gate yields `REJECTED`. Therefore `TOO_SHORT` is not a generic “less than five calendar weeks” test; it is specifically **fewer than 25 sessions in the engine segment representation**.
+
+The assessed OHLC region is inclusive from `segment.start_date` through `segment.end_date`. Within that region:
+
+```text
+base_high        = max(high)
+base_low         = min(low)
+mean_close       = mean(close)
+
+normalized_range = (base_high - base_low) / base_high
+close_dispersion = population_std(close) / mean_close
+upper_band_5pct  = fraction(close >= 0.95 * base_high)
+```
+
+`upper_band_5pct` is emitted as evidence but does **not** participate in the frozen state decision.
+
+Research-only bands:
+
+```text
+TIGHT:
+  normalized_range <= 0.03
+  AND close_dispersion <= 0.01
+
+WIDE_LOOSE:
+  normalized_range >= 0.07
+  OR close_dispersion >= 0.03
+```
+
+State mapping:
+
+```text
+duration < 25 OR depth > 15%        -> REJECTED
+hard gates pass + WIDE_LOOSE        -> AMBIGUOUS
+hard gates pass + BOUNDARY_CONTEXT  -> AMBIGUOUS
+hard gates pass + TIGHT             -> RECOGNIZED
+otherwise                            -> AMBIGUOUS
+```
+
+Thus a clean `RECOGNIZED` Flat Base requires not merely passing O'Neil-style duration/depth gates, but also satisfying the **research-only 3% normalized-range AND 1% close-dispersion tight band**. This is the critical anatomy finding behind the 0/10 clean-recognition result.
+
+### Why WIDE_LOOSE is especially important
+
+The frozen code explicitly says the tightness/wide-loose thresholds are **research bands, not claimed official O'Neil/IBD thresholds**. The P8 decision record further documents that source-aligned SNPS 2023 and TW 2024 contradicted the earlier policy that treated WIDE_LOOSE as a hard rejection. v0.2 therefore changed WIDE_LOOSE to `AMBIGUOUS`, but retained the same numeric bands.
+
+However, the state machine still only emits clean `RECOGNIZED` when the candidate passes the separate TIGHT band (<=3% normalized range AND <=1% close dispersion). Therefore removing WIDE_LOOSE as a hard rejection did **not** make source-valid but non-TIGHT bases clean-recognizable; the intermediate region remains `AMBIGUOUS`.
+
+This distinction matters:
+
+- `WIDE_LOOSE` explains a recurring explicit fault;
+- the broader **clean-recognition bottleneck is the positive TIGHT requirement itself**;
+- those TIGHT thresholds are also research-only.
+
+### Confirmed structure vs open-right-edge
+
+`src/oneil_patterns/validation/open_right_edge_flat.py` reuses the same constants and state bands but changes the observation window. It begins at a confirmed SWING_HIGH and observes through as-of T rather than requiring a fully confirmed high-low-high segment.
+
+For open-right-edge:
+
+```text
+duration = number of bars from start.price_date through asof_date
+depth    = (start.price - observed_low) / start.price
+```
+
+It then applies the same 25-session, 15%-depth, WIDE_LOOSE, and TIGHT thresholds.
+
+This explains why a source-pivot lineage can appear twice with different outcomes: the confirmed structural segment can be `TOO_SHORT`, while its open-right-edge observation has accumulated >=25 sessions and loses `TOO_SHORT`, yet remains `AMBIGUOUS` because of WIDE_LOOSE or because it does not satisfy TIGHT.
+
+### Boundary context
+
+Confirmed-structure assessment adds `BOUNDARY_CONTEXT` when the start, trough, or recovery landmark is marked as a segmentation boundary. Even without WIDE_LOOSE, this forces `AMBIGUOUS`. Open-right-edge validation does not apply this boundary-context check.
+
+### R1-A diagnosis
+
+The frozen FLAT_BASE recognition architecture contains three logically different filters:
+
+1. source/theory-style hard gates: **>=25 sessions and <=15% depth**;
+2. research-only negative descriptor: **WIDE_LOOSE** at >=7% normalized range OR >=3% close dispersion;
+3. research-only positive recognition requirement: **TIGHT** at <=3% normalized range AND <=1% close dispersion.
+
+The 40-case audit therefore points to a more precise research question than “is WIDE_LOOSE too strict?”:
+
+> **Should clean O'Neil Flat Base recognition require the current research-only TIGHT band at all, and what source-backed morphology should distinguish RECOGNIZED from AMBIGUOUS once duration/depth pass?**
+
+No threshold has been changed. Frozen production behavior remains untouched.
+
+R1-A status: **COMPLETE**.
+
+Next stage: **R1-B diagnostic replay** — capture, for all 10 Flat Base golden cases, the exact duration, depth, normalized range, close dispersion, tight/wide-loose booleans, candidate semantics, and state at the source-target/nearest-source lineage. This is diagnostic extraction only; no detector change.

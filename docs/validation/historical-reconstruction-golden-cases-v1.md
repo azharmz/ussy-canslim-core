@@ -2015,3 +2015,18 @@ On **2023-10-27**, the replay bar opened **545.19**, reached **585.00**, and clo
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / WIDE_LOOSE_GEOMETRY_GAP / BREAKOUT_WEEK_ENDING_2023-10-27_CONFIRMED / BREAKOUT_VOLUME_5.189X_STRONG_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X6**.
 
 Numeric-audit progress after this freeze: **36/40 = 90% overall**; FLAT_BASE **6/10 = 60%**.
+
+
+## FLAT_BASE numeric audit #007 — CROX 2021
+
+Frozen MarketSmith oracle identifies Crocs (CROX) as a **FLAT_BASE** with **109.91** pivot. The frozen source note associates the historical breakout with **2021-06-15**; replay chronology begins 2021-06-14 and uses the stricter rule “first daily close >= oracle pivot”, which occurs one session earlier. Source chronology and replay close-crossing are therefore kept separate rather than forcing either date to replace the other.
+
+Full-candidate inspection of authoritative replay **35497962478** independently reconstructs the source pivot. The CONFIRMED_STRUCTURE candidate starts/pivots **2021-05-10**, ends **2021-05-26**, pivot **109.91000366**, engine-measured depth **11.582206%**, status **REJECTED**, faults **TOO_SHORT + WIDE_LOOSE**. The OPEN_RIGHT_EDGE representation uses the same 2021-05-10 pivot and **109.91000366** level, extends through replay as-of 2021-06-14, measures depth **13.638436%**, and remains **AMBIGUOUS** under **WIDE_LOOSE**. No source-target candidate reaches RECOGNIZED.
+
+The pivot difference is only **+$0.00000366**, approximately **+0.0000033%**, a practical exact reconstruction. The retrieved oracle does not freeze authoritative numeric left-boundary, duration, or depth/range values. Consequently the engine's 2021-05-10 boundary, 11.5822%/13.6384% depths, and TOO_SHORT flag are observations but **NOT SCORED** as source discrepancies. In particular, unlike SNPS and TW, TOO_SHORT cannot be promoted to a proven duration-semantics gap without a source duration.
+
+On **2021-06-14**, replay high was **115.37** and close **112.58**, +2.4293% above the 109.91 pivot. Replay volume was **1.4620x prior-50** (+46.20%). The frozen oracle note labels 2021-06-15 as breakout, so this one-day chronology difference is recorded explicitly as **SOURCE_DATE_VS_REPLAY_CLOSE_CROSSING_DISCREPANCY**, not a morphology failure. T+1 relative to replay close-crossing, **2021-06-15**, opened **112.47**, +2.3292% above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_OBSERVATIONAL_ONLY / WIDE_LOOSE_GEOMETRY_GAP / SOURCE_BREAKOUT_NOTE_2021-06-15 / REPLAY_CLOSE_CROSSING_2021-06-14 / SOURCE_DATE_VS_REPLAY_CLOSE_CROSSING_DISCREPANCY / BREAKOUT_VOLUME_1.462X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
+
+Numeric-audit progress after this freeze: **37/40 = 92.5% overall**; FLAT_BASE **7/10 = 70%**.

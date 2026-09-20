@@ -1548,3 +1548,37 @@ The oracle-to-engine pivot delta is effectively zero. No competing same-era line
 On 2024-04-18 both high and close clear the oracle pivot; close is +0.6308% above it and inside the original 5% zone. Volume is 1.1833x the prior-50 mean, retained as separate breakout evidence. T+1 open 170.01 is +1.1663% above pivot and remains inside the 5% zone.
 
 Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH / RECOGNIZED_NO_FAULTS**.
+
+
+## CWOH numeric audit 010 — NVDA 2023
+
+Status: **AUDITED / SOURCE-TARGET MATCH AFTER EXPLICIT SPLIT-BASIS NORMALIZATION / REPLAY-DIAGNOSTIC BASIS DEFECT CONFIRMED / NO ENGINE CHANGE**.
+
+This audit re-inspects the complete frozen CWOH candidate set from authoritative replay run **35471986323**, job **105974484647**. NVDA requires explicit basis normalization because current Yahoo history reflects the later 2024 10-for-1 split while the 2023 oracle is pre-split.
+
+| Field | Source oracle | Frozen output / normalized comparison | Delta / result |
+|---|---:|---:|---|
+| Pattern family | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | **family exact match** |
+| Pivot | 187.90 pre-split | engine 18.79000092 split-adjusted = **187.9000092 x10** | **practical exact match after basis normalization** |
+| Source-target landmarks | source numeric landmarks not frozen | LEFT_RIM 2022-12-13 / CUP_LOW 2022-12-28 | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Cup depth | source numeric depth not frozen | 26.109637% | **NOT SCORED / SOURCE NUMERIC VALUE NOT AVAILABLE** |
+| Final source-near state | valid CWOH | RECOGNIZED | **categorical match** |
+| Faults | source accepts structure | none | **match** |
+| Breakout 2023-01-27 | pivot 187.90 | raw H 20.628 / C 20.365; normalized H **206.28** / C **203.65** | **high and close above oracle after x10 normalization** |
+| Breakout volume | source numeric oracle not frozen | ratio **1.2080x prior-50**; invariant to /10 normalization | separate breakout evidence |
+| T+1 open | n/a to source morphology | raw 19.950001; normalized **199.500008**, **+6.1735%** vs pivot | above original 5% zone; operationalization only |
+| Price basis | contemporaneous 2023 pre-split | metadata declares `LATER_10_FOR_1_SPLIT_RESTORED`, x10 OHLC / ÷10 volume | **declared adaptation correct; diagnostics remain raw-provider-basis** |
+
+All frozen CWOH candidates were inspected. Once candidates are compared on the oracle's pre-split basis, the source-nearest structure is the **RECOGNIZED** candidate LEFT_RIM **2022-12-13**, CUP_LOW **2022-12-28**, raw pivot **18.79000092**, depth **26.109637%**, with no detector faults. Normalized by x10, its pivot is **187.9000092**, a practical exact match to oracle **187.90**.
+
+Several earlier lineages have raw pivots above 28–34 but are REJECTED as `TOO_DEEP`; other recognized historical structures exist below the target. They do not displace the source-target candidate after basis normalization.
+
+As with NFLX 2024, the replay metadata declares the correct x10 OHLC / ÷10 volume adaptation, but the frozen `breakout_day_assessment` and `ussy_t1_execution_observation` compare raw post-split Yahoo prices directly with the pre-split oracle. Their roughly -89% diagnostic values and false crossing flags are therefore basis-invalid. On a common pre-split basis, 2023-01-27 is approximately O **194.62**, H **206.28**, L **194.05**, C **203.65**; both high and close clear 187.90. T+1 open normalizes to approximately **199.50**, or **+6.17%** above pivot, beyond the original 5% buy-zone upper bound.
+
+This independently confirms that the price-basis application defect found in NFLX is systematic for these later-split replay diagnostics, while the frozen pattern candidate itself remains source-faithful after normalization.
+
+Audit conclusion: **CWOH_FAMILY_MATCH / SOURCE_TARGET_STRUCTURE_FOUND / PIVOT_PRACTICAL_EXACT_MATCH_AFTER_BASIS_NORMALIZATION / RECOGNIZED_NO_FAULTS / REPLAY_DIAGNOSTIC_PRICE_BASIS_APPLICATION_DEFECT**.
+
+### CWOH numeric-audit closure
+
+All **10/10** reconstructed CUP_WITHOUT_HANDLE golden cases have now received full-candidate numeric adjudication. The audit repeatedly showed that representative-candidate shorthand can materially misclassify source fidelity; full candidate inspection is required before declaring a source-target structure absent. The CWOH numeric-audit tranche is therefore **CLOSED** without tuning or modifying the frozen engine.

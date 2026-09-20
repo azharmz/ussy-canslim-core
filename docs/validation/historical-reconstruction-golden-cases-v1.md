@@ -2030,3 +2030,20 @@ On **2021-06-14**, replay high was **115.37** and close **112.58**, +2.4293% abo
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_OBSERVATIONAL_ONLY / WIDE_LOOSE_GEOMETRY_GAP / SOURCE_BREAKOUT_NOTE_2021-06-15 / REPLAY_CLOSE_CROSSING_2021-06-14 / SOURCE_DATE_VS_REPLAY_CLOSE_CROSSING_DISCREPANCY / BREAKOUT_VOLUME_1.462X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE**.
 
 Numeric-audit progress after this freeze: **37/40 = 92.5% overall**; FLAT_BASE **7/10 = 70%**.
+
+
+## FLAT_BASE numeric audit #008 — CPRT 2020
+
+Primary IBD Top Stocks evidence identifies Copart (CPRT) as a **five-week FLAT_BASE** with **92.51** buy point and states that the stock broke out on Thursday **2020-01-02**, closing **93.48**. This gives direct oracle support for family, pivot, duration, breakout date, and breakout close.
+
+Full-candidate inspection of authoritative replay **35497962478** finds **no FLAT_BASE candidate at or near 92.51**. The nearest emitted pivot is **83.69999695**, about **-$8.8100 / -9.523%** below the oracle. Its OPEN_RIGHT_EDGE representation starts/pivots **2019-09-17**, extends through 2020-01-02, measures depth **8.781361%**, and is AMBIGUOUS under **WIDE_LOOSE**. The corresponding CONFIRMED_STRUCTURE ends **2019-10-03** and is REJECTED under **TOO_SHORT + WIDE_LOOSE**. Other emitted pivots (79.74, 67.08, 60.01, etc.) are still farther from the source target.
+
+Because the source-target 92.51 pivot is absent, this is not principally a final geometry-gate failure. The discrepancy is upstream in **boundary/landmark/pivot construction**: the engine never constructs the source-target FLAT_BASE. The source explicitly says **five weeks**, but the emitted 83.70 structure is a different structure, so its TOO_SHORT flag must not be compared as if it adjudicated the oracle base.
+
+Corporate-action handling requires a correction to the provisional source note. The authoritative replay uses **x4** historical price normalization, not x2. Copart had successive 2-for-1 splits after the 2020 oracle, yielding a cumulative x4 basis transformation for comparison to the 92.51 historical price. The replay therefore correctly uses prices x4 and volume /4; the stale “later 2-for-1 split restored” wording is insufficient if read as the cumulative transform.
+
+On **2020-01-02**, replay high was **93.57** and close **93.48**, exactly corroborating the IBD-reported close and placing the close **+1.0485%** above the 92.51 pivot. Replay volume was **1.4822x prior-50** (+48.22%), observational because the source excerpt does not provide a numeric breakout-volume percentage. T+1 on **2020-01-03** opened **92.62**, only **+0.1189%** above pivot and inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_ORACLE / SOURCE_PIVOT_92.51_NOT_RECONSTRUCTED / SOURCE_DURATION_FIVE_WEEKS / NEAREST_ENGINE_PIVOT_83.70_MINUS_9.52PCT / NEAREST_STRUCTURE_NOT_ORACLE_STRUCTURE / UPSTREAM_BOUNDARY_LANDMARK_PIVOT_GAP / SOURCE_BREAKOUT_2020-01-02_CONFIRMED / SOURCE_CLOSE_93.48_EXACTLY_CORROBORATED / BREAKOUT_VOLUME_1.482X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_CUMULATIVE_X4_VALIDATED**.
+
+Numeric-audit progress after this freeze: **38/40 = 95% overall**; FLAT_BASE **8/10 = 80%**.

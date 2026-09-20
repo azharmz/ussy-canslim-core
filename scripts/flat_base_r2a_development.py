@@ -56,21 +56,36 @@ def main():
    source=routed.source.value if hasattr(routed.source,"value") else str(routed.source)
    fallback=routed.fallback_reason
    print(f"R2-A source: {sym}: {source}; fallback={fallback}",flush=True)
-   if str(source).upper()!="R2":
-    out.append({"symbol":sym,"oracle_pivot":pivot,"result":"NON_CANONICAL_SOURCE_EXCLUDED","ohlcv_source":source,"fallback_reason":fallback})
-    continue
    f=routed.frame
+   # Frozen engine adapters preserve raw OHLC plus adj_close for every routed
+   # provider. Canonical research price basis is constructed below from the
+   # recorded adj_close/close factor; provider identity remains explicit.
+   if "adj_close" not in f.columns:
+    out.append({"symbol":sym,"oracle_pivot":pivot,"result":"PRICE_BASIS_UNVERIFIABLE","ohlcv_source":source,"fallback_reason":fallback})
+    continue
   except Exception as exc:
    out.append({"symbol":sym,"oracle_pivot":pivot,"result":"DATA_UNAVAILABLE","error":str(exc)})
    continue
-  f["date"]=pd.to_datetime(f["date"]); d=f[f.date.dt.date<=asof].copy()
+  f["date"]=pd.to_datetime(f["date"])
+  for col in ["open","high","low","close","adj_close"]:
+   f[col]=pd.to_numeric(f[col],errors="raise")
+  factor=f["adj_close"]/f["close"]
+  if factor.isna().any() or (factor<=0).any():
+   out.append({"symbol":sym,"oracle_pivot":pivot,"result":"PRICE_BASIS_INVALID","ohlcv_source":source,"fallback_reason":fallback})
+   continue
+  # Match ussy-data PREBACKTEST-GATE: one adj_close/close factor is applied to
+  # O/H/L/C; volume is unchanged.
+  for col in ["open","high","low","close"]:
+   f[col]=f[col]*factor
+  f["adj_close"]=f["close"]
+  d=f[f.date.dt.date<=asof].copy()
   obs=[x.to_dict() if hasattr(x,"to_dict") else x.__dict__ for x in analyze_security(sym,sym,d,asof)]
   fb=[x for x in obs if x.get("pattern")=="FLAT_BASE"]
   if not fb:
    out.append({"symbol":sym,"oracle_pivot":pivot,"ohlcv_source":source,"result":"NO_FLAT_BASE_CANDIDATE"}); continue
   fb.sort(key=lambda x:abs(float(x["pivot_level"])-pivot)); p=float(fb[0]["pivot_level"])
   lin=[x for x in fb if abs(float(x["pivot_level"])-p)<1e-6]
-  out.append({"symbol":sym,"oracle_pivot":pivot,"ohlcv_source":source,"nearest_delta_pct":p/pivot-1,
+  out.append({"symbol":sym,"oracle_pivot":pivot,"ohlcv_source":source,"price_basis":"ADJUSTED_OHLC_FROM_ADJ_CLOSE_FACTOR","fallback_reason":fallback,"nearest_delta_pct":p/pivot-1,
    "lineage":[{"semantics":x["candidate_semantics"],"state":x["normalized_status"],"start":x["structural_start"],"end":x["structural_end"],"pivot":x["pivot_level"],"faults":x["detector_faults"],**metrics(d,x)} for x in lin]})
  Path("artifacts/research").mkdir(parents=True,exist_ok=True)
  Path("artifacts/research/flat-base-r2a-development.json").write_text(json.dumps(out,indent=2)+"\n")

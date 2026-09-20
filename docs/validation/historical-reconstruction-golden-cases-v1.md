@@ -2062,3 +2062,18 @@ The replay's first daily close >= oracle pivot is **2020-08-25**: high **3357.40
 Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_NEAR_EXACT_MATCH_0.003PCT / SOURCE_DURATION_FIVE_WEEKS / CONFIRMED_STRUCTURE_TOO_SHORT_DURATION_SEMANTICS_GAP / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_AND_WIDE_LOOSE_GEOMETRY_GAP / REPLAY_CLOSE_CROSSING_2020-08-25 / BREAKOUT_VOLUME_0.841X_WEAK_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_X20_VALIDATED**.
 
 Numeric-audit progress after this freeze: **39/40 = 97.5% overall**; FLAT_BASE **9/10 = 90%**.
+
+
+## FLAT_BASE numeric audit #010 — KKR 2024
+
+Frozen IBD oracle identifies KKR as a **stage-three FLAT_BASE** with **103.48** buy point. The source note is dated **2024-05-10**; replay chronology uses the frozen rule “first daily close >= oracle pivot” and finds that crossing on **2024-05-15**. Price basis is identity.
+
+Full-candidate inspection of authoritative replay **35497962478** independently reconstructs the source pivot. The OPEN_RIGHT_EDGE source-target candidate starts/pivots **2024-03-21**, extends through replay as-of **2024-05-15**, pivot **103.48000336**, engine-measured depth **11.171245%**, status **AMBIGUOUS**, sole fault **WIDE_LOOSE**. The corresponding CONFIRMED_STRUCTURE uses the same start/pivot, ends **2024-04-19**, and is **REJECTED** under **TOO_SHORT + WIDE_LOOSE**. No source-target FLAT_BASE reaches RECOGNIZED.
+
+The pivot difference is only **+$0.00000336**, approximately **+0.00000325%**, a practical exact reconstruction. The frozen oracle does not provide authoritative numeric duration, left boundary, or depth/range, so those dimensions are **NOT SCORED**. Accordingly, the engine's TOO_SHORT flag is observational only and cannot be elevated to a proven duration-semantics mismatch. The source does provide the base-stage label (**stage three**), but stage classification is not an emitted numeric morphology field in this FLAT_BASE candidate contract and is therefore preserved as source context rather than scored against an invented engine equivalent.
+
+On **2024-05-15**, replay high was **107.94** and close **107.67**, +4.0491% above the 103.48 pivot. Replay volume was **1.3333x prior-50** (+33.33%), observational because no source-equivalent numeric breakout-volume value is frozen. T+1 on **2024-05-16** opened **107.00**, +3.4016% above pivot and still inside the original 5% buy zone.
+
+Audit conclusion: **FLAT_BASE_FAMILY_MATCH / SOURCE_PIVOT_PRACTICAL_EXACT_MATCH / SOURCE_STAGE_THREE_CONTEXT_PRESERVED_NOT_SCORED / SOURCE_LEFT_BOUNDARY_NOT_SCORED / SOURCE_DURATION_NOT_SCORED / SOURCE_DEPTH_NOT_SCORED / SOURCE_TARGET_NOT_RECOGNIZED / TOO_SHORT_OBSERVATIONAL_ONLY / WIDE_LOOSE_GEOMETRY_GAP / REPLAY_CLOSE_CROSSING_2024-05-15 / BREAKOUT_VOLUME_1.333X_OBSERVATIONAL / T1_INSIDE_ORIGINAL_5PCT_ZONE / PRICE_BASIS_IDENTITY**.
+
+With this case, the deep numeric audit is complete: **40/40 = 100% overall** and FLAT_BASE **10/10 = 100%**.

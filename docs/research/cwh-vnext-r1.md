@@ -209,3 +209,42 @@ For each development case, report whether source-near cup/right-rim geometry exi
 7. Promote only if source-target fidelity improves without collapsing negative controls and all four-core regressions remain green.
 
 Golden CWH 10 remains diagnosis-only throughout.
+
+
+## R2-A — independent DEVELOPMENT/control cohort registry
+
+Status: **COHORT FROZEN BEFORE ENGINE REPLAY**
+
+Golden CWH 10 are excluded: LRCX, EW, NVO, OLED, TSLA, TOL, URBN, SHOP, RBLX, DUOL.
+
+### Positive development cases
+
+1. **NFLX 2023**
+   - authoritative IBD retrospective CWH example;
+   - cup begins 2023-02-03, base depth 25%;
+   - handle depth 10%, duration six weeks, light volume;
+   - proper buy point 349.80, breakout 2023-05-18.
+   - This is especially useful as a textbook normal-handle positive control.
+
+2. **ELF 2022**
+   - MarketSmith/IBD Stock Guide identifies a cup-with-handle breakout on 2022-07-21.
+   - Source is sufficient to freeze family/date; exact pivot/handle numeric dimensions must remain NOT_SCORED unless independently sourced before replay.
+   - Useful as a positive assembly case, not a numeric-threshold calibration case.
+
+### Semantics/control anchors (not detector positives)
+
+3. **IBD CWH checklist/infographic**
+   - base minimum seven weeks; typical base depth 15–30%; ideal buy point above the peak in the handle.
+   - methodology control only.
+
+4. **LRCX source semantics**
+   - retained only as a methodology anchor for the documented normal 8–12% handle guideline and >=5 trading-session minimum.
+   - LRCX itself remains Golden and is forbidden from development scoring.
+
+### Negative-control policy
+
+No negative stock case is admitted merely because the frozen engine labels it malformed. A negative/control security must have independent source evidence that the candidate was not a proper CWH or that a specific structural defect was documented. Until such a source is frozen, synthetic malformed handles may be used only for unit invariants, not source-fidelity scoring.
+
+### Leakage guardrail
+
+R2-A registry is frozen before any vNext measurement replay on NFLX/ELF. No threshold may be selected from Golden 10 or from later holdout cases.

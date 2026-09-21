@@ -141,3 +141,40 @@ Guardrail: ARWR/BNTX/AVGO are Cup-family body positives, not asserted as handle-
 Source facts are frozen before any replay against the v0.2 measurements. No Golden case is included. No threshold will be fitted to these four cases.
 
 The discriminating question is preregistered: among source-positive Cup bodies that pass source-supported duration/depth semantics, does the current `FRAGMENTED_BOTTOM` proxy create source disagreement independently of sharp-V evidence? Measurements will be reported continuously, not optimized into a cutoff.
+
+
+## R2 — independent DEVELOPMENT adjudication
+
+Status: **DEVELOPMENT COMPLETE / CANDIDATE SEMANTICS FROZEN**
+
+Engine replay run: `35584701478`
+Artifact: `10631549153`
+Digest: `sha256:b0b686a64f73a84a25d1e9a2afec33726355f22f610ff049e698db9a12bcecbf`
+Replay SHA: `c338260b63acc3043ad7df3d5d21d236c722348c`
+
+All four source cases resolve to source-dimension MATCH after applying the frozen TSLA 15x corporate-action comparison factor.
+
+| Case | Pivot agreement | Matched production state | Matched fault | Adjudication |
+|---|---:|---|---|---|
+| TSLA 2017 | 0.000313% error | RECOGNIZED | none | clean direct-CWOH control |
+| ARWR 2019 | 0.002710% | AMBIGUOUS | SHARP_V | supports keeping sharp-V hypothesis separate |
+| BNTX 2020 | 0.002043% | REJECTED | TOO_DEEP | source-positive exceptional-depth disagreement; out of current fragmentation scope |
+| AVGO 2025 | 0.005316% | AMBIGUOUS | FRAGMENTED_BOTTOM | independent discriminating source-positive fragmentation disagreement |
+
+AVGO is the key independent discriminator: source pivot reconstruction is effectively exact and the matched source structure is held at AMBIGUOUS solely by the internal `FRAGMENTED_BOTTOM` research band. This reproduces the residual AX phenomenon without using AX/Golden for tuning.
+
+### Frozen candidate semantics
+
+For the next validation gate only:
+
+1. retain `FRAGMENTED_BOTTOM` as explicit measured evidence;
+2. test removal of `FRAGMENTED_BOTTOM` from state-bearing ambiguity faults when it is the only Cup-body research-band fault;
+3. retain `SHARP_V` as state-bearing AMBIGUOUS;
+4. retain `WEAK_RIGHT_RIM_RECOVERY` as state-bearing AMBIGUOUS;
+5. retain source-supported duration/depth hard gates unchanged;
+6. make no numerical cutoff change, including no tuning of the existing 0.75 continuity measurement;
+7. candidate construction, pivot ranking, source matching, and pattern-family routing remain unchanged.
+
+This is a semantic remap candidate, not a threshold fit.
+
+No production promotion is authorized by DEVELOPMENT. The candidate must now face locked independent VALIDATION selected and frozen before detector replay.

@@ -123,3 +123,21 @@ Select independent authoritative source-labelled Cup/CWOH DEVELOPMENT cases that
 - representation/candidate-multiplicity controls where available.
 
 Only after DEVELOPMENT may a candidate state semantic be frozen. Validation remains locked until then.
+
+
+## R1-D — independent DEVELOPMENT corpus freeze
+
+Status: **SOURCE FACTS FROZEN BEFORE DETECTOR REPLAY**
+
+Four independent authoritative IBD/MarketSurge Cup-family positives are frozen for bottom-shape DEVELOPMENT. None is in the CWOH Golden 10.
+
+1. **TSLA 2017** — IBD explicitly identifies a cup-without-handle base, buy point 287.30, breakout 2017-04-03.
+2. **ARWR 2019** — IBD identifies a cup base, buy point 36.90; first breakout 2019-10-17 and definitive recross 2019-10-22.
+3. **BNTX 2020** — IBD identifies a cup base, buy point 48.95; breakout on 2020-03-17.
+4. **AVGO 2025** — IBD/MarketSurge identifies a weekly cup base with buy point 376.23; article dated 2025-10-31 reports shares trading inside the resulting buy zone.
+
+Guardrail: ARWR/BNTX/AVGO are Cup-family body positives, not asserted as handle-identity labels beyond what the source states. They are used to test shared Cup-body roundedness/fragmentation measurements. TSLA is the direct CWOH positive control.
+
+Source facts are frozen before any replay against the v0.2 measurements. No Golden case is included. No threshold will be fitted to these four cases.
+
+The discriminating question is preregistered: among source-positive Cup bodies that pass source-supported duration/depth semantics, does the current `FRAGMENTED_BOTTOM` proxy create source disagreement independently of sharp-V evidence? Measurements will be reported continuously, not optimized into a cutoff.

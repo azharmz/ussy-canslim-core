@@ -79,9 +79,9 @@ jobs:
           PY
       - name: Verify v2 production publisher contract
         run: python -m pytest -q tests/test_v2_production_publisher.py
-      - name: Dry-run v2 production publisher against fresh shadow lineage
+      - name: Publish verified v2 production snapshot and pointer
         env:
-          CANSLIM_V2_PUBLISH_DRY_RUN: '1'
+          CANSLIM_V2_PUBLISH_DRY_RUN: '0'
         run: python scripts/publish_v2_production.py
       - uses: actions/upload-artifact@v6
         with:

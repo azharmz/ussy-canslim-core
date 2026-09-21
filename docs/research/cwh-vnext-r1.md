@@ -248,3 +248,54 @@ No negative stock case is admitted merely because the frozen engine labels it ma
 ### Leakage guardrail
 
 R2-A registry is frozen before any vNext measurement replay on NFLX/ELF. No threshold may be selected from Golden 10 or from later holdout cases.
+
+
+## R2-B — corrected independent DEVELOPMENT synthesis
+
+Status: **5/5 DEVELOPMENT AUDITED / CANDIDATE SEMANTICS FROZEN / VALIDATION STILL LOCKED**
+
+The earlier R2-A registry is superseded for split assignment. The authoritative P8 label registry already classifies NFLX 2023 as VALIDATION, so NFLX MUST remain untouched until after candidate semantics are frozen. ELF is not used for threshold selection here.
+
+Actual DEVELOPMENT cohort:
+- CTSH 2004 (`p8-label-0003`)
+- FOUR 2024 (`p8-label-0004`)
+- APH 2026 (`p8-label-0013`)
+- NVDA 2026 (`p8-label-0014`)
+- BAC 2025 (`p8-label-0015`)
+
+NFLX 2023 (`p8-label-0002`) remains locked VALIDATION.
+
+### Development synthesis
+
+- **CTSH:** source-near pivot geometry exists. Absolute handle low falls below cup midpoint, while 11/12 handle closes (91.67%) are at/above the midpoint. This supports the preregistered H-placement representation concern, but cup-body/assembly disagreement remains independently visible.
+- **FOUR:** source pivot is practically exact and cup/placement geometry is otherwise clean. The source-positive handle is about 12.33% deep, just above the frozen 12% normal-quality reference, so the universal >12% ambiguity mapping is not source-faithful as a categorical veto.
+- **APH:** source CWH is present but source-target pivot/assembly is not reconstructed faithfully. The selected lineage also carries cup-body and deep-handle evidence. This case therefore cannot be repaired or scored as a pure handle-gate problem.
+- **NVDA:** source pivot is practically exact and handle morphology is clean (duration and depth within current normal bands, upper-half placement clear). Remaining disagreement is cup-body/lineage morphology, not handle semantics.
+- **BAC:** unique source-equivalent CWH candidate with pivot within 1%; handle is within current normal depth band and entirely upper-half by close-region evidence. Remaining ambiguity is cup-body `SHARP_V`, not handle morphology.
+
+### Frozen candidate semantics for validation
+
+The DEVELOPMENT evidence supports a deliberately narrow handle-layer change:
+
+1. Keep minimum handle duration at **>=5 sessions**.
+2. Keep **12%** as a normal-handle quality reference and continue reporting `DEEP_HANDLE_EXCEPTIONAL`, but **do not use >12% alone as a categorical CWH ambiguity veto**.
+3. Keep the absolute-low `BELOW_CUP_MIDPOINT` observation as explicit evidence, but **do not let one sub-midpoint excursion alone hard-reject an otherwise upper-half handle region**.
+4. Handle-region placement must remain causally measured and reported. No new numeric region-placement cutoff is selected from these five positives.
+5. Cup-body faults (`SHARP_V`, `FRAGMENTED_BOTTOM`, etc.) remain independently state-bearing; the handle-layer revision MUST NOT erase them.
+6. Assembly/boundary/pivot disagreement remains independent and cannot be converted to a morphology pass by relaxed handle semantics.
+7. Slope and volume descriptors remain **diagnostic only**; no recognition cutoff is introduced.
+8. Confirmed and open-right-edge handles must use parity semantics.
+
+This freeze is intentionally conservative: it removes unsupported universal handle veto behavior without inventing a replacement threshold from positive examples.
+
+### Validation gate
+
+NFLX 2023 is now eligible for the first untouched positive validation replay because the candidate semantics above are frozen before inspecting its vNext result. Validation must report source dimensions, handle evidence, cup-body faults, assembly/pivot agreement, and final state. A validation failure must be diagnosed by layer; it must not trigger post-hoc threshold tuning.
+
+Promotion remains blocked until:
+- measurement implementation is corrected to the preregistered OLS slope definition;
+- preceding-volume evidence requires a full 20-session denominator;
+- invalid/non-positive cup range fails closed for measurements;
+- confirmed/open-right parity and causality/state-invariance tests pass;
+- untouched validation is complete;
+- four-core regression is green.

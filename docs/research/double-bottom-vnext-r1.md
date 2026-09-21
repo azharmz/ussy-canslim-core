@@ -59,3 +59,68 @@ WMT remains a landmark extractor workstream. A morphology rule change is not all
 ## Immediate implementation gate
 
 No engine change is authorized at R1. First execute the independent DEVELOPMENT audit using the current production SHA `10668bbe9e27780d0dfe2464b9370e25e996fda5` and current DB v3 semantics. Only repeated, source-backed disagreement may advance to a state-remapping proposal.
+
+
+## R2 — independent DEVELOPMENT replay
+
+Status: **5/5 AUDITED / SEMANTIC QUESTION NARROWED / NO ENGINE CHANGE**
+
+Production engine SHA: `10668bbe9e27780d0dfe2464b9370e25e996fda5`.
+Replay run: `35576443466`.
+Artifact digest: `sha256:128055219bc2e32267b59f301a598278c34e61c6026276bd2b197bf3c3797351`.
+
+All five authoritative DOUBLE_BOTTOM DEVELOPMENT labels remain source-dimension MATCH. Candidate multiplicity is retained rather than resolved from detector state.
+
+### SEI 2024
+
+- source pivot 12.74; matched engine pivot 12.73999977, practical exact;
+- matched confirmed core-W candidate is `DOUBLE_BOTTOM_REJECTED` only on `TOO_SHORT`;
+- source-equivalent set contains both REJECTED confirmed structure and RECOGNIZED completion semantics;
+- this supports the existing v3 duration-representation solution rather than a lower duration threshold.
+
+### NVDA 2023
+
+- source pivot 47.61; engine 47.60900116, practical exact;
+- source-equivalent candidates are consistently `DOUBLE_BOTTOM_RECOGNIZED`;
+- matched candidate has no faults;
+- this remains the clean positive morphology control.
+
+### SPOT 2025
+
+- source pivot 621.20; engine 621.20001221, practical exact;
+- matched candidate is `DOUBLE_BOTTOM_AMBIGUOUS` only on `NO_SECOND_TROUGH_UNDERCUT`;
+- source-equivalent set contains AMBIGUOUS and REJECTED candidates, but no RECOGNIZED source-equivalent candidate;
+- this is the strongest independent DEVELOPMENT evidence that no-undercut should be examined as quality evidence rather than an identity veto.
+
+### WMT 2024
+
+- current production stack now source-matches pivot 60.89 at 60.88999939 through `LOCAL_TURN_AUX:p8-db-local-turn-v0.1`;
+- matched candidate is `DOUBLE_BOTTOM_RECOGNIZED` with no faults;
+- this differs from the older Golden frozen-engine result where the April-May structure was absent upstream. The difference is attributable to later landmark/local-turn engineering, not a morphology relaxation;
+- WMT therefore no longer supports changing the undercut rule in the current production stack.
+
+### EMBJ 2026
+
+- source pivot 71.68; engine 71.68000031, practical exact;
+- deterministic matched candidate is AMBIGUOUS on `NO_SECOND_TROUGH_UNDERCUT`;
+- however the source-equivalent candidate set contains AMBIGUOUS, RECOGNIZED and REJECTED states;
+- because source-equivalent lineages disagree, EMBJ is evidence for candidate/lineage multiplicity and cannot independently authorize undercut state remapping.
+
+## R2 synthesis
+
+The independent cohort does **not** support a broad Double Bottom rewrite.
+
+- Duration: existing open-right completion semantics already solve the SEI representation issue without changing the 35-session hard threshold.
+- Upstream landmarks: WMT is repaired in the current stack by local-turn auxiliary generation; keep that separate from morphology.
+- Undercut: NVDA is a clean recognized control; SPOT is a clean source-positive no-undercut disagreement; EMBJ is mixed because source-equivalent lineages disagree.
+- Research-only `SHALLOW_UNDERCUT` and `WEAK_MIDDLE_REBOUND` remain insufficiently isolated by this cohort to justify numerical changes.
+
+### Candidate semantic proposal
+
+The only morphology change with enough evidence to advance to a future validation gate is narrow:
+
+> retain `NO_SECOND_TROUGH_UNDERCUT` as explicit morphology/quality evidence, but test whether it should cease to be state-bearing when duration/depth and the remaining W structure pass.
+
+This proposal is **not implemented** here. A fresh DOUBLE_BOTTOM holdout, not used in Golden diagnosis or P8 DEVELOPMENT, is required before production remapping. No cutoff may be selected from SPOT, EMBJ, IPHI or other positive examples.
+
+Until such a holdout is frozen, production remains unchanged.

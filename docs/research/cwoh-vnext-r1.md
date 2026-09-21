@@ -256,3 +256,42 @@ The candidate semantic remains narrow: retain FRAGMENTED_BOTTOM evidence but tes
 The implementation regression at `09183c289b728ecf43cec64244b21244be405bb4` is green: workflow `35584979999` SUCCESS. This proves code/test consistency only; it is not validation evidence.
 
 Next gate: freeze a locked independent VALIDATION cohort before replaying the semantic candidate.
+
+
+## R3 — candidate implementation, locked VALIDATION, and promotion gate
+
+Status: **PROMOTION GATE PASSED**
+
+The frozen candidate semantic was implemented without changing any numeric morphology threshold: `FRAGMENTED_BOTTOM` remains recorded evidence but is non-state-bearing when it is the sole research-band fault. `SHARP_V`, `WEAK_RIGHT_RIM_RECOVERY`, duration/depth hard gates, candidate construction, pivots, and source matching remain unchanged.
+
+Implementation commit: `8fc0b64949ab79529c9499f398679a259992fea5`.
+Post-fix DEVELOPMENT replay: run `35588545002`, artifact `10633945367`, digest `sha256:95f0a83e6f10f4525f7a1d43659f44cfbf1655d1ce0d2e8618fe530a34a8ce0e`.
+
+Post-fix DEVELOPMENT audit remained source MATCH 4/4. TSLA remained clean RECOGNIZED; ARWR remained AMBIGUOUS on SHARP_V; BNTX remained REJECTED on TOO_DEEP; AVGO alone changed AMBIGUOUS -> RECOGNIZED while retaining FRAGMENTED_BOTTOM evidence. AVGO candidate identity, pivot, landmarks, depth, and source-equivalent uniqueness were unchanged.
+
+### Locked independent VALIDATION
+
+Before validation replay, four pre-existing authoritative CWOH labels not used in the vNext DEVELOPMENT cohort were frozen as VALIDATION controls: INTC 2026, ARW 2026, AMD 2019, and SE 2019. No threshold or semantic tuning was performed after observing validation.
+
+Validation run: `35589117087` at SHA `fc1243da25b582f4eab3e3b3de7dfe2c2bb7a095`.
+Artifact: `10633930736`.
+Digest: `sha256:0e79323a2ebc8009dbe6d6527b131ea7166f253b5b8c19824845cffedb11ad93`.
+
+| Case | Source agreement | Resolution | Matched state | Key audit result |
+|---|---|---|---|---|
+| INTC 2026 | MATCH | SOURCE_EQUIVALENT_MULTIPLE (2) | RECOGNIZED selected presentation candidate | pivot 54.60 practical exact; alternate open-right candidate remains AMBIGUOUS because SHARP_V is still state-bearing |
+| ARW 2026 | MATCH | UNIQUE | RECOGNIZED | pivot 162.61 exact; clean morphology |
+| AMD 2019 | MATCH | UNIQUE | RECOGNIZED | August start matches MONTH precision; pivot 35.55 practical exact; engine depth 22.8411% matches source 23% +/-2 pp |
+| SE 2019 | MATCH | UNIQUE | RECOGNIZED | engine pivot 38.00 vs source 38.10, relative error 0.262467%; clean morphology |
+
+Locked VALIDATION source agreement is therefore **4/4 MATCH**. This is not described as four morphology votes: INTC explicitly retains source-equivalent multiplicity, while ARW/AMD/SE are unique clean controls.
+
+### Unit clarification
+
+The legacy evaluator field `pivot_price_error_pct` is historically misnamed. Its implementation is `abs(engine_pivot / source_pivot - 1)`, so it stores a **fractional relative-error ratio**, not a percentage-number. Thus `0.00531587` means **0.531587%**, and the default tolerance `0.01` means **1%**. The legacy field/parameter names are retained for artifact compatibility; code comments now make the unit explicit. No evaluator arithmetic or tolerance changed.
+
+### Promotion decision
+
+The evidence gate is satisfied for the narrow semantic change only: **FRAGMENTED_BOTTOM remains diagnostic evidence and is no longer state-bearing by itself**. This decision does not authorize threshold tuning or changes to SHARP_V, WEAK_RIGHT_RIM_RECOVERY, duration, depth, candidate construction, pivot selection, or source matching.
+
+The research branch may now be promoted to the production contract after normal regression/CI passes. The locked DEVELOPMENT and VALIDATION artifacts above are the promotion evidence lineage.

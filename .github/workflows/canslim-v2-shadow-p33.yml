@@ -1,4 +1,4 @@
-name: CAN SLIM v2 production qualified p33
+name: CAN SLIM v2 production
 on:
   workflow_dispatch:
   schedule:
@@ -32,32 +32,57 @@ jobs:
       - run: |
           python -m pip install --disable-pip-version-check pytest pandas pyarrow boto3 numpy
           python -m pip install --disable-pip-version-check -e ./oneil-patterns
+      - name: Gate on new finalized READY session
+        id: cadence
+        run: |
+          python - <<'PY'
+          import json,os,boto3
+          s3=boto3.client('s3',endpoint_url=os.environ['R2_ENDPOINT'],region_name='auto',aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          b=os.environ['R2_BUCKET_NAME']
+          ready=json.loads(s3.get_object(Bucket=b,Key='production/ready/current.json')['Body'].read())
+          ready_date=str(ready.get('as_of_date') or ready.get('asof_date') or '')
+          try:
+            cur=json.loads(s3.get_object(Bucket=b,Key='canslim/v2/current.json')['Body'].read()); cur_date=str(cur.get('decision_date') or '')
+          except Exception as ex:
+            if 'NoSuchKey' not in str(ex): raise
+            cur_date=''
+          if not ready_date: raise RuntimeError('READY_POINTER_MISSING_ASOF_DATE')
+          run=ready_date>cur_date
+          with open(os.environ['GITHUB_OUTPUT'],'a') as fh: fh.write(f'run={str(run).lower()}\\nready_date={ready_date}\\ncurrent_date={cur_date}\\n')
+          print(json.dumps({'ready_date':ready_date,'current_v2_date':cur_date,'run':run},sort_keys=True))
+          PY
       - name: Build fresh read-only v2 watchlist
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_WATCHLIST_OUTPUT: shadow-v2-watchlist.json
         run: python scripts/build_shadow_v2_watchlist.py
       - name: Run frozen p33 for qualified identities only
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
           CANSLIM_V2_P33_OUTPUT: shadow-v2-p33.json
         run: python scripts/run_shadow_v2_p33.py
       - name: Build role-aware v2 shadow candidates
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_WATCHLIST_INPUT: shadow-v2-watchlist.json
           CANSLIM_V2_P33_INPUT: shadow-v2-p33.json
           CANSLIM_V2_CANDIDATE_OUTPUT: shadow-v2-candidates.json
         run: python scripts/run_shadow_v2_candidate.py
       - name: Build causal v2 T+1 shadow execution
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_CANDIDATE_INPUT: shadow-v2-candidates.json
           CANSLIM_V2_EXECUTION_OUTPUT: shadow-v2-execution.json
         run: python scripts/run_shadow_v2_execution.py
       - name: Build v2 shadow lifecycle boundary
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_EXECUTION_INPUT: shadow-v2-execution.json
           CANSLIM_V2_LIFECYCLE_OUTPUT: shadow-v2-lifecycle.json
         run: python scripts/run_shadow_v2_lifecycle.py
       - name: Summarize v2 shadow observation
+        if: steps.cadence.outputs.run == 'true'
         run: |
           python - <<'PY'
           import json
@@ -73,12 +98,15 @@ jobs:
           },sort_keys=True))
           PY
       - name: Verify v2 production publisher contract
+        if: steps.cadence.outputs.run == 'true'
         run: python -m pytest -q tests/test_v2_production_publisher.py
       - name: Publish verified v2 production snapshot and pointer
+        if: steps.cadence.outputs.run == 'true'
         env:
           CANSLIM_V2_PUBLISH_DRY_RUN: '0'
         run: python scripts/publish_v2_production.py
       - uses: actions/upload-artifact@v6
+        if: steps.cadence.outputs.run == 'true'
         with:
           name: canslim-v2-shadow-qualified-p33-${{ github.run_id }}
           path: |

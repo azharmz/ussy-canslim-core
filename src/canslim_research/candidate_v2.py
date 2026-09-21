@@ -6,7 +6,7 @@ from typing import Mapping, Sequence
 from canslim_research.eligibility_v2 import EligibilityV2Input, evaluate_v2
 
 PATTERN_SCHEMA_VERSION = "oneil-pattern-output-v2"
-EXPECTED_PATTERN_ENGINE_VERSION = "33-core-p8-frozen-v1"
+EXPECTED_PATTERN_ENGINE_VERSIONS = frozenset({"33-core-p8-frozen-v1", "33-core-p8-frozen-v2"})
 EXPECTED_LABELLED_VALIDATION_STATUS = "P8_CONDITIONAL_PASS_FROZEN"
 CANDIDATE_SPEC_VERSION = "theory-faithful-candidate-spec-v1"
 CANDIDATE_OUTPUT_SCHEMA_VERSION = "canslim-candidate-output-v2"
@@ -19,11 +19,16 @@ CORE_PATTERNS = frozenset({
     "CUP_WITH_HANDLE",
 })
 PATTERN_STATUSES = frozenset({"RECOGNIZED", "AMBIGUOUS", "REJECTED"})
-EXPECTED_DETECTOR_VERSIONS = {
-    "FLAT_BASE": "flat-base-v2",
-    "DOUBLE_BOTTOM": "double-bottom-v3",
-    "CUP_WITHOUT_HANDLE": "cup-family-v2",
-    "CUP_WITH_HANDLE": "cup-family-v2",
+EXPECTED_DETECTOR_VERSIONS_BY_ENGINE = {
+    "33-core-p8-frozen-v1": {
+        "FLAT_BASE": "flat-base-v2", "DOUBLE_BOTTOM": "double-bottom-v3",
+        "CUP_WITHOUT_HANDLE": "cup-family-v2", "CUP_WITH_HANDLE": "cup-family-v2",
+    },
+    "33-core-p8-frozen-v2": {
+        "FLAT_BASE": "flat-base-v2", "DOUBLE_BOTTOM": "double-bottom-v3",
+        "CUP_WITHOUT_HANDLE": "cup-family-v3-cwoh-fragmentation",
+        "CUP_WITH_HANDLE": "cup-family-v3-cwoh-fragmentation",
+    },
 }
 
 
@@ -58,7 +63,7 @@ class PatternAssessment:
         if schema != PATTERN_SCHEMA_VERSION:
             raise ValueError(f"unsupported pattern schema: {schema!r}")
         engine = str(row.get("engine_version", ""))
-        if engine != EXPECTED_PATTERN_ENGINE_VERSION:
+        if engine not in EXPECTED_PATTERN_ENGINE_VERSIONS:
             raise ValueError(f"unsupported #33 engine version: {engine!r}")
         validation_status = str(row.get("labelled_validation_status", ""))
         if validation_status != EXPECTED_LABELLED_VALIDATION_STATUS:
@@ -67,7 +72,7 @@ class PatternAssessment:
         if pattern not in CORE_PATTERNS:
             raise ValueError(f"pattern outside frozen #33 core contract: {pattern!r}")
         detector_version = str(row.get("detector_contract_version", ""))
-        expected_detector = EXPECTED_DETECTOR_VERSIONS[pattern]
+        expected_detector = EXPECTED_DETECTOR_VERSIONS_BY_ENGINE[engine][pattern]
         if detector_version != expected_detector:
             raise ValueError(
                 f"unsupported detector version for {pattern}: {detector_version!r}; expected {expected_detector!r}"

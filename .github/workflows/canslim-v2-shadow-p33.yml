@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/canslim-v2-shadow-p33.yml'
+      - 'src/canslim_research/candidate_v2.py'
   schedule:
     - cron: '30 23 * * 1-5'
 permissions:

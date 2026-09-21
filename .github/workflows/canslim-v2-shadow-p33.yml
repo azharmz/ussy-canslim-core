@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/canslim-v2-shadow-p33.yml'
       - 'src/canslim_research/candidate_v2.py'
+      - 'scripts/run_shadow_v2_candidate.py'
   schedule:
     - cron: '30 23 * * 1-5'
 permissions:

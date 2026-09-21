@@ -52,9 +52,10 @@ def main():
     decisions=[]
     for r in eligible:
         sid=str(r["security_id"])
+        g=ready[ready["security_id"].astype(str).eq(sid)].sort_values("date")
         if later and timely is False:
             # Historical/recovered candidates are never granted a retroactive fill.
-            continue; g=ready[ready["security_id"].astype(str).eq(sid)].sort_values("date")
+            continue
         nxt=g[g["date"].dt.date>signal]
         if nxt.empty: nd=no=None
         else:

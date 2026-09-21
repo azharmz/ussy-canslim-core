@@ -82,3 +82,44 @@ R1-C: preregister representation measurements that distinguish:
 - candidate/landmark sensitivity.
 
 Measurements are additive only. No state remapping is allowed before independent DEVELOPMENT evidence.
+
+
+## R1-C — representation measurement preregistration
+
+Status: **IMPLEMENTED ADDITIVELY / REGRESSION PASS / NO STATE CHANGE**
+
+Measurement implementation lives on `ussy-oneil-patterns:research/cwoh-vnext-measurement`.
+
+Commits:
+- `3cf19ca754483fedef806d7db83cfd76d9802921` — additive cup-shape diagnostics;
+- `8d10648cc310010cbd5e510f3d89f75df142294f` — schema/range/state-invariance tests.
+
+Draft PR: `ussy-oneil-patterns#18`.
+CI run: `35584090735` — pytest SUCCESS. P8/P6 compute jobs were correctly skipped; this change requires only unit/regression coverage.
+
+Frozen additive measurements:
+- decline sessions and recovery sessions;
+- left/right time ratio;
+- 5%-of-trough dwell fraction;
+- 10%-of-trough dwell fraction;
+- lower-third occupancy fraction;
+- maximum contiguous run within 10% of trough;
+- 10%-bottom continuity ratio;
+- right-rim / left-rim recovery ratio (pre-existing, retained).
+
+These measurements are observational. They do not alter `CupBodyState`, `CupBodyFault`, thresholds, candidate ranking, or source matching. The diagnostic schema advances from `p8-cup-body-diagnostic-v0.1` to `v0.2`.
+
+### Preregistered interpretation
+
+No single measurement is a replacement rule for `FRAGMENTED_BOTTOM`. Independent DEVELOPMENT must first determine whether source-labelled rounded cups systematically disagree with the current 0.75 continuity state gate while remaining acceptable on duration/depth and non-V evidence.
+
+The development analysis must report the measurements continuously; it must not search cutoffs that maximize agreement.
+
+### R1-D entry gate
+
+Select independent authoritative source-labelled Cup/CWOH DEVELOPMENT cases that are not in the Golden 10. Freeze identities/source facts before detector replay. Include:
+- clean positive controls;
+- at least one rounded source-positive case capable of discriminating fragmentation semantics;
+- representation/candidate-multiplicity controls where available.
+
+Only after DEVELOPMENT may a candidate state semantic be frozen. Validation remains locked until then.

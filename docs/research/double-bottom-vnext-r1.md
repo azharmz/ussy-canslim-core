@@ -124,3 +124,65 @@ The only morphology change with enough evidence to advance to a future validatio
 This proposal is **not implemented** here. A fresh DOUBLE_BOTTOM holdout, not used in Golden diagnosis or P8 DEVELOPMENT, is required before production remapping. No cutoff may be selected from SPOT, EMBJ, IPHI or other positive examples.
 
 Until such a holdout is frozen, production remains unchanged.
+
+
+## R3 — frozen VALIDATION gate
+
+Status: **SOURCE-FIDELITY PASS / DISCRIMINATING GATE NOT SATISFIED / NO PROMOTION**
+
+After the R2 candidate semantics were frozen, three new authoritative IBD Double Bottom cases were frozen as VALIDATION before detector comparison:
+
+1. MELI 2025 — source pivot 2146.82.
+2. TJX 2024 — source pivot 102.04.
+3. LII 2024 — source pivot 499.27.
+
+The candidate implementation changed only one semantic: `NO_SECOND_TROUGH_UNDERCUT` remains explicit evidence but is no longer by itself state-bearing. Duration/depth hard gates and the research-only `SHALLOW_UNDERCUT` / `WEAK_MIDDLE_REBOUND` ambiguity bands were preserved.
+
+### MELI
+
+Run `35578291570`, artifact digest `sha256:d7a0729c9ebfeb19c7db5cb455a34edf62c9aef10de0b20a25a25ceddcc50295`.
+
+- source pivot 2146.82; engine source-equivalent pivot 2146.820068, practical exact;
+- source-dimension agreement MATCH;
+- deterministic matched state RECOGNIZED;
+- however the matched source-pivot candidate is fault-free and does not exercise `NO_SECOND_TROUGH_UNDERCUT`;
+- source-equivalent multiplicity remains explicit.
+
+MELI is a source-fidelity positive control but is non-discriminating for the proposed semantic change.
+
+### TJX
+
+Run `35578446972`, artifact digest `sha256:ea910547db5014db427fc654b0459c0c396cafde537258d8d1f3e51d5338f474`.
+
+- source pivot 102.04; engine source-equivalent pivot 102.0400009, practical exact;
+- source-dimension agreement MATCH;
+- deterministic matched candidate remains AMBIGUOUS on `WEAK_MIDDLE_REBOUND`, not on no-undercut;
+- another source-equivalent exact-pivot lineage is RECOGNIZED with no faults;
+- 23 source-equivalent candidates span RECOGNIZED / AMBIGUOUS / REJECTED and multiple semantics.
+
+TJX is not a clean discriminator of the undercut proposal; it instead exposes lineage/candidate multiplicity and the separate research-only rebound band.
+
+### LII
+
+Run `35578568506`, artifact digest `sha256:53928a36e5fd969c9c1fe00a96fa30be03943a6cea8511e6179f606f28e55e66`.
+
+- source pivot 499.27; engine 499.269989, practical exact;
+- source-dimension agreement MATCH;
+- deterministic matched candidate RECOGNIZED with no faults;
+- source-equivalent multiplicity remains, including rejected alternatives.
+
+LII is another positive source-fidelity control but does not exercise the proposed no-undercut remapping.
+
+## R3 adjudication
+
+All three untouched authoritative holdouts confirm that the current engine can reconstruct the published Double Bottom pivots without breaking source fidelity. Full regression under the candidate implementation is green.
+
+However, **none of the three holdouts cleanly tests the semantic delta itself**. MELI and LII match through fault-free source-pivot candidates; TJX's deterministic disagreement is `WEAK_MIDDLE_REBOUND` plus heavy candidate multiplicity. Therefore the validation set cannot establish that removing the state-bearing effect of `NO_SECOND_TROUGH_UNDERCUT` improves source fidelity rather than merely broadening recognition.
+
+Promotion gate: **BLOCKED**.
+
+The candidate implementation must remain research-only and must not be merged to production. Production SHA `10668bbe9e27780d0dfe2464b9370e25e996fda5` remains authoritative for DOUBLE_BOTTOM.
+
+A future promotion attempt requires an authoritative holdout whose published/source-grounded geometry actually discriminates the trough relationship, ideally with both troughs documented or otherwise uniquely reconstructable. Do not keep sampling ordinary positive Double Bottom articles until one happens to fit; that would turn holdout selection into post-hoc search.
+
+This is a methodological stop, not an engineering failure.

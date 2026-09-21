@@ -322,3 +322,10 @@ Status: **CLOSED / VERIFIED IN CONTRACT CI**
 - No strategy semantics, frozen O'Neil morphology, C/A thresholds, or frozen exit contracts changed.
 
 Engineering completion estimate: **99%**. Remaining boundary is final merge/default-branch scheduling and explicit production-cutover authorization; natural populated Entry->Lifecycle evidence remains observational rather than synthetic.
+
+
+## 2026-09-21 — #33 CWOH vNext production baseline consumed by v2 shadow
+
+Status: **INTEGRATION PIN UPDATED / SHADOW SEMANTICS PRESERVED**
+
+Canonical `ussy-oneil-patterns` completed CWOH vNext production-contract closure at SHA `3d0b35272d89c5a6f1329e8dea865b3cf7a32b0f` (`oneil-pattern-output-v2`, engine `33-core-p8-frozen-v2`, cup-family contract `cup-family-v3-cwoh-fragmentation`, canonical adapter `p8-canonical-prediction-adapter-v1.2-cwh-measurement`). The v2 qualified-only shadow workflow now pins that exact #33 production baseline instead of the superseded `c433cc1...` baseline. Frozen CAN SLIM v1 remains untouched. No C/A/L/M, breakout, T+1, or lifecycle semantics changed.

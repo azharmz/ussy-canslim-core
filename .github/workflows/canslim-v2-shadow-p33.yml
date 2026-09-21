@@ -25,7 +25,7 @@ jobs:
         with:
           repository: azharmz/ussy-oneil-patterns
           path: oneil-patterns
-          ref: c433cc1e35a5aa32a46f732cd8c5545935e36e40
+          ref: 3d0b35272d89c5a6f1329e8dea865b3cf7a32b0f
       - uses: actions/setup-python@v7
         with: {python-version: '3.12'}
       - run: |

@@ -11,7 +11,7 @@ from oneil_patterns.data.r2_ready import ReadyDataset, REQUIRED_COLUMNS
 from oneil_patterns.production.engine import analyze_security
 from oneil_patterns.production.runner import run_ready_dataset
 
-ONEIL_REPO_SHA="c433cc1e35a5aa32a46f732cd8c5545935e36e40"
+ONEIL_REPO_SHA="3d0b35272d89c5a6f1329e8dea865b3cf7a32b0f"
 
 def env(n):
     v=os.getenv(n)

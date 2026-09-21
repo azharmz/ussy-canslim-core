@@ -178,3 +178,81 @@ For the next validation gate only:
 This is a semantic remap candidate, not a threshold fit.
 
 No production promotion is authorized by DEVELOPMENT. The candidate must now face locked independent VALIDATION selected and frozen before detector replay.
+
+
+## R2-A — DEVELOPMENT numeric audit 1/4: TSLA 2017
+
+| Component | Source oracle | Engine source-equivalent candidate | Result |
+|---|---|---|---|
+| Pattern | CUP_WITHOUT_HANDLE | CUP_WITHOUT_HANDLE | family match |
+| Pivot | 287.30 pre-split | 19.1593323 post-split; 287.389984 after 15x normalization | practical exact, 0.00031321% evaluator error |
+| Left boundary | not source-scored | 2017-02-14 | NOT SCORED |
+| Cup low | not source-scored | 2017-02-27 | NOT SCORED |
+| Structural end | breakout/as-of 2017-04-03 | 2017-04-03 open-right candidate | compatible; end semantic not scored |
+| Depth | not source-provided | 15.7904% | NOT SCORED |
+| Resolution | — | UNIQUE source-equivalent candidate | clean |
+| State/faults | source positive | RECOGNIZED / none | clean positive control |
+
+Audit conclusion: TSLA is a clean direct-CWOH control. The 15x price-basis normalization is required and is now explicit; no morphology disagreement is present.
+
+## R2-B — DEVELOPMENT numeric audit 2/4: ARWR 2019
+
+| Component | Source oracle | Engine source-equivalent candidate | Result |
+|---|---|---|---|
+| Pattern | source identifies a cup base | CWOH body candidate | Cup-body comparable; handle identity not inferred |
+| Pivot | 36.90 | 36.7999992 | practical near-exact, 0.00271005% evaluator error |
+| Left boundary | not source-scored | 2019-08-30 | NOT SCORED |
+| Cup low | not source-scored | 2019-09-30 | NOT SCORED |
+| Structural end | source recross 2019-10-22 | 2019-10-22 open-right candidate | compatible; end semantic not scored |
+| Depth | not source-provided | 29.4293% | NOT SCORED |
+| Resolution | — | UNIQUE source-equivalent candidate | clean |
+| State/faults | source positive Cup body | AMBIGUOUS / SHARP_V | morphology disagreement |
+
+Audit conclusion: ARWR does **not** provide evidence about FRAGMENTED_BOTTOM. It isolates a different research proxy, SHARP_V. It therefore remains a control demonstrating why sharp-V and fragmentation semantics must not be merged.
+
+## R2-C — DEVELOPMENT numeric audit 3/4: BNTX 2020
+
+| Component | Source oracle | Engine source-equivalent candidate | Result |
+|---|---|---|---|
+| Pattern | source identifies a cup base | CWOH body candidate | Cup-body comparable; handle identity not inferred |
+| Pivot | 48.95 | 48.8499985 | practical near-exact, 0.00204293% evaluator error |
+| Left boundary | not source-scored | 2020-01-07 | NOT SCORED |
+| Cup low | not source-scored | 2020-03-12 | NOT SCORED |
+| Structural end | breakout/as-of 2020-03-17 | 2020-03-17 open-right candidate | compatible; end semantic not scored |
+| Depth | not source-provided | 42.6817% | NOT SCORED against source |
+| Resolution | — | UNIQUE source-equivalent candidate | clean |
+| State/faults | source positive Cup body | REJECTED / TOO_DEEP | separate depth-semantics disagreement |
+
+Audit conclusion: BNTX is outside the fragmentation question. Its source-equivalent candidate is rejected solely by the >33% normal-depth gate. Because the source record used here does not provide detector-comparable depth semantics, this case cannot adjudicate a new depth threshold and must not be used to alter the CWOH fragmentation candidate.
+
+## R2-D — DEVELOPMENT numeric audit 4/4: AVGO 2025
+
+| Component | Source oracle | Engine source-equivalent candidate | Result |
+|---|---|---|---|
+| Pattern | IBD/MarketSurge weekly cup base | CWOH body candidate | Cup-body comparable; handle identity not inferred |
+| Pivot | 376.23 | 374.230011 | practical near match under evaluator tolerance, 0.00531587% evaluator error |
+| Left boundary | not source-scored | 2025-09-11 | NOT SCORED |
+| Cup low | not source-scored | 2025-10-10 | NOT SCORED |
+| Structural end | source article/as-of 2025-10-31 | 2025-10-31 open-right candidate | compatible; end semantic not scored |
+| Depth | not source-provided | 13.4089% | NOT SCORED |
+| Resolution | — | UNIQUE source-equivalent candidate | clean |
+| State/faults | source positive Cup body | AMBIGUOUS / FRAGMENTED_BOTTOM only | independent discriminating disagreement |
+
+Audit conclusion: AVGO is the independent discriminator for the exact CWOH residual under study. Candidate identity is unique; pivot reconstruction is source-near; no competing fault contaminates the matched candidate. The only state-bearing disagreement is FRAGMENTED_BOTTOM.
+
+## R2-E — 4/4 audit synthesis
+
+All four DEVELOPMENT cases have now been audited individually. They must not be treated as four equivalent votes:
+
+- TSLA: clean direct-CWOH positive control.
+- ARWR: separate SHARP_V disagreement.
+- BNTX: separate TOO_DEEP disagreement.
+- AVGO: the sole independent discriminator for FRAGMENTED_BOTTOM.
+
+Therefore the frozen fragmentation candidate is supported by **one clean independent discriminating case (AVGO)** plus the prior Golden diagnostic AX. It is not supported by a 4/4 morphology vote.
+
+The candidate semantic remains narrow: retain FRAGMENTED_BOTTOM evidence but test it as non-state-bearing when it is the sole Cup-body research-band fault. No numeric cutoff changes are authorized. SHARP_V, WEAK_RIGHT_RIM_RECOVERY, duration and depth semantics are explicitly out of scope for this candidate.
+
+The implementation regression at `09183c289b728ecf43cec64244b21244be405bb4` is green: workflow `35584979999` SUCCESS. This proves code/test consistency only; it is not validation evidence.
+
+Next gate: freeze a locked independent VALIDATION cohort before replaying the semantic candidate.

@@ -186,3 +186,33 @@ The candidate implementation must remain research-only and must not be merged to
 A future promotion attempt requires an authoritative holdout whose published/source-grounded geometry actually discriminates the trough relationship, ideally with both troughs documented or otherwise uniquely reconstructable. Do not keep sampling ordinary positive Double Bottom articles until one happens to fit; that would turn holdout selection into post-hoc search.
 
 This is a methodological stop, not an engineering failure.
+
+
+## R4 — source-semantics adjudication
+
+Status: **SOURCE SEMANTICS CLARIFIED / vNEXT REMAP WITHDRAWN / PRODUCTION PRESERVED**
+
+After R3 stopped promotion for lack of a discriminating holdout, the undercut question was re-opened at the source-semantics layer rather than by sampling additional positive holdouts.
+
+Additional historical IBD educational material provides materially stronger guidance than the earlier isolated wording that the second bottom is "usually" lower:
+
+- IBD educational coverage of the Double Bottom states that the second low **should undercut the first**, and uses that relationship as part of what makes an example a proper pattern.
+- An IBD chart-reading education article likewise says investors should know that the second low should undercut the first.
+- The David Ryan / IBD Q&A corpus contains a TWTR question explicitly distinguishing a cup-like structure from a Double Bottom because the second bottom did not undercut the first; this is supporting context, not used alone as a normative rule because the wording occurs in the question.
+- Contemporary IBD wording that the second bottom is "usually" lower is retained as a nuance: it does not justify converting a no-undercut structure into a clean RECOGNIZED Double Bottom.
+
+### Adjudication
+
+The R2 proposal to make `NO_SECOND_TROUGH_UNDERCUT` non-state-bearing is **withdrawn**.
+
+The DEVELOPMENT disagreement in SPOT remains useful evidence of a source-labelled case whose engine-selected geometry does not undercut, but it is no longer sufficient reason to relax morphology identity. It may instead reflect candidate/boundary reconstruction ambiguity or source-label granularity.
+
+The research implementation on `research/double-bottom-vnext-audit` must therefore remain non-production and must not be promoted. Production behavior that preserves `NO_SECOND_TROUGH_UNDERCUT` as state-bearing AMBIGUOUS evidence is the conservative source-faithful policy.
+
+No numerical minimum-undercut threshold is authorized by this adjudication. `SHALLOW_UNDERCUT` remains a separate research-only band and must not be conflated with the categorical question of whether an undercut occurred.
+
+### Closure
+
+Double Bottom vNext does not need a production semantic relaxation on the evidence currently available. Golden reconstruction, independent DEVELOPMENT and locked VALIDATION were still productive: together they isolated the disagreement, ruled out broad family failure, showed current source-pivot fidelity, separated upstream/lineage issues from morphology, and prevented an unsupported broadening of RECOGNIZED status.
+
+Production SHA `10668bbe9e27780d0dfe2464b9370e25e996fda5` remains authoritative for DOUBLE_BOTTOM.

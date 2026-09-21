@@ -1,14 +1,9 @@
-name: CAN SLIM v2 shadow qualified p33
+name: CAN SLIM v2 production qualified p33
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/publish_v2_production.py'
-      - 'tests/test_v2_production_publisher.py'
-      - '.github/workflows/canslim-v2-shadow-p33.yml'
   schedule:
-    - cron: '30 23 * * 1-5'
+    # Reconcile after ussy-data production has had time to finalize the preceding US session.
+    - cron: '45 8 * * 2-6'
 permissions:
   contents: read
 concurrency:
@@ -73,7 +68,7 @@ jobs:
             "qualified_security_ids":x.get("qualified_security_ids",[]),
             "candidate_stage_counts":stages,
             "eligible_count":stages.get("CANSLIM_V2_ELIGIBLE",0),
-            "production_cutover":False,
+            "production_cutover":True,
             "entry_lifecycle_write":False
           },sort_keys=True))
           PY

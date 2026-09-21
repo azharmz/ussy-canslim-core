@@ -299,3 +299,47 @@ Promotion remains blocked until:
 - confirmed/open-right parity and causality/state-invariance tests pass;
 - untouched validation is complete;
 - four-core regression is green.
+
+
+## R2-C — untouched validation and implementation gate
+
+Status: **PASS / PROMOTION ELIGIBLE**
+
+Implementation repository: `azharmz/ussy-oneil-patterns`
+Implementation branch: `research/cwh-vnext-measurement`
+
+Frozen vNext semantics were implemented without post-hoc tuning after the DEVELOPMENT synthesis:
+
+- minimum handle duration remains >=5 sessions and remains categorical;
+- `BELOW_CUP_MIDPOINT` remains explicit evidence, but one absolute-low excursion is not by itself a categorical veto when the causal handle-region midpoint remains in the upper half;
+- a handle region whose median close remains below the cup midpoint is still rejected;
+- `DEEP_HANDLE_EXCEPTIONAL` remains explicit quality evidence at >12%, but is not by itself a universal categorical ambiguity veto;
+- cup-body faults remain independently state-bearing;
+- confirmed and open-right paths use parity semantics;
+- slope and volume remain diagnostic only.
+
+Synthetic negative/control invariants passed, including TOO_SHORT preservation, lower-half-region rejection, malformed chronology/geometry guards, and cup-body state separation. Full regression passed: 241 tests.
+
+Untouched NFLX 2023 validation was replayed only after candidate semantics were frozen. The source-equivalent candidate is UNIQUE and identity STABLE:
+
+- source start 2023-02-03 -> engine 2023-02-03 exact;
+- family CUP_WITH_HANDLE -> CUP_WITH_HANDLE;
+- source-dimension agreement: MATCH;
+- detector status under vNext: CUP_WITH_HANDLE_RECOGNIZED;
+- cup depth: 24.8004% (source dimension not scored);
+- handle duration: 32 sessions;
+- handle depth: 9.7713%;
+- absolute-low evidence: BELOW_CUP_MIDPOINT retained;
+- median close position in cup: 0.500531;
+- fraction of handle closes at/above cup midpoint: 0.50;
+- minimum close position: 0.342402;
+- normalized close slope: +0.0000836;
+- handle/pre-20 median volume ratio: 0.827174.
+
+The validation result therefore confirms the preregistered representation concern: the old single-extreme-low veto can reject a source-positive handle even when the handle region itself is centered in the upper half. No new threshold was selected from NFLX after observing the holdout.
+
+Validation workflow run: `35573469837`
+Validation implementation SHA: `a5f5e6ddb217d60c0e857488f2508585be34a137`
+Artifact digest: `sha256:18e8a0a780fe83eaee2b185e936e34309d37398e125e951b1e4250d6dd5414e9`
+
+Promotion gate: **PASS**, subject to merge/main CI remaining green.

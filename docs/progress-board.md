@@ -1,6 +1,6 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-17
+Last updated: 2026-09-22
 
 ## Current project state
 
@@ -135,130 +135,6 @@ The Phase 12 post-run R2 audit reported 1,748 objects / 2,209,214,500 bytes (~2.
 - R2 retention remains rolling 7 days with protected snapshots and at least the two newest **distinct session dates** retained for cross-session handoff/recovery safety.
 - Within an as-of/session date, exactly one canonical Candidate snapshot is retained: the current-pointer snapshot when applicable, otherwise the newest run. Non-canonical same-date rerun/remediation snapshots are operational duplicates and may be removed immediately unless explicitly protected.
 
-## Phase 9 READY compatibility follow-up — 2026-09-18
-
-**CLOSED / VERIFIED — CONTROLLED R2-BACKED E2E PASS**
-
-- Scheduled Phase 9 run `35228601748` failed on the pre-remediation state.
-- Commit `905df69875f7952f8f4883b4a9b22b00dde7f865` introduced the READY→frozen-#33 compatibility direction, but follow-up audit found that the patch also drifted from existing frozen Candidate/evidence APIs and therefore was not accepted as sufficient production validation.
-- Commit `cea9fb51b3782e0d7ea54a2734dd314ff52b2f4f` restored the pre-existing Candidate/evidence semantics while retaining only the READY→`ReadyDataset` compatibility adapter and frozen `run_ready_dataset` invocation.
-- Commit `1971a93f3b44f2474dd752fb2f216b6ecdab682b` added a non-R2-mutating publisher contract workflow.
-- GitHub Actions run `35298025951`: **PASS**. It compiles the production publisher and runs the frozen Entry / Phase 7 / Phase 8 / Phase 9 boundary regression suite.
-- This PASS validates local contract/API compatibility only. It does **not** prove the R2-backed production path because the validation deliberately performs no production mutation.
-
-Controlled R2-backed E2E run `35298373473`: **PASS** on 2026-09-18.
-
-- cadence: READY `2026-09-16` vs prior Candidate `2026-09-14` → `proceed=True`;
-- preflight R2 audit: ~1.22 GiB, below warning/hard-stop thresholds;
-- prior Candidate consumption / Entry publication: PASS, eligible candidates 0 and entry decisions 0;
-- Lifecycle publication: PASS with the legitimate existing boundary `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` / zero executable entries;
-- frozen #33 scan: 1,227 securities → 929,220 assessments;
-- Candidate publication: 929,220 outputs;
-- stages: `NOT_ELIGIBLE=842,508`, `PIVOT_DEFINED=85,311`, `PIVOT_CROSSED=981`, `BREAKOUT_CONFIRMED=420`;
-- Candidate pointer publication: PASS;
-- lossless compaction: PASS;
-- protected rolling retention: `RETENTION_OK`;
-- post-retention R2 audit: ~1.51 GiB, storage guard OK.
-
-**Disposition:** Phase 9 READY compatibility remediation is **CLOSED / VERIFIED**. This closes the compatibility failure only; it does not close Phase 8B / Entry→Lifecycle natural-population observation, which remains legitimately blocked until a natural executable production entry exists.
-
-## Architecture ordering observation — 2026-09-18
-
-**IDENTIFIED / NOT REMEDIATED — production baseline remains frozen**
-
-A direct audit of `scripts/publish_production_candidates.py` establishes that the current production implementation is compute-ordered as:
-
-```text
-ALL READY OHLCV
-→ frozen #33 O'Neil pattern scan across the ready universe
-→ pattern assessments
-→ PIT C/A + L/I/M evidence
-→ build_candidate()
-→ frozen eligibility / Candidate publication
-→ T+1 Entry
-```
-
-This implementation order must be distinguished from the conceptual CAN SLIM decision order:
-
-```text
-MARKET CONTEXT
-→ CAN SLIM stock-quality / fundamental screening
-→ eligible watchlist
-→ chart/base monitoring
-→ valid O'Neil pattern
-→ pivot / breakout / buy condition
-→ entry
-```
-
-The distinction is currently an **architecture-ordering observation**, not evidence that production semantics are wrong. Pattern remains the timing/entry gate conceptually even though the production publisher computes pattern assessments before assembling the full CAN SLIM evidence state.
-
-Governance decision:
-
-- do **not** reopen or tune frozen #33 morphology;
-- do **not** refactor production merely for compute efficiency or conceptual aesthetics;
-- do **not** use the current pattern-first production implementation as a requirement for historical full-universe pattern replay;
-- historical/backtest architecture may remain FA-first/event-driven and is governed separately;
-- any future proposal to pre-screen CAN SLIM quality/watchlist before invoking #33 must be a separately governed architecture workstream;
-- such a refactor must demonstrate output-semantic equivalence to the frozen baseline for the same inputs/decision time, including Candidate eligibility, pattern identity/provenance, pivot/breakout state, and fail-closed behavior;
-- wait for a concrete operational requirement or evidence from the backtest/research workstream before deciding whether this optimization is warranted.
-
-**Current disposition:** `ARCHITECTURE_ORDERING_ISSUE = IDENTIFIED / NOT_YET_REMEDIATED`.
-
-## Original O'Neil workflow vs production v1 audit — 2026-09-18
-
-**HQ AUDIT COMPLETE / NO PRODUCTION CHANGE AUTHORIZED**
-
-Canonical audit: `docs/audits/original-oneil-vs-production-v1-2026-09-18.md`.
-
-The frozen production system is a deterministic, fail-closed CAN SLIM v1 implementation; it must not be described as a literal reconstruction of discretionary O'Neil/IBD practice. The repository's own #30 theory audit distinguishes heterogeneous component roles (C/A screening, S/I evidence, M market context), while `canslim-eligibility-contract-v1` deliberately makes C/A/N/S/L/I/M all mandatory for full production eligibility.
-
-The largest fidelity boundary is therefore the all-mandatory eligibility compression plus the causal T+1 Open execution contract, not merely pattern morphology. Zero eligible production candidates does **not** authorize threshold/gate relaxation. Any more literal Original-CAN-SLIM interpretation belongs in a separately governed v2 theory-fidelity workstream and must start from methodology evidence rather than performance.
-
-Production v1 remains **FROZEN**.
-
-## Controlled debt / observation boundaries
-
-- `PRODUCTION ENTRY→LIFECYCLE OBSERVATION: BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` until a natural executable production entry exists.
-- #33 conditional morphology validation debt remains frozen/disclosed.
-- Market-level `leadership_confirming` / `weakening_confirmed` remain `NOT_EVALUABLE` without new authorized evidence.
-- The 9 GiB R2 hard stop is an operational ceiling, not a guaranteed temporary publication-headroom reservation.
-- Historical/deprecated research artifacts may remain; they are not production semantics.
-
-## Operational verification after storage correction
-
-**CLOSED / VERIFIED**
-
-- Same-date duplicate retention semantics corrected in `scripts/retain_candidate_snapshots.py`.
-- 2026-09-14 canonical Candidate snapshot: `run-34967947364`.
-- Three redundant same-date snapshots removed; total reclaimed bytes: `954,651,232`.
-- Fresh read-only whole-bucket audit: **1,737 objects / 1,254,563,268 bytes (~1.168 GiB)**; storage guard `OK`.
-- Cloudflare R2 live dashboard independently showed **1.168 GiB / 1,737 objects**.
-- Retention regression is permanently covered by `.github/workflows/candidate-retention-policy-regression.yml`.
-- GitHub Actions run `35035962081`: **PASS — 5 tests passed**.
-- Cleanup workflow restored to manual/fail-closed mode; no destructive recurring cleanup was left enabled.
-
-## 2026-09-16 production freshness / I1 operational incident
-
-**CLOSED / VERIFIED — 2026-09-17**
-
-- `ussy-data` Production daily OHLCV run `35074062125` completed **SUCCESS** on commit `bca86d829f70cc1871143e345d5b8ebee4d63ec1`; canonical ready data reached as-of `2026-09-15`.
-- Scheduled CAN SLIM production orchestrator run `35070650271` correctly failed closed while publishing current-session candidates because canonical M state was stale for decision session `2026-09-15`. Entry and lifecycle consumption remained zero-population and lifecycle remained `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`; no stale M state was converted to a signal.
-- Root cause was #49/#50 lacking daily schedules. Repair commits `cabb4162fc2b29081c1ce0669d3655d0e2bc20fe` (#49 weekday schedule) and `c13a1afd5cfc2ecf11fa83670783ec21d6f227d0` (#50 weekday schedule) are now validated by green runs `35076064173` and `35076083587` respectively. The stale-M scheduling blocker is therefore closed.
-- `ussy-fundamentals` 13F canonical publish regression is also closed: repair commit `c097228faba365746cfbfa3bfdb918c97cdd9571` passed canonical sponsorship publish run `35076053291`. This remains infrastructure evidence only and does **not** promote I.
-- Subsequent 13F retention/canonical publication validation remained green: canonical sponsorship publish run `35161251835` and retention regression run `35161378270` both completed successfully.
-- Production OHLCV received an additional correctness hardening on 2026-09-17: run `35184919545` passed on commit `d5f73a2a0c515ed9942a406ae7d678953e0fd95d`, enforcing one canonical READY snapshot per trading day. This is an infrastructure invariant; it does not change strategy semantics.
-- Frozen X3/PORT1/FWD1 semantics are unchanged. No forward outcome was used to tune any historical rule.
-
-## 2026-09-17 forward benchmark freshness audit
-
-**OPEN OPERATIONAL DEBT / FAIL-CLOSED INTERPRETATION**
-
-- Latest persisted FWD1 evidence was collected at `2026-09-17T01:33:34Z` under run `35171004048` and remains `ACCUMULATING` with `data_gate_pass=true`, **0 forward candidates**, **0 X3 candidate trades**, **0 X3 portfolio entries**, **0 closed X3 portfolio trades**, and **0 completed calendar months**.
-- That evidence still reports `market_data_asof=2026-09-11` even though production stock OHLCV has advanced beyond that date. Therefore the zero-candidate observation is interpretable under the frozen FWD1 minimum gate (`>=2026-09-10`) but is **not evidence of current-session freshness** and must not be extrapolated as a fresh zero signal for later sessions.
-- The repository no longer contains an active SPY/QQQ benchmark updater workflow even though the legacy benchmark documentation describes scheduled updates. This leaves the legacy FWD1 benchmark path operationally stale. Do not alter frozen FWD1 semantics to hide this discrepancy; restore/validate the benchmark publication path separately before claiming fresh forward coverage beyond the persisted benchmark as-of date.
-- Production CAN SLIM M is not dependent on this legacy SPY/QQQ FWD1 path: canonical production M uses the frozen major-index publisher/consumer architecture. The stale legacy benchmark therefore does not invalidate the frozen production M state, but it does limit FWD1 freshness.
-- EXH2 remains separate/prospective; no evidence reviewed in this audit authorizes a semantic change or promotion.
-
 ## Forward / research boundaries
 
 FWD1 remains LIVE / ACCUMULATING with its existing gate; EXH2 remains separate and prospective. Neither may silently alter the frozen CAN SLIM v1 production baseline.
@@ -279,7 +155,6 @@ Future semantic changes require separately governed evidence/research. Integrati
 - Full-universe #33 is separated conceptually as periodic Pattern Intelligence; the daily v2 CAN SLIM critical path evaluates #33 only for qualified identities.
 - Heavy-work recovery boundary is watchlist checkpoint before #33, with immutable READY/PIT lineage.
 - Next action: implement a shadow-only v2 watchlist + eligibility path and tests. No live Entry/Lifecycle cutover is authorized.
-
 
 ## CAN SLIM v2 shadow integration — 2026-09-18
 
@@ -310,7 +185,6 @@ Remaining before cutover:
 
 Engineering completion estimate: **97%**. This percentage describes system implementation readiness, not trading performance or strategy validity.
 
-
 ### v2 causal execution audit closure — 2026-09-18
 
 Status: **CLOSED / VERIFIED IN CONTRACT CI**
@@ -323,9 +197,19 @@ Status: **CLOSED / VERIFIED IN CONTRACT CI**
 
 Engineering completion estimate: **99%**. Remaining boundary is final merge/default-branch scheduling and explicit production-cutover authorization; natural populated Entry->Lifecycle evidence remains observational rather than synthetic.
 
-
 ## 2026-09-21 — #33 CWOH vNext production baseline consumed by v2 shadow
 
 Status: **INTEGRATION PIN UPDATED / SHADOW SEMANTICS PRESERVED**
 
 Canonical `ussy-oneil-patterns` completed CWOH vNext production-contract closure at SHA `3d0b35272d89c5a6f1329e8dea865b3cf7a32b0f` (`oneil-pattern-output-v2`, engine `33-core-p8-frozen-v2`, cup-family contract `cup-family-v3-cwoh-fragmentation`, canonical adapter `p8-canonical-prediction-adapter-v1.2-cwh-measurement`). The v2 qualified-only shadow workflow now pins that exact #33 production baseline instead of the superseded `c433cc1...` baseline. Frozen CAN SLIM v1 remains untouched. No C/A/L/M, breakout, T+1, or lifecycle semantics changed.
+
+## 2026-09-22 — status-control infrastructure audit
+
+**OPEN / REPAIR COMMITTED — VALIDATION PENDING**
+
+- `ussy-data` Production daily OHLCV run `35685662920` is **SUCCESS** on commit `af9e41f158afbd071965750c91c089518008ce42`. The durable completion path recognized already-completed production work, correctly skipped unnecessary OHLCV/READY/EMA recompute, passed the shared-R2 preflight guard, and completed downstream publication/dispatch. This is an infrastructure/completion-contract transition, not a strategy-semantic change.
+- `ussy-fundamentals` scheduled incremental run `35601962603` failed **after** SEC PIT acquisition, merge, audit, and readiness reporting had succeeded. The failure was fail-closed before immutable R2 publication because `publish_r2.py` now requires `fundamentals_serving_current.json`, while the incremental workflow did not build that projection. No stale/invalid evidence was promoted and the current pointer was not advanced by the failed run.
+- The failed run had 63 impacted SEC-filing symbols and rebuilt readiness at **901 / 1,327 (67.90%)** before publication was refused. This is infrastructure/data-publication evidence only; it does not change C/A/I semantics and does not promote I.
+- Safe repair commit in `azharmz/ussy-fundamentals`: `06172f49a025810c834dafad8b0cce4aa19c16d7`, adding the existing `serving_projection.write_serving_projection()` stage before `publish_r2`. No frozen X3/PORT1/FWD1 or historical strategy rules were changed.
+- Validation of the repaired incremental publication remains pending; do not treat the unpublished 63-symbol delta as canonical until a green publish run advances the pointer.
+- FWD1 remains `LIVE / ACCUMULATING`; EXH2 remains separate/prospective; Phase 8B remains `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`. No reviewed evidence authorizes changing those states or implicitly promoting I.

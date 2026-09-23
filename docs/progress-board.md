@@ -1,6 +1,6 @@
 # CAN SLIM Progress Board
 
-Last updated: 2026-09-22
+Last updated: 2026-09-23
 
 ## Current project state
 
@@ -205,11 +205,26 @@ Canonical `ussy-oneil-patterns` completed CWOH vNext production-contract closure
 
 ## 2026-09-22 — status-control infrastructure audit
 
-**OPEN / REPAIR COMMITTED — VALIDATION PENDING**
+**CLOSED / REPAIR VALIDATED**
 
 - `ussy-data` Production daily OHLCV run `35685662920` is **SUCCESS** on commit `af9e41f158afbd071965750c91c089518008ce42`. The durable completion path recognized already-completed production work, correctly skipped unnecessary OHLCV/READY/EMA recompute, passed the shared-R2 preflight guard, and completed downstream publication/dispatch. This is an infrastructure/completion-contract transition, not a strategy-semantic change.
 - `ussy-fundamentals` scheduled incremental run `35601962603` failed **after** SEC PIT acquisition, merge, audit, and readiness reporting had succeeded. The failure was fail-closed before immutable R2 publication because `publish_r2.py` now requires `fundamentals_serving_current.json`, while the incremental workflow did not build that projection. No stale/invalid evidence was promoted and the current pointer was not advanced by the failed run.
 - The failed run had 63 impacted SEC-filing symbols and rebuilt readiness at **901 / 1,327 (67.90%)** before publication was refused. This is infrastructure/data-publication evidence only; it does not change C/A/I semantics and does not promote I.
 - Safe repair commit in `azharmz/ussy-fundamentals`: `06172f49a025810c834dafad8b0cce4aa19c16d7`, adding the existing `serving_projection.write_serving_projection()` stage before `publish_r2`. No frozen X3/PORT1/FWD1 or historical strategy rules were changed.
-- Validation of the repaired incremental publication remains pending; do not treat the unpublished 63-symbol delta as canonical until a green publish run advances the pointer.
+- Validation is now green: scheduled incremental run `35704036773` completed successfully on repair commit `06172f49a025810c834dafad8b0cce4aa19c16d7`, including the required serving projection and R2 publication path. The 2026-09-22 publication blocker is therefore closed.
 - FWD1 remains `LIVE / ACCUMULATING`; EXH2 remains separate/prospective; Phase 8B remains `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION`. No reviewed evidence authorizes changing those states or implicitly promoting I.
+
+## 2026-09-23 — status-control data-quality audit
+
+**OPEN / FAIL-CLOSED SAFEGUARDS ACTIVE — NO SEMANTIC REPAIR AUTHORIZED**
+
+Canonical detail: `docs/operations/2026-09-23-status-control.md`.
+
+- `ussy-data` Production daily OHLCV run `35831976164` failed during `Prepare immutable snapshot inputs`, after production snapshot work had completed. The decision-date guard found incoherent leading-edge coverage: 1,217 securities had latest date `2026-09-21`, while only 7 had `2026-09-22`. READY finalization was correctly refused rather than advancing canonical data on a partial Yahoo leading edge.
+- This is an upstream/data-quality availability failure. The existing safeguard is behaving as designed; weakening it would violate the production data contract, so no code repair was made.
+- Scheduled SPY/QQQ benchmark publication is likewise not currently green. Benchmark QC remains fail-closed; the last successfully promoted canonical pointer remains authoritative, and stale benchmark state must not be interpreted as a fresh zero signal.
+- Canonical FWD1 remains `LIVE / ACCUMULATING`. Latest persisted observation remains `2026-09-19` with `market_data_asof=2026-09-17`, `data_gate_pass=true`, `candidate_zero_interpretable=true`, and 0 forward candidates / 0 X3 candidate trades / 0 X3 entries / 0 closed X3 trades / 0 completed months. No later stale/invalid session is counted as fresh zero evidence.
+- EXH2 remains separate/prospective/accumulating with no reviewed state transition.
+- I/13F remains under its frozen delayed-PIT evidence role. No reviewed evidence authorizes implicit I promotion or converting missing/stale/invalid sponsorship evidence to zero.
+- Frozen X3/PORT1/FWD1 semantics and historical strategy rules are unchanged.
+- Remaining blocker: wait for coherent upstream OHLCV/benchmark coverage to pass existing safeguards, then allow normal publication/recovery. Phase 8B separately remains `BLOCKED_ON_PRODUCTION_ENTRY_POPULATION` pending a natural executable production entry.

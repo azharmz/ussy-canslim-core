@@ -1,6 +1,6 @@
 {
-  "code_sha": "503c75bba12ed7bc032764eae3f4b3451c01edae",
-  "collected_at_utc": "2026-10-07T11:12:35.981377+00:00",
+  "code_sha": "58e7d30841aa7ead34a59f16f7dd2c753ccf67df",
+  "collected_at_utc": "2026-10-08T11:30:15.948534+00:00",
   "experiment": "FWD1_FORWARD_VALIDATION",
   "forward_boundary_exclusive": "2026-09-09",
   "forward_candidate_count": 0,
@@ -14,7 +14,7 @@
     "data_gate_pass": true,
     "forward_boundary_exclusive": "2026-09-09",
     "forward_start": "2026-09-10",
-    "market_data_asof": "2026-10-06",
+    "market_data_asof": "2026-10-07",
     "minimum_calendar_months": 12,
     "minimum_closed_x3_portfolio_trades": 50,
     "minimum_market_data_asof": "2026-09-10",
@@ -31,11 +31,11 @@
     "C": false,
     "EXH2": false
   },
-  "market_data_asof": "2026-10-06",
+  "market_data_asof": "2026-10-07",
   "methodology": "docs/methodology/forward-validation-v1.md",
   "methodology_frozen_before_forward_collection": true,
   "research_universe": "CURRENT_COMPLIANT_UNIVERSE_FROZEN_AT_2026_08_28",
-  "run_id": "37612490133",
+  "run_id": "37770428719",
   "source_data_ready_for_forward_inference": true,
   "variants": [
     {
@@ -52,7 +52,7 @@
       "gross_cagr": null,
       "gross_max_drawdown": 0.0,
       "gross_total_return": 0.0,
-      "last_date": "2026-10-06",
+      "last_date": "2026-10-07",
       "portfolio_entry_count": 0,
       "variant": "X1"
     },
@@ -70,7 +70,7 @@
       "gross_cagr": null,
       "gross_max_drawdown": 0.0,
       "gross_total_return": 0.0,
-      "last_date": "2026-10-06",
+      "last_date": "2026-10-07",
       "portfolio_entry_count": 0,
       "variant": "X3"
     }

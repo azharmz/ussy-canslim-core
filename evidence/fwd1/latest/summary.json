@@ -1,6 +1,6 @@
 {
-  "code_sha": "0aad6e9dfc44705197031109616baf9bb5ca09de",
-  "collected_at_utc": "2026-11-10T12:50:29.159980+00:00",
+  "code_sha": "31f68133dc80ca8f454964c35a7da4918333508a",
+  "collected_at_utc": "2026-11-11T11:59:30.008333+00:00",
   "experiment": "FWD1_FORWARD_VALIDATION",
   "forward_boundary_exclusive": "2026-09-09",
   "forward_candidate_count": 0,
@@ -10,11 +10,11 @@
     "calendar_gate_pass": false,
     "candidate_zero_interpretable": true,
     "closed_x3_portfolio_trades": 0,
-    "completed_calendar_months": 1,
+    "completed_calendar_months": 2,
     "data_gate_pass": true,
     "forward_boundary_exclusive": "2026-09-09",
     "forward_start": "2026-09-10",
-    "market_data_asof": "2026-11-09",
+    "market_data_asof": "2026-11-10",
     "minimum_calendar_months": 12,
     "minimum_closed_x3_portfolio_trades": 50,
     "minimum_market_data_asof": "2026-09-10",
@@ -31,11 +31,11 @@
     "C": false,
     "EXH2": false
   },
-  "market_data_asof": "2026-11-09",
+  "market_data_asof": "2026-11-10",
   "methodology": "docs/methodology/forward-validation-v1.md",
   "methodology_frozen_before_forward_collection": true,
   "research_universe": "CURRENT_COMPLIANT_UNIVERSE_FROZEN_AT_2026_08_28",
-  "run_id": "42819128379",
+  "run_id": "43016424483",
   "source_data_ready_for_forward_inference": true,
   "variants": [
     {
@@ -52,7 +52,7 @@
       "gross_cagr": null,
       "gross_max_drawdown": 0.0,
       "gross_total_return": 0.0,
-      "last_date": "2026-11-09",
+      "last_date": "2026-11-10",
       "portfolio_entry_count": 0,
       "variant": "X1"
     },
@@ -70,7 +70,7 @@
       "gross_cagr": null,
       "gross_max_drawdown": 0.0,
       "gross_total_return": 0.0,
-      "last_date": "2026-11-09",
+      "last_date": "2026-11-10",
       "portfolio_entry_count": 0,
       "variant": "X3"
     }

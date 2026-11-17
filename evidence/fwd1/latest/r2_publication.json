@@ -1,9 +1,9 @@
 {
-  "immutable_prefix": "research/ussy-canslim-research/fwd1/runs/43591009301",
-  "manifest_key": "research/ussy-canslim-research/fwd1/runs/43591009301/manifest.json",
-  "manifest_sha256": "16999451ddb64099c7b5b158b42848d68247e1a1d776ed88a1a149f7df8c301f",
+  "immutable_prefix": "research/ussy-canslim-research/fwd1/runs/44095228298",
+  "manifest_key": "research/ussy-canslim-research/fwd1/runs/44095228298/manifest.json",
+  "manifest_sha256": "9ca039a31174ed4b2b0b542013183108cbe4cc1db8fcae5915b01b51d4385174",
   "published_file_count": 10,
-  "run_id": "43591009301",
+  "run_id": "44095228298",
   "status": "PUBLISHED",
-  "updated_at_utc": "2026-11-14T11:40:15.778882+00:00"
+  "updated_at_utc": "2026-11-17T13:42:51.638359+00:00"
 }

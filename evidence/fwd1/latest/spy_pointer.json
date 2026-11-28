@@ -12,7 +12,7 @@
     "adj_close",
     "volume"
   ],
-  "created_at": "2026-11-27T13:06:05.872915+00:00",
+  "created_at": "2026-11-28T12:20:34.058388+00:00",
   "currency": "USD",
   "discarded_incomplete_source_rows": 0,
   "dtypes": {
@@ -29,7 +29,7 @@
   "fetch_parameters": {
     "actions": false,
     "auto_adjust": false,
-    "end": "2026-11-27",
+    "end": "2026-11-28",
     "interval": "1d",
     "prepost": false,
     "progress": false,
@@ -39,20 +39,20 @@
     "timeout": 30
   },
   "first_date": "1993-01-29",
-  "last_date": "2026-11-25",
-  "parquet_key": "benchmarks/SPY/runs/b99f2fd8aa964132a732d98667104fb7.parquet",
-  "previous_parquet_key": "benchmarks/SPY/runs/0ea75cb77d7d4f7eac46069a73a2acdd.parquet",
+  "last_date": "2026-11-27",
+  "parquet_key": "benchmarks/SPY/runs/283aab373ad34caf9c196c4288e44640.parquet",
+  "previous_parquet_key": "benchmarks/SPY/runs/b99f2fd8aa964132a732d98667104fb7.parquet",
   "qc": "passed",
   "role": "market_benchmark_only",
-  "rows": 8515,
-  "run_manifest_key": "benchmarks/SPY/runs/b99f2fd8aa964132a732d98667104fb7.json",
+  "rows": 8516,
+  "run_manifest_key": "benchmarks/SPY/runs/283aab373ad34caf9c196c4288e44640.json",
   "schema_version": 1,
   "security_id": "benchmark:SPY",
-  "sha256": "bb72c83d17be32754a2220c7f5b50a8284fc9ac4d100b2716e4063e6504d0c3c",
+  "sha256": "f841e06f8ed9534afa7bb49fd1f0f5a316fc1f929bc3c2dc4c4b6490beff4475",
   "source": "yfinance/Yahoo Finance",
   "ticker": "SPY",
   "versions": {
-    "boto3": "1.44.12",
+    "boto3": "1.44.13",
     "pandas": "2.3.3",
     "pyarrow": "23.0.1",
     "yfinance": "0.2.66"
